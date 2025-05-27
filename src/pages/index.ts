@@ -1,0 +1,12 @@
+export { default as Contact } from './Contact';
+export { default as Terms } from './Terms';
+export { default as Privacy } from './Privacy';
+export { default as About } from './About';
+export { default as Pricing } from './Pricing';
+export { default as Blog } from './Blog';
+export { default as Careers } from './Careers';
+export { default as CookiePolicy } from './CookiePolicy';
+export { default as GDPR } from './GDPR';
+export { default as HelpCenter } from './HelpCenter';
+export { default as Status } from './Status';
+export { default as Features } from './Features';

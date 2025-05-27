@@ -1,0 +1,228 @@
+import {
+	BrowserRouter as Router,
+	Routes,
+	Route,
+} from 'react-router-dom';
+import {
+	QueryClient,
+	QueryClientProvider,
+} from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import ChatBotApp from './components/chat/ChatBotApp';
+import LandingPage from './components/layout/LandingPage';
+import Navigation from './components/layout/Navigation';
+import Footer from './components/layout/Footer';
+import PageWrapper from './components/layout/PageWrapper';
+import AnalyticsPage from './pages/AnalyticsPage';
+import {
+	Contact,
+	Terms,
+	Privacy,
+	About,
+	Pricing,
+	Blog,
+	Careers,
+	CookiePolicy,
+	GDPR,
+	HelpCenter,
+	Status,
+	Features,
+} from './pages';
+import { ChatProvider } from './contexts/ChatContext';
+import { ThemeProvider } from './contexts/ThemeContext';
+import ScrollToTop from './components/ui/ScrollToTop';
+import BackToTop from './components/ui/BackToTop';
+import { useChat } from './hooks/useChat';
+
+const queryClient = new QueryClient();
+
+// Wrapper component to provide chats data to AnalyticsPage
+const AnalyticsPageWrapper = () => {
+	const { chats } = useChat();
+	return (
+		<PageWrapper>
+			<AnalyticsPage chats={chats} />
+		</PageWrapper>
+	);
+};
+
+const App = () => {
+	return (
+		<QueryClientProvider client={queryClient}>
+			<ThemeProvider>
+				<Router>
+					<ScrollToTop />
+					<Routes>
+						{/* Landing page and other routes */}
+						<Route
+							path='/'
+							element={
+								<PageWrapper>
+									<Navigation />
+									<LandingPage />
+									<Footer />
+									<BackToTop />
+								</PageWrapper>
+							}
+						/>
+						<Route
+							path='/about'
+							element={
+								<PageWrapper>
+									<Navigation />
+									<About />
+									<Footer />
+									<BackToTop />
+								</PageWrapper>
+							}
+						/>
+						<Route
+							path='/contact'
+							element={
+								<PageWrapper>
+									<Navigation />
+									<Contact />
+									<Footer />
+									<BackToTop />
+								</PageWrapper>
+							}
+						/>
+						<Route
+							path='/terms'
+							element={
+								<PageWrapper>
+									<Navigation />
+									<Terms />
+									<Footer />
+									<BackToTop />
+								</PageWrapper>
+							}
+						/>
+						<Route
+							path='/privacy'
+							element={
+								<PageWrapper>
+									<Navigation />
+									<Privacy />
+									<Footer />
+									<BackToTop />
+								</PageWrapper>
+							}
+						/>
+						{/* Dedicated AI Chat route */}
+						<Route
+							path='/ai-chat'
+							element={
+								<ChatProvider>
+									<ChatBotApp />
+								</ChatProvider>
+							}
+						/>
+						{/* Analytics route */}
+						<Route
+							path='/analytics'
+							element={
+								<ChatProvider>
+									<AnalyticsPageWrapper />
+								</ChatProvider>
+							}
+						/>
+						{/* New footer pages */}
+						<Route
+							path='/pricing'
+							element={
+								<PageWrapper>
+									<Navigation />
+									<Pricing />
+									<Footer />
+									<BackToTop />
+								</PageWrapper>
+							}
+						/>
+						<Route
+							path='/blog'
+							element={
+								<PageWrapper>
+									<Navigation />
+									<Blog />
+									<Footer />
+									<BackToTop />
+								</PageWrapper>
+							}
+						/>
+						<Route
+							path='/careers'
+							element={
+								<PageWrapper>
+									<Navigation />
+									<Careers />
+									<Footer />
+									<BackToTop />
+								</PageWrapper>
+							}
+						/>
+						<Route
+							path='/cookies'
+							element={
+								<PageWrapper>
+									<Navigation />
+									<CookiePolicy />
+									<Footer />
+									<BackToTop />
+								</PageWrapper>
+							}
+						/>
+						<Route
+							path='/gdpr'
+							element={
+								<PageWrapper>
+									<Navigation />
+									<GDPR />
+									<Footer />
+									<BackToTop />
+								</PageWrapper>
+							}
+						/>
+						<Route
+							path='/help'
+							element={
+								<PageWrapper>
+									<Navigation />
+									<HelpCenter />
+									<Footer />
+									<BackToTop />
+								</PageWrapper>
+							}
+						/>
+						<Route
+							path='/status'
+							element={
+								<PageWrapper>
+									<Navigation />
+									<Status />
+									<Footer />
+									<BackToTop />
+								</PageWrapper>
+							}
+						/>
+						{/* Public Routes */}
+						<Route
+							path='/features'
+							element={
+								<PageWrapper>
+									<Navigation />
+									<Features />
+									<Footer />
+									<BackToTop />
+								</PageWrapper>
+							}
+						/>
+					</Routes>
+				</Router>
+			</ThemeProvider>
+			<ReactQueryDevtools />
+		</QueryClientProvider>
+	);
+};
+
+export default App;

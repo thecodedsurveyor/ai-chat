@@ -1,0 +1,637 @@
+@import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700&display=swap');
+@import './styles/animations.css';
+@import './styles/slider.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom CSS Variables for Settings */
+:root {
+	--font-family: 'Inter', sans-serif;
+	--font-size-base: 1rem;
+	--line-height: 1.6;
+	--sidebar-width: 320px;
+	--message-spacing: 16px;
+	--border-radius: 12px;
+	--animation-duration: 300ms;
+}
+
+/* Apply custom font family */
+body {
+	font-family: var(
+		--font-family,
+		'Inter',
+		system-ui,
+		-apple-system,
+		sans-serif
+	) !important;
+	font-size: var(--font-size-base, 1rem);
+	line-height: var(--line-height, 1.6);
+	margin: 0;
+	padding: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	transition: background-color 0.3s ease, color 0.3s ease,
+		font-family 0.3s ease;
+}
+
+/* Dark mode (default) */
+body,
+.dark body {
+	color: #ffffff;
+	background: #0d111a;
+}
+
+/* Light mode - IMPROVED CONTRAST */
+body.light,
+html.light body {
+	color: #1e293b; /* Changed from #0f172a for better contrast */
+	background: #f1f5f9; /* Changed from #f8fafc to a slightly grayer background */
+}
+
+/* Light mode toggle switches - MUCH IMPROVED VISIBILITY */
+.light .settings-toggle-slider {
+	background-color: #e2e8f0; /* Light gray background */
+	border: 2px solid #cbd5e1; /* Visible border */
+	box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1); /* Subtle inner shadow */
+}
+
+.light .settings-toggle-slider:before {
+	background-color: #ffffff; /* White thumb */
+	border: 2px solid #94a3b8; /* Gray border for definition */
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); /* Shadow for depth */
+}
+
+.light
+	.settings-toggle
+	input:checked
+	+ .settings-toggle-slider {
+	background-color: #3b82f6; /* Blue for checked state */
+	border-color: #2563eb; /* Darker blue border */
+}
+
+.light
+	.settings-toggle
+	input:checked
+	+ .settings-toggle-slider:before {
+	background-color: #ffffff; /* Keep thumb white */
+	border-color: #1d4ed8; /* Darker border when checked */
+}
+
+.light
+	.settings-toggle
+	input:focus
+	+ .settings-toggle-slider {
+	box-shadow: 0 0 0 2px #f1f5f9, 0 0 0 4px #3b82f6;
+	outline: none;
+}
+
+/* Light mode card and container improvements */
+.light .backdrop-blur-sm {
+	background-color: rgba(255, 255, 255, 0.9) !important;
+	border: 1px solid #e2e8f0 !important;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Light mode button improvements */
+.light button {
+	border: 1px solid #e2e8f0;
+	transition: all 0.2s ease;
+}
+
+.light button:hover {
+	border-color: #cbd5e1;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Light mode input improvements */
+.light input,
+.light textarea,
+.light select {
+	background-color: #ffffff !important;
+	border: 2px solid #e2e8f0 !important;
+	color: #1e293b !important;
+}
+
+.light input:focus,
+.light textarea:focus,
+.light select:focus {
+	border-color: #3b82f6 !important;
+	box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Light mode navigation and header improvements */
+.light nav,
+.light header {
+	background-color: rgba(255, 255, 255, 0.95) !important;
+	border-bottom: 1px solid #e2e8f0 !important;
+	backdrop-filter: blur(10px);
+}
+
+/* Light mode sidebar improvements */
+.light aside,
+.light .sidebar {
+	background-color: #ffffff !important;
+	border-right: 1px solid #e2e8f0 !important;
+}
+
+/* Light mode modal improvements */
+.light .modal,
+.light [role='dialog'] {
+	background-color: #ffffff !important;
+	border: 1px solid #e2e8f0 !important;
+	box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Light mode text improvements for better readability */
+.light h1,
+.light h2,
+.light h3,
+.light h4,
+.light h5,
+.light h6 {
+	color: #0f172a !important; /* Darker headings */
+}
+
+.light p,
+.light span,
+.light div {
+	color: #334155 !important; /* Improved body text contrast */
+}
+
+.light .text-gray-500,
+.light .text-gray-400,
+.light .text-gray-300 {
+	color: #64748b !important; /* Better muted text */
+}
+
+/* Light mode link improvements */
+.light a {
+	color: #2563eb !important;
+}
+
+.light a:hover {
+	color: #1d4ed8 !important;
+}
+
+/* Light mode code and pre block improvements */
+.light code,
+.light pre {
+	background-color: #f8fafc !important;
+	border: 1px solid #e2e8f0 !important;
+	color: #1e293b !important;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+/* Dark mode scrollbar */
+.dark *::-webkit-scrollbar {
+	width: 6px;
+}
+
+.dark *::-webkit-scrollbar-track {
+	background: #131927;
+}
+
+.dark *::-webkit-scrollbar-thumb {
+	background: #7b8ebc;
+	border-radius: 3px;
+}
+
+.dark *::-webkit-scrollbar-thumb:hover {
+	background: #8e25bf;
+}
+
+/* Light mode scrollbar - IMPROVED */
+.light *::-webkit-scrollbar {
+	width: 8px; /* Slightly wider for better visibility */
+}
+
+.light *::-webkit-scrollbar-track {
+	background: #f8fafc;
+	border: 1px solid #e2e8f0; /* Add border for definition */
+}
+
+.light *::-webkit-scrollbar-thumb {
+	background: #94a3b8; /* Darker for better visibility */
+	border-radius: 4px;
+	border: 1px solid #cbd5e1; /* Add border */
+}
+
+.light *::-webkit-scrollbar-thumb:hover {
+	background: #64748b; /* Darker on hover */
+}
+
+@layer components {
+	.gradient-primary {
+		background: linear-gradient(
+			135deg,
+			#f42f5f,
+			#8e25bf
+		);
+	}
+
+	.gradient-secondary {
+		background: linear-gradient(
+			135deg,
+			#fe8d5c,
+			#f42f5f
+		);
+	}
+
+	.btn-primary {
+		@apply inline-flex items-center justify-center rounded-md bg-gradient-to-r from-chat-pink to-chat-purple px-4 py-2 font-medium text-white transition-all hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-chat-purple focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+	}
+
+	.btn-secondary {
+		@apply inline-flex items-center justify-center rounded-md bg-chat-secondary px-4 py-2 font-medium text-chat-text transition-all hover:bg-opacity-80 focus:outline-none focus:ring-2 focus:ring-chat-purple focus:ring-offset-2;
+	}
+
+	.input-primary {
+		@apply w-full rounded-md border border-gray-600 bg-transparent px-3 py-2 text-white placeholder:text-chat-accent focus:border-chat-purple focus:outline-none focus:ring-1 focus:ring-chat-purple;
+	}
+}
+
+@layer utilities {
+	.text-shadow-sm {
+		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+	}
+
+	.text-shadow-md {
+		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+	}
+
+	.backdrop-blur-xs {
+		backdrop-filter: blur(2px);
+	}
+
+	.scrollbar-hide {
+		-ms-overflow-style: none;
+		scrollbar-width: none;
+	}
+
+	.scrollbar-hide::-webkit-scrollbar {
+		display: none;
+	}
+
+	/* Line clamp utilities */
+	.line-clamp-1 {
+		overflow: hidden;
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 1;
+	}
+
+	.line-clamp-2 {
+		overflow: hidden;
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+	}
+
+	.line-clamp-3 {
+		overflow: hidden;
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 3;
+	}
+
+	/* Progress animation for typing indicator */
+	@keyframes progress {
+		0% {
+			width: 0%;
+		}
+		50% {
+			width: 70%;
+		}
+		100% {
+			width: 100%;
+		}
+	}
+}
+
+/* Layout Modes */
+.layout-compact {
+	--message-spacing: 8px;
+	--border-radius: 8px;
+}
+
+.layout-compact .message-container,
+.layout-compact [class*='message'],
+.layout-compact .p-4,
+.layout-compact .p-6 {
+	padding: 0.5rem !important;
+	margin-bottom: 0.5rem !important;
+}
+
+.layout-comfortable {
+	--message-spacing: 16px;
+	--border-radius: 12px;
+}
+
+.layout-comfortable .message-container,
+.layout-comfortable [class*='message'],
+.layout-comfortable .p-4,
+.layout-comfortable .p-6 {
+	padding: 1rem !important;
+	margin-bottom: 1rem !important;
+}
+
+.layout-spacious {
+	--message-spacing: 24px;
+	--border-radius: 16px;
+}
+
+.layout-spacious .message-container,
+.layout-spacious [class*='message'],
+.layout-spacious .p-4,
+.layout-spacious .p-6 {
+	padding: 1.5rem !important;
+	margin-bottom: 1.5rem !important;
+}
+
+/* Apply border radius from settings */
+.settings-applied .rounded-lg,
+.settings-applied .rounded-xl,
+.settings-applied .rounded-2xl,
+.settings-applied .rounded-3xl {
+	border-radius: var(--border-radius) !important;
+}
+
+/* Accessibility */
+.high-contrast {
+	filter: contrast(1.5) !important;
+}
+
+.high-contrast * {
+	border-color: currentColor !important;
+}
+
+.large-click-targets button,
+.large-click-targets a,
+.large-click-targets input,
+.large-click-targets select,
+.large-click-targets textarea {
+	min-height: 44px !important;
+	min-width: 44px !important;
+	padding: 12px 16px !important;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+	}
+}
+
+.reduced-motion *,
+.reduced-motion *::before,
+.reduced-motion *::after {
+	animation-duration: 0.01ms !important;
+	animation-iteration-count: 1 !important;
+	transition-duration: 0.01ms !important;
+}
+
+/* Focus indicators */
+.focus-indicators *:focus {
+	outline: 3px solid #f59e0b !important;
+	outline-offset: 2px !important;
+}
+
+/* Settings scrollbar */
+.settings-scrollbar::-webkit-scrollbar {
+	width: 8px;
+}
+
+.settings-scrollbar::-webkit-scrollbar-track {
+	background: rgba(0, 0, 0, 0.1);
+}
+
+.settings-scrollbar::-webkit-scrollbar-thumb {
+	background: rgba(0, 0, 0, 0.3);
+	border-radius: 4px;
+}
+
+.settings-scrollbar::-webkit-scrollbar-thumb:hover {
+	background: rgba(0, 0, 0, 0.5);
+}
+
+/* Settings animations */
+.animate-settings-slide-in {
+	animation: settingsSlideIn 0.3s ease-out forwards;
+}
+
+.animate-settings-slide-out {
+	animation: settingsSlideOut 0.3s ease-in forwards;
+}
+
+@keyframes settingsSlideIn {
+	from {
+		opacity: 0;
+		transform: translateX(100%);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+@keyframes settingsSlideOut {
+	from {
+		opacity: 1;
+		transform: translateX(0);
+	}
+	to {
+		opacity: 0;
+		transform: translateX(100%);
+	}
+}
+
+/* Voice controls */
+.voice-listening {
+	position: relative;
+	overflow: hidden;
+}
+
+.voice-listening::after {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: -100%;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(
+		90deg,
+		transparent,
+		rgba(59, 130, 246, 0.3),
+		transparent
+	);
+	animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+	0% {
+		left: -100%;
+	}
+	50% {
+		left: 100%;
+	}
+	100% {
+		left: 100%;
+	}
+}
+
+/* Settings toggle switch */
+.settings-toggle {
+	position: relative;
+	display: inline-block;
+	width: 48px;
+	height: 24px;
+}
+
+.settings-toggle input {
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+
+.settings-toggle-slider {
+	position: absolute;
+	cursor: pointer;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: #ccc;
+	transition: 0.3s;
+	border-radius: 24px;
+}
+
+.settings-toggle-slider:before {
+	position: absolute;
+	content: '';
+	height: 18px;
+	width: 18px;
+	left: 3px;
+	bottom: 3px;
+	background-color: white;
+	transition: 0.3s;
+	border-radius: 50%;
+}
+
+.settings-toggle input:checked + .settings-toggle-slider {
+	background-color: #3b82f6;
+}
+
+.settings-toggle
+	input:checked
+	+ .settings-toggle-slider:before {
+	transform: translateX(24px);
+}
+
+/* Font size preview */
+.font-size-preview {
+	font-family: var(--font-family);
+}
+
+.font-size-xs {
+	font-size: 0.75rem;
+}
+
+.font-size-sm {
+	font-size: 0.875rem;
+}
+
+.font-size-md {
+	font-size: 1rem;
+}
+
+.font-size-lg {
+	font-size: 1.125rem;
+}
+
+.font-size-xl {
+	font-size: 1.25rem;
+}
+
+/* Settings category icons */
+.settings-category-icon {
+	transition: transform 0.2s ease;
+}
+
+.settings-category-active .settings-category-icon {
+	transform: scale(1.1);
+}
+
+/* Mobile responsive settings */
+@media (max-width: 768px) {
+	.settings-modal {
+		width: 100vw;
+		height: 100vh;
+		max-width: none;
+		max-height: none;
+		border-radius: 0;
+	}
+
+	.settings-sidebar {
+		width: 100%;
+		border-right: none;
+		border-bottom: 1px solid #e2e8f0;
+	}
+
+	.settings-content {
+		padding: 1rem;
+	}
+}
+
+/* Print styles */
+@media print {
+	.focus-mode-overlay,
+	.settings-modal,
+	.voice-controls {
+		display: none !important;
+	}
+}
+
+/* Ensure all text elements inherit the custom font */
+.settings-applied * {
+	font-family: inherit !important;
+}
+
+/* Font loading states */
+.font-loading {
+	font-display: swap;
+}
+
+.font-loaded {
+	font-display: auto;
+}
+
+/* Ensure consistent font rendering */
+.settings-applied h1,
+.settings-applied h2,
+.settings-applied h3,
+.settings-applied h4,
+.settings-applied h5,
+.settings-applied h6,
+.settings-applied p,
+.settings-applied span,
+.settings-applied div,
+.settings-applied button,
+.settings-applied input,
+.settings-applied textarea {
+	font-family: var(
+		--font-family,
+		'Inter',
+		system-ui,
+		-apple-system,
+		sans-serif
+	) !important;
+}
