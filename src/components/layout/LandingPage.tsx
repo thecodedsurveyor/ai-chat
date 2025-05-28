@@ -1,9 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import {
-	motion,
-	useScroll,
-	useSpring,
-} from 'framer-motion';
+import { motion } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
@@ -17,7 +13,6 @@ import {
 	ChevronUp,
 	Clock,
 	Zap,
-	Star,
 	Search as SearchIcon,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -29,29 +24,13 @@ gsap.registerPlugin(ScrollTrigger);
 const LandingPage = () => {
 	const navigate = useNavigate();
 	const { isDark } = useTheme();
-	const [currentMessage, setCurrentMessage] = useState(0);
-	const [typingText, setTypingText] = useState('');
 	const [userCount, setUserCount] = useState(0);
 	const [conversationCount, setConversationCount] =
-		useState(0);
-	const [currentTestimonial, setCurrentTestimonial] =
 		useState(0);
 	const [expandedFAQ, setExpandedFAQ] = useState<
 		number | null
 	>(null);
 	const [faqSearch, setFaqSearch] = useState('');
-	const [mousePosition, setMousePosition] = useState({
-		x: 0,
-		y: 0,
-	});
-
-	// Scroll progress
-	const { scrollYProgress } = useScroll();
-	const scaleX = useSpring(scrollYProgress, {
-		stiffness: 100,
-		damping: 30,
-		restDelta: 0.001,
-	});
 
 	const handleTryAI = () => {
 		navigate('/ai-chat');
@@ -63,46 +42,6 @@ const LandingPage = () => {
 
 	const heroRef = useRef<HTMLDivElement>(null);
 	const featuresRef = useRef<HTMLDivElement>(null);
-
-	// Demo messages for typing effect
-	const demoMessages = [
-		"Hello! I'm your AI assistant. How can I help you today?",
-		'I can help you with coding, writing, analysis, and much more!',
-		'I remember our conversation context for better assistance.',
-		"Try asking me anything - I'm powered by multiple AI models!",
-	];
-
-	// Testimonials data
-	const testimonials = [
-		{
-			name: 'Sarah Chen',
-			role: 'Software Developer',
-			avatar: '👩‍💻',
-			text: 'This AI chatbot has revolutionized my coding workflow. The smart memory feature is incredible!',
-			rating: 5,
-		},
-		{
-			name: 'Marcus Johnson',
-			role: 'Content Creator',
-			avatar: '✍️',
-			text: '15+ AI models in one place? Game changer! The offline support saved me during a recent trip.',
-			rating: 5,
-		},
-		{
-			name: 'Elena Rodriguez',
-			role: 'Researcher',
-			avatar: '🔬',
-			text: 'The advanced search and conversation templates have made my research so much more efficient.',
-			rating: 5,
-		},
-		{
-			name: 'David Kim',
-			role: 'Designer',
-			avatar: '🎨',
-			text: 'Beautiful themes and seamless voice integration. This is how AI chat should be done!',
-			rating: 5,
-		},
-	];
 
 	// FAQ data
 	const faqs = [
@@ -165,46 +104,29 @@ const LandingPage = () => {
 		};
 	}, []);
 
-	// Typing effect
-	useEffect(() => {
-		const message = demoMessages[currentMessage];
-		let index = 0;
-		setTypingText('');
-
-		const typingInterval = setInterval(() => {
-			if (index < message.length) {
-				setTypingText(message.slice(0, index + 1));
-				index++;
-			} else {
-				clearInterval(typingInterval);
-				setTimeout(() => {
-					setCurrentMessage(
-						(prev) =>
-							(prev + 1) % demoMessages.length
-					);
-				}, 2000);
-			}
-		}, 50);
-
-		return () => clearInterval(typingInterval);
-	}, [currentMessage]);
-
-	// Testimonials rotation
-	useEffect(() => {
-		const interval = setInterval(() => {
-			setCurrentTestimonial(
-				(prev) => (prev + 1) % testimonials.length
-			);
-		}, 4000);
-		return () => clearInterval(interval);
-	}, []);
-
 	// Mouse tracking for particle interactions
 	useEffect(() => {
 		const handleMouseMove = (e: MouseEvent) => {
-			setMousePosition({
-				x: e.clientX,
-				y: e.clientY,
+			// Mouse tracking for interactive particles
+			const x = e.clientX;
+			const y = e.clientY;
+
+			// Update particle positions based on mouse
+			const particles = document.querySelectorAll(
+				'.interactive-particle'
+			);
+			particles.forEach((particle) => {
+				const rect =
+					particle.getBoundingClientRect();
+				const centerX = rect.left + rect.width / 2;
+				const centerY = rect.top + rect.height / 2;
+
+				const deltaX = (x - centerX) / 50;
+				const deltaY = (y - centerY) / 50;
+
+				(
+					particle as HTMLElement
+				).style.transform = `translate(${deltaX}px, ${deltaY}px)`;
 			});
 		};
 		window.addEventListener(
@@ -317,12 +239,6 @@ const LandingPage = () => {
 					: 'bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50'
 			}`}
 		>
-			{/* Scroll Progress Indicator */}
-			<motion.div
-				className='fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-chat-pink to-chat-purple z-50'
-				style={{ scaleX, transformOrigin: '0%' }}
-			/>
-
 			{/* Hero Section */}
 			<section className='relative min-h-screen flex items-center justify-center px-6 overflow-hidden'>
 				{/* Background Water Effect */}
@@ -335,7 +251,7 @@ const LandingPage = () => {
 					{Array.from({ length: 15 }, (_, i) => (
 						<motion.div
 							key={i}
-							className={`absolute w-2 h-2 rounded-full ${
+							className={`absolute w-2 h-2 rounded-full interactive-particle ${
 								isDark
 									? 'bg-white/20'
 									: 'bg-purple-400/30'
@@ -349,21 +265,15 @@ const LandingPage = () => {
 								}%`,
 							}}
 							animate={{
-								x:
-									(mousePosition.x -
-										window.innerWidth /
-											2) /
-									50,
-								y:
-									(mousePosition.y -
-										window.innerHeight /
-											2) /
-									50,
+								y: [0, -25, 0],
+								opacity: [0.4, 0.9, 0.4],
+								scale: [1, 1.2, 1],
 							}}
 							transition={{
-								type: 'spring',
-								stiffness: 50,
-								damping: 10,
+								duration: 4 + i * 0.5,
+								repeat: Infinity,
+								ease: 'easeInOut',
+								delay: i * 0.2,
 							}}
 						/>
 					))}
@@ -432,65 +342,6 @@ const LandingPage = () => {
 						</span>{' '}
 						that adapt to your workflow.
 					</p>
-
-					{/* Interactive Demo */}
-					<motion.div
-						initial={{ opacity: 0, y: 30 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{
-							duration: 0.8,
-							delay: 0.4,
-						}}
-						className={`mb-10 p-6 rounded-2xl backdrop-blur-sm border max-w-md mx-auto ${
-							isDark
-								? 'bg-white/10 border-white/20'
-								: 'bg-white/80 border-gray-200'
-						}`}
-					>
-						<div className='flex items-center gap-3 mb-4'>
-							<div className='w-8 h-8 rounded-full bg-gradient-to-r from-chat-pink to-chat-purple flex items-center justify-center'>
-								<MessageCircle className='w-4 h-4 text-white' />
-							</div>
-							<span
-								className={`font-medium ${
-									isDark
-										? 'text-white'
-										: 'text-gray-800'
-								}`}
-							>
-								AI Assistant
-							</span>
-							<div className='flex gap-1'>
-								<div className='w-2 h-2 bg-green-400 rounded-full animate-pulse'></div>
-								<div
-									className='w-2 h-2 bg-green-400 rounded-full animate-pulse'
-									style={{
-										animationDelay:
-											'0.2s',
-									}}
-								></div>
-								<div
-									className='w-2 h-2 bg-green-400 rounded-full animate-pulse'
-									style={{
-										animationDelay:
-											'0.4s',
-									}}
-								></div>
-							</div>
-						</div>
-						<div
-							className={`text-left ${
-								isDark
-									? 'text-gray-300'
-									: 'text-gray-700'
-							}`}
-						>
-							{typingText}
-							<span className='animate-pulse'>
-								|
-							</span>
-						</div>
-					</motion.div>
 
 					<div className='flex flex-col sm:flex-row gap-6 justify-center items-center'>
 						<motion.button
@@ -811,132 +662,6 @@ const LandingPage = () => {
 								Uptime
 							</div>
 						</motion.div>
-					</div>
-				</div>
-			</section>
-
-			{/* Testimonials Section */}
-			<section
-				className={`py-20 px-6 ${
-					isDark
-						? 'bg-gradient-to-br from-chat-primary/30 to-chat-secondary/30'
-						: 'bg-gradient-to-br from-slate-50/80 to-white/80'
-				} backdrop-blur-sm`}
-			>
-				<div className='max-w-4xl mx-auto text-center'>
-					<motion.h2
-						initial={{ opacity: 0, y: 30 }}
-						whileInView={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.8 }}
-						viewport={{ once: true }}
-						className={`text-4xl md:text-5xl font-exo font-bold mb-12 ${
-							isDark
-								? 'text-white'
-								: 'text-gray-800'
-						}`}
-					>
-						What Our{' '}
-						<span className='bg-gradient-to-r from-chat-pink to-chat-purple bg-clip-text text-transparent'>
-							Users Say
-						</span>
-					</motion.h2>
-
-					<motion.div
-						key={currentTestimonial}
-						initial={{ opacity: 0, x: 50 }}
-						animate={{ opacity: 1, x: 0 }}
-						exit={{ opacity: 0, x: -50 }}
-						transition={{ duration: 0.5 }}
-						className={`p-8 rounded-3xl backdrop-blur-sm border ${
-							isDark
-								? 'bg-white/10 border-white/20'
-								: 'bg-white border-gray-200'
-						}`}
-					>
-						<div className='text-6xl mb-4'>
-							{
-								testimonials[
-									currentTestimonial
-								].avatar
-							}
-						</div>
-						<div className='flex justify-center mb-4'>
-							{[
-								...Array(
-									testimonials[
-										currentTestimonial
-									].rating
-								),
-							].map((_, i) => (
-								<Star
-									key={i}
-									className='w-5 h-5 text-yellow-400 fill-current'
-								/>
-							))}
-						</div>
-						<p
-							className={`text-xl mb-6 italic ${
-								isDark
-									? 'text-gray-300'
-									: 'text-gray-700'
-							}`}
-						>
-							"
-							{
-								testimonials[
-									currentTestimonial
-								].text
-							}
-							"
-						</p>
-						<div
-							className={`font-semibold ${
-								isDark
-									? 'text-white'
-									: 'text-gray-800'
-							}`}
-						>
-							{
-								testimonials[
-									currentTestimonial
-								].name
-							}
-						</div>
-						<div
-							className={`${
-								isDark
-									? 'text-gray-400'
-									: 'text-gray-600'
-							}`}
-						>
-							{
-								testimonials[
-									currentTestimonial
-								].role
-							}
-						</div>
-					</motion.div>
-
-					{/* Testimonial indicators */}
-					<div className='flex justify-center gap-2 mt-6'>
-						{testimonials.map((_, index) => (
-							<button
-								key={index}
-								onClick={() =>
-									setCurrentTestimonial(
-										index
-									)
-								}
-								className={`w-3 h-3 rounded-full transition-colors ${
-									index ===
-									currentTestimonial
-										? 'bg-chat-pink'
-										: isDark
-										? 'bg-white/30'
-										: 'bg-gray-300'
-								}`}
-							/>
-						))}
 					</div>
 				</div>
 			</section>
