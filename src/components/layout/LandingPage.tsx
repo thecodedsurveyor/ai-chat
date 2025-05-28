@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import WaterEffect from '../ui/WaterEffect';
@@ -26,7 +26,7 @@ const LandingPage = () => {
 	const featuresRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
-		// Hero animations
+		// Hero animations with enhanced timing
 		if (heroRef.current) {
 			gsap.fromTo(
 				heroRef.current.children,
@@ -34,28 +34,30 @@ const LandingPage = () => {
 				{
 					y: 0,
 					opacity: 1,
-					duration: 1,
-					stagger: 0.2,
+					duration: 1.2,
+					stagger: 0.15,
 					ease: 'power3.out',
 				}
 			);
 		}
 
-		// Features scroll animation
+		// Features scroll animation with smoother entrance
 		if (featuresRef.current) {
 			gsap.fromTo(
 				featuresRef.current.querySelectorAll(
 					'.feature-card'
 				),
-				{ y: 100, opacity: 0 },
+				{ y: 80, opacity: 0, scale: 0.95 },
 				{
 					y: 0,
 					opacity: 1,
-					duration: 0.8,
-					stagger: 0.2,
+					scale: 1,
+					duration: 0.9,
+					stagger: 0.15,
+					ease: 'power2.out',
 					scrollTrigger: {
 						trigger: featuresRef.current,
-						start: 'top 80%',
+						start: 'top 85%',
 						end: 'bottom 20%',
 						toggleActions:
 							'play none none reverse',
@@ -70,37 +72,37 @@ const LandingPage = () => {
 			icon: '🤖',
 			title: 'Smart AI Assistant',
 			description:
-				'Powered by advanced AI models for intelligent conversations and helpful responses.',
+				'Engage with 15+ advanced AI models including GPT-4, Claude, and Gemini for intelligent conversations and expert assistance.',
 		},
 		{
 			icon: '💾',
 			title: 'Smart Memory',
 			description:
-				'AI remembers your preferences and conversation context for personalized interactions.',
+				'AI remembers your preferences, conversation context, and learning patterns for truly personalized interactions.',
 		},
 		{
 			icon: '🔍',
 			title: 'Advanced Search',
 			description:
-				'Find any conversation or message instantly with powerful search capabilities.',
+				'Find any conversation, message, or topic instantly with powerful search capabilities and smart filtering.',
 		},
 		{
 			icon: '📱',
 			title: 'PWA Support',
 			description:
-				'Install as a native app on any device with offline capabilities and push notifications.',
+				'Install as a native app on any device with full offline capabilities, push notifications, and seamless sync.',
 		},
 		{
 			icon: '🎨',
-			title: 'Customizable Themes',
+			title: 'Beautiful Themes',
 			description:
-				'Personalize your experience with multiple themes, fonts, and layout options.',
+				'Personalize your experience with 6 stunning color schemes, custom fonts, and adaptive layout options.',
 		},
 		{
 			icon: '⚡',
 			title: 'Quick Responses',
 			description:
-				'Access pre-built templates and quick responses for faster conversations.',
+				'Access intelligent templates, conversation starters, and quick responses for enhanced productivity.',
 		},
 	];
 
@@ -127,10 +129,13 @@ const LandingPage = () => {
 					<motion.div
 						initial={{ scale: 0.8, opacity: 0 }}
 						animate={{ scale: 1, opacity: 1 }}
-						transition={{ duration: 0.8 }}
+						transition={{
+							duration: 0.8,
+							ease: 'backOut',
+						}}
 						className='mb-8'
 					>
-						<div className='w-20 h-20 mx-auto text-6xl mb-6 flex items-center justify-center'>
+						<div className='w-20 h-20 mx-auto text-6xl mb-6 flex items-center justify-center transform hover:scale-110 transition-transform duration-300'>
 							🤖
 						</div>
 					</motion.div>
@@ -148,47 +153,72 @@ const LandingPage = () => {
 						Revolution
 					</h1>
 
-					<p className='text-lg text-gray-600 dark:text-gray-300 mb-8'>
-						Experience the power of AI with
-						smart memory capabilities, advanced
-						search functionality, and
-						customizable themes that adapt to
-						your workflow.
+					<p
+						className={`text-xl leading-relaxed mb-10 max-w-4xl mx-auto ${
+							isDark
+								? 'text-gray-300'
+								: 'text-gray-700'
+						}`}
+					>
+						Experience the power of AI with{' '}
+						<span className='font-semibold text-chat-pink'>
+							smart memory capabilities
+						</span>
+						,{' '}
+						<span className='font-semibold text-chat-purple'>
+							advanced search functionality
+						</span>
+						, and{' '}
+						<span className='font-semibold text-chat-orange'>
+							beautiful customizable themes
+						</span>{' '}
+						that adapt to your workflow.
 					</p>
 
 					<div className='flex flex-col sm:flex-row gap-6 justify-center items-center'>
 						<motion.button
 							onClick={handleTryAI}
-							className='group bg-gradient-to-r from-chat-pink to-chat-purple px-8 py-4 rounded-2xl font-exo font-semibold text-lg text-white shadow-2xl hover:shadow-chat-pink/25 transition-all duration-300 flex items-center gap-3'
-							whileHover={{ scale: 1.05 }}
+							className='group bg-gradient-to-r from-chat-pink to-chat-purple px-8 py-4 rounded-2xl font-exo font-semibold text-lg text-white shadow-2xl hover:shadow-chat-pink/30 transition-all duration-300 flex items-center gap-3 relative overflow-hidden'
+							whileHover={{
+								scale: 1.05,
+								y: -2,
+							}}
 							whileTap={{ scale: 0.95 }}
 						>
-							Try AI Chat Now
-							<ArrowRight className='w-5 h-5 group-hover:translate-x-1 transition-transform' />
+							<div className='absolute inset-0 bg-gradient-to-r from-chat-purple to-chat-pink opacity-0 group-hover:opacity-100 transition-opacity duration-300' />
+							<span className='relative'>
+								Try AI Chat Now
+							</span>
+							<ArrowRight className='w-5 h-5 group-hover:translate-x-1 transition-transform relative' />
 						</motion.button>
 
 						<motion.button
 							onClick={handleLearnMore}
-							className={`px-8 py-4 rounded-2xl font-exo font-semibold text-lg border-2 transition-all duration-300 ${
+							className={`px-8 py-4 rounded-2xl font-exo font-semibold text-lg border-2 transition-all duration-300 flex items-center gap-3 backdrop-blur-sm ${
 								isDark
-									? 'border-chat-accent text-gray-700 hover:bg-gray-700 hover:text-white'
-									: 'border-gray-300 text-gray-700 hover:bg-gray-600 hover:border-gray-400'
+									? 'border-chat-accent text-white hover:bg-chat-accent/20 hover:border-chat-pink'
+									: 'border-gray-300 text-gray-700 hover:bg-white hover:border-chat-purple hover:text-chat-purple'
 							}`}
-							whileHover={{ scale: 1.05 }}
+							whileHover={{
+								scale: 1.05,
+								y: -2,
+							}}
 							whileTap={{ scale: 0.95 }}
 						>
-							Learn More
+							<Search className='w-5 h-5' />
+							Explore Features
 						</motion.button>
 					</div>
 				</div>
 
-				{/* Floating elements */}
+				{/* Enhanced Floating elements */}
 				<div className='absolute inset-0 pointer-events-none'>
 					<motion.div
-						className='absolute top-20 left-10 w-4 h-4 bg-chat-pink/30 rounded-full'
+						className='absolute top-20 left-10 w-4 h-4 bg-chat-pink/40 rounded-full shadow-lg'
 						animate={{
-							y: [0, -20, 0],
-							opacity: [0.3, 0.8, 0.3],
+							y: [0, -25, 0],
+							opacity: [0.4, 0.9, 0.4],
+							scale: [1, 1.2, 1],
 						}}
 						transition={{
 							duration: 4,
@@ -197,11 +227,12 @@ const LandingPage = () => {
 						}}
 					/>
 					<motion.div
-						className='absolute top-40 right-20 w-6 h-6 bg-chat-purple/30 rounded-full'
+						className='absolute top-40 right-20 w-6 h-6 bg-chat-purple/40 rounded-full shadow-lg'
 						animate={{
-							y: [0, 30, 0],
-							x: [0, -10, 0],
-							opacity: [0.4, 0.9, 0.4],
+							y: [0, 35, 0],
+							x: [0, -15, 0],
+							opacity: [0.5, 1, 0.5],
+							scale: [1, 1.3, 1],
 						}}
 						transition={{
 							duration: 6,
@@ -211,17 +242,49 @@ const LandingPage = () => {
 						}}
 					/>
 					<motion.div
-						className='absolute bottom-40 left-20 w-3 h-3 bg-chat-orange/40 rounded-full'
+						className='absolute bottom-40 left-20 w-3 h-3 bg-chat-orange/50 rounded-full shadow-lg'
 						animate={{
-							y: [0, -15, 0],
-							x: [0, 15, 0],
-							opacity: [0.2, 0.7, 0.2],
+							y: [0, -20, 0],
+							x: [0, 20, 0],
+							opacity: [0.3, 0.8, 0.3],
+							scale: [1, 1.4, 1],
 						}}
 						transition={{
 							duration: 5,
 							repeat: Infinity,
 							ease: 'easeInOut',
 							delay: 2,
+						}}
+					/>
+					{/* Additional floating elements */}
+					<motion.div
+						className='absolute top-60 left-1/2 w-2 h-2 bg-chat-cyan/40 rounded-full shadow-lg'
+						animate={{
+							y: [0, -30, 0],
+							x: [0, 25, 0],
+							opacity: [0.2, 0.7, 0.2],
+							scale: [1, 1.5, 1],
+						}}
+						transition={{
+							duration: 7,
+							repeat: Infinity,
+							ease: 'easeInOut',
+							delay: 3,
+						}}
+					/>
+					<motion.div
+						className='absolute bottom-60 right-1/4 w-5 h-5 bg-chat-green/30 rounded-full shadow-lg'
+						animate={{
+							y: [0, 25, 0],
+							x: [0, -20, 0],
+							opacity: [0.3, 0.8, 0.3],
+							scale: [1, 1.2, 1],
+						}}
+						transition={{
+							duration: 5.5,
+							repeat: Infinity,
+							ease: 'easeInOut',
+							delay: 1.5,
 						}}
 					/>
 				</div>
@@ -231,7 +294,7 @@ const LandingPage = () => {
 			<section
 				id='features-section'
 				ref={featuresRef}
-				className={`py-20 px-6 ${
+				className={`py-24 px-6 ${
 					isDark
 						? 'bg-gradient-to-br from-chat-secondary to-chat-primary'
 						: 'bg-gradient-to-br from-white to-slate-100'
@@ -239,14 +302,14 @@ const LandingPage = () => {
 			>
 				<div className='max-w-7xl mx-auto'>
 					<motion.div
-						className='text-center mb-16'
+						className='text-center mb-20'
 						initial={{ opacity: 0, y: 50 }}
 						whileInView={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.8 }}
 						viewport={{ once: true }}
 					>
 						<h2
-							className={`text-4xl md:text-6xl font-exo font-bold mb-6 ${
+							className={`text-5xl md:text-7xl font-exo font-bold mb-8 ${
 								isDark
 									? 'text-white'
 									: 'text-gray-800'
@@ -258,17 +321,26 @@ const LandingPage = () => {
 							</span>
 						</h2>
 						<p
-							className={`text-xl max-w-3xl mx-auto leading-relaxed ${
+							className={`text-xl max-w-4xl mx-auto leading-relaxed ${
 								isDark
 									? 'text-chat-accent'
 									: 'text-gray-600'
 							}`}
 						>
 							Experience cutting-edge
-							artificial intelligence with
-							voice capabilities, advanced
-							conversations, and seamless
-							interaction.
+							artificial intelligence with{' '}
+							<span className='font-semibold'>
+								voice capabilities
+							</span>
+							,{' '}
+							<span className='font-semibold'>
+								advanced conversations
+							</span>
+							, and{' '}
+							<span className='font-semibold'>
+								seamless interaction
+							</span>{' '}
+							across all your devices.
 						</p>
 					</motion.div>
 
@@ -276,10 +348,10 @@ const LandingPage = () => {
 						{features.map((feature, index) => (
 							<motion.div
 								key={index}
-								className={`feature-card p-8 rounded-3xl backdrop-blur-lg border transition-all duration-300 hover:scale-105 ${
+								className={`feature-card p-8 rounded-3xl backdrop-blur-lg border transition-all duration-300 hover:scale-105 hover:-translate-y-2 group ${
 									isDark
-										? 'bg-chat-secondary/30 border-chat-accent/20 hover:bg-chat-secondary/50 hover:border-chat-orange/40'
-										: 'bg-white/70 border-chat-purple/30 hover:bg-white hover:shadow-lg hover:border-chat-pink/50'
+										? 'bg-chat-secondary/30 border-chat-accent/20 hover:bg-chat-secondary/50 hover:border-chat-orange/40 hover:shadow-2xl hover:shadow-chat-orange/10'
+										: 'bg-white/70 border-chat-purple/30 hover:bg-white hover:shadow-2xl hover:border-chat-pink/50 hover:shadow-chat-pink/10'
 								}`}
 								initial={{
 									opacity: 0,
@@ -295,7 +367,7 @@ const LandingPage = () => {
 								}}
 								viewport={{ once: true }}
 							>
-								<div className='text-chat-pink mb-6'>
+								<div className='text-6xl mb-6 transform group-hover:scale-110 transition-transform duration-300'>
 									{feature.icon}
 								</div>
 								<h3
@@ -324,7 +396,7 @@ const LandingPage = () => {
 
 			{/* CTA Section */}
 			<section
-				className={`py-20 px-6 ${
+				className={`py-24 px-6 ${
 					isDark
 						? 'bg-gradient-to-r from-chat-primary to-chat-secondary'
 						: 'bg-gradient-to-r from-blue-50 to-indigo-100'
@@ -338,7 +410,7 @@ const LandingPage = () => {
 						viewport={{ once: true }}
 					>
 						<h2
-							className={`text-4xl md:text-6xl font-exo font-bold mb-6 ${
+							className={`text-5xl md:text-7xl font-exo font-bold mb-8 ${
 								isDark
 									? 'text-white'
 									: 'text-gray-800'
@@ -351,7 +423,7 @@ const LandingPage = () => {
 							?
 						</h2>
 						<p
-							className={`text-xl mb-8 max-w-2xl mx-auto ${
+							className={`text-xl mb-10 max-w-3xl mx-auto leading-relaxed ${
 								isDark
 									? 'text-chat-accent'
 									: 'text-gray-600'
@@ -359,15 +431,29 @@ const LandingPage = () => {
 						>
 							Join thousands of users who are
 							already experiencing the future
-							of AI conversation.
+							of AI conversation with{' '}
+							<span className='font-semibold'>
+								24 powerful features
+							</span>{' '}
+							and{' '}
+							<span className='font-semibold'>
+								15+ AI models
+							</span>
+							.
 						</p>
 						<motion.button
 							onClick={handleTryAI}
-							className='bg-gradient-to-r from-chat-pink to-chat-purple px-12 py-6 rounded-2xl font-exo font-bold text-xl text-white shadow-2xl hover:shadow-chat-pink/25 transition-all duration-300'
-							whileHover={{ scale: 1.05 }}
+							className='bg-gradient-to-r from-chat-pink to-chat-purple px-12 py-6 rounded-2xl font-exo font-bold text-xl text-white shadow-2xl hover:shadow-chat-pink/30 transition-all duration-300 relative overflow-hidden group'
+							whileHover={{
+								scale: 1.05,
+								y: -3,
+							}}
 							whileTap={{ scale: 0.95 }}
 						>
-							Get Started Free
+							<div className='absolute inset-0 bg-gradient-to-r from-chat-purple to-chat-pink opacity-0 group-hover:opacity-100 transition-opacity duration-300' />
+							<span className='relative'>
+								Get Started Free
+							</span>
 						</motion.button>
 					</motion.div>
 				</div>
