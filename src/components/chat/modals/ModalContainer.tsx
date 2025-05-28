@@ -104,11 +104,16 @@ const ModalContainer: React.FC = () => {
 		[updateChat]
 	);
 
-	const handleConversationTemplateSelect =
-		useCallback(() => {
-			// This would typically set input value, but we'll handle it in the component
+	const handleConversationTemplateSelect = useCallback(
+		(template: { prompt: string }) => {
+			// Set the input value with the template prompt
+			updateInputValue({
+				target: { value: template.prompt },
+			} as React.ChangeEvent<HTMLInputElement>);
 			closeConversationTemplates();
-		}, [closeConversationTemplates]);
+		},
+		[updateInputValue, closeConversationTemplates]
+	);
 
 	const handleChatSelect = useCallback(
 		(chatId: string) => {
