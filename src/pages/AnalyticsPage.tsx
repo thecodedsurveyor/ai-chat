@@ -32,6 +32,19 @@ const AnalyticsPage: React.FC<AnalyticsPageProps> = ({
 	const { isDark } = useTheme();
 	const [timeRange, setTimeRange] =
 		useState<AnalyticsTimeRange>('all');
+	const [isRefreshing, setIsRefreshing] = useState(false);
+	const [refreshKey, setRefreshKey] = useState(0);
+
+	// Handle refresh functionality
+	const handleRefresh = () => {
+		setIsRefreshing(true);
+		setRefreshKey((prev) => prev + 1);
+
+		// Simulate refresh delay for better UX
+		setTimeout(() => {
+			setIsRefreshing(false);
+		}, 1000);
+	};
 
 	// Generate analytics data
 	const analyticsData: AnalyticsData = useMemo(() => {
@@ -39,7 +52,8 @@ const AnalyticsPage: React.FC<AnalyticsPageProps> = ({
 			chats,
 			timeRange
 		);
-	}, [chats, timeRange]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [chats, timeRange, refreshKey]); // refreshKey intentionally included to force refresh
 
 	// Simple bar chart component
 	const BarChart: React.FC<{
@@ -355,6 +369,123 @@ const AnalyticsPage: React.FC<AnalyticsPageProps> = ({
 		favoriteTopics,
 	} = analyticsData;
 
+	// Check if there are any chats
+	const hasChats = chats.length > 0;
+
+	// Empty state component
+	const EmptyState = () => (
+		<motion.div
+			initial={{ opacity: 0, y: 20 }}
+			animate={{ opacity: 1, y: 0 }}
+			className='flex flex-col items-center justify-center min-h-[60vh] text-center'
+		>
+			<div className='text-8xl mb-6'>📊</div>
+			<h2
+				className={cn(
+					'text-3xl font-bold mb-4',
+					isDark
+						? 'text-white'
+						: 'text-chat-light-text'
+				)}
+			>
+				No Analytics Data Yet
+			</h2>
+			<p
+				className={cn(
+					'text-lg mb-8 max-w-md',
+					isDark
+						? 'text-chat-accent'
+						: 'text-chat-light-accent'
+				)}
+			>
+				Start chatting with the AI to see your
+				conversation analytics, usage patterns, and
+				insights here.
+			</p>
+			<motion.button
+				onClick={() => navigate('/ai-chat')}
+				className='bg-gradient-to-r from-chat-pink to-chat-purple text-white font-semibold py-3 px-8 rounded-xl hover:shadow-lg hover:shadow-chat-pink/30 transition-all duration-300'
+				whileHover={{ scale: 1.05 }}
+				whileTap={{ scale: 0.95 }}
+			>
+				Start Your First Chat
+			</motion.button>
+		</motion.div>
+	);
+
+	// If no chats, show empty state
+	if (!hasChats) {
+		return (
+			<div
+				className={cn(
+					'min-h-screen',
+					isDark
+						? 'bg-gradient-to-br from-chat-primary via-chat-secondary to-chat-primary'
+						: 'bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50'
+				)}
+			>
+				{/* Header */}
+				<div
+					className={cn(
+						'sticky top-0 z-10 border-b-2 backdrop-blur-sm',
+						isDark
+							? 'bg-chat-primary/90 border-chat-accent/30'
+							: 'bg-white/90 border-chat-purple/30'
+					)}
+				>
+					<div className='max-w-7xl mx-auto px-6 py-4'>
+						<div className='flex items-center justify-between'>
+							<div className='flex items-center space-x-4'>
+								<button
+									onClick={() =>
+										navigate('/ai-chat')
+									}
+									className={cn(
+										'p-2 rounded-lg transition-colors',
+										isDark
+											? 'text-chat-accent hover:text-white hover:bg-chat-secondary'
+											: 'text-chat-light-accent hover:text-chat-light-text hover:bg-gray-100'
+									)}
+								>
+									<ArrowLeft className='w-5 h-5' />
+								</button>
+								<div>
+									<h1
+										className={cn(
+											'text-3xl font-bold',
+											isDark
+												? 'text-white'
+												: 'text-chat-light-text'
+										)}
+									>
+										📊 Analytics
+										Dashboard
+									</h1>
+									<p
+										className={cn(
+											'text-sm mt-1',
+											isDark
+												? 'text-chat-accent'
+												: 'text-chat-light-accent'
+										)}
+									>
+										Insights from your
+										AI conversations
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				{/* Empty State Content */}
+				<div className='max-w-7xl mx-auto px-6 py-8'>
+					<EmptyState />
+				</div>
+			</div>
+		);
+	}
+
 	// Prepare chart data
 	const categoryChartData: ChartDataPoint[] =
 		categoryStatistics.map((cat) => ({
@@ -485,17 +616,38 @@ const AnalyticsPage: React.FC<AnalyticsPageProps> = ({
 							</select>
 
 							{/* Action Buttons */}
-							<button
+							<motion.button
+								onClick={handleRefresh}
+								disabled={isRefreshing}
 								className={cn(
 									'flex items-center gap-2 px-4 py-2 rounded-lg border-2 text-sm font-medium transition-colors',
 									isDark
-										? 'border-chat-accent/30 text-chat-accent hover:bg-chat-secondary/50'
-										: 'border-gray-300 text-gray-700 hover:bg-gray-100'
+										? 'border-chat-accent/30 text-chat-accent hover:bg-chat-secondary/50 disabled:opacity-50'
+										: 'border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-50'
 								)}
+								whileHover={{ scale: 1.02 }}
+								whileTap={{ scale: 0.98 }}
 							>
-								<RefreshCw className='w-4 h-4' />
-								Refresh
-							</button>
+								<motion.div
+									animate={{
+										rotate: isRefreshing
+											? 360
+											: 0,
+									}}
+									transition={{
+										duration: 1,
+										repeat: isRefreshing
+											? Infinity
+											: 0,
+										ease: 'linear',
+									}}
+								>
+									<RefreshCw className='w-4 h-4' />
+								</motion.div>
+								{isRefreshing
+									? 'Refreshing...'
+									: 'Refresh'}
+							</motion.button>
 						</div>
 					</div>
 				</div>

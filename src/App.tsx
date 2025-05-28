@@ -33,13 +33,14 @@ import { ChatProvider } from './contexts/ChatContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import ScrollToTop from './components/ui/ScrollToTop';
 import BackToTop from './components/ui/BackToTop';
-import { useChat } from './hooks/useChat';
+import { useChats } from './stores/chatStore';
 
 const queryClient = new QueryClient();
 
 // Wrapper component to provide chats data to AnalyticsPage
 const AnalyticsPageWrapper = () => {
-	const { chats } = useChat();
+	// Use Zustand store instead of ChatContext for real-time data
+	const chats = useChats();
 	return (
 		<PageWrapper>
 			<AnalyticsPage chats={chats} />
@@ -123,9 +124,7 @@ const App = () => {
 						<Route
 							path='/analytics'
 							element={
-								<ChatProvider>
-									<AnalyticsPageWrapper />
-								</ChatProvider>
+								<AnalyticsPageWrapper />
 							}
 						/>
 						{/* New footer pages */}
