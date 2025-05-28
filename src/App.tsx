@@ -14,6 +14,7 @@ import Navigation from './components/layout/Navigation';
 import Footer from './components/layout/Footer';
 import PageWrapper from './components/layout/PageWrapper';
 import AnalyticsPage from './pages/AnalyticsPage';
+import AuthPage from './pages/AuthPage';
 import {
 	Contact,
 	Terms,
@@ -213,6 +214,16 @@ const App = () => {
 									<Navigation />
 									<Features />
 									<Footer />
+									<BackToTop />
+								</PageWrapper>
+							}
+						/>
+						{/* Authentication route */}
+						<Route
+							path='/auth'
+							element={
+								<PageWrapper>
+									<AuthPage />
 									<BackToTop />
 								</PageWrapper>
 							}

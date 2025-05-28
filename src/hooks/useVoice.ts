@@ -4,7 +4,6 @@ import {
 	useRef,
 	useCallback,
 } from 'react';
-import { useTheme } from '../contexts/ThemeContext';
 import toast from 'react-hot-toast';
 
 export interface VoiceSettings {
@@ -16,7 +15,6 @@ export interface VoiceSettings {
 }
 
 export const useVoice = () => {
-	const { isDark } = useTheme();
 	const [isListening, setIsListening] = useState(false);
 	const [isSpeaking, setIsSpeaking] = useState(false);
 	const [transcript, setTranscript] = useState('');
@@ -32,7 +30,9 @@ export const useVoice = () => {
 			language: 'en-US',
 		});
 
-	const recognitionRef = useRef<any>(null);
+	const recognitionRef = useRef<SpeechRecognition | null>(
+		null
+	);
 	const synthRef = useRef<SpeechSynthesis | null>(null);
 	const utteranceRef =
 		useRef<SpeechSynthesisUtterance | null>(null);
@@ -40,19 +40,24 @@ export const useVoice = () => {
 	// Initialize speech recognition
 	useEffect(() => {
 		const SpeechRecognition =
-			(window as any).SpeechRecognition ||
-			(window as any).webkitSpeechRecognition;
+			(window as unknown as Record<string, unknown>)
+				.SpeechRecognition ||
+			(window as unknown as Record<string, unknown>)
+				.webkitSpeechRecognition;
 
-		if (SpeechRecognition) {
-			recognitionRef.current =
-				new SpeechRecognition();
-			recognitionRef.current.continuous = true;
-			recognitionRef.current.interimResults = true;
-			recognitionRef.current.lang =
-				voiceSettings.language;
+		if (
+			SpeechRecognition &&
+			typeof SpeechRecognition === 'function'
+		) {
+			const recognition =
+				new (SpeechRecognition as new () => SpeechRecognition)();
+			recognitionRef.current = recognition;
+			recognition.continuous = true;
+			recognition.interimResults = true;
+			recognition.lang = voiceSettings.language;
 
-			recognitionRef.current.onresult = (
-				event: any
+			recognition.onresult = (
+				event: SpeechRecognitionEvent
 			) => {
 				let finalTranscript = '';
 				for (
@@ -70,8 +75,8 @@ export const useVoice = () => {
 				}
 			};
 
-			recognitionRef.current.onerror = (
-				event: any
+			recognition.onerror = (
+				event: SpeechRecognitionErrorEvent
 			) => {
 				console.error(
 					'Speech recognition error:',
@@ -84,7 +89,7 @@ export const useVoice = () => {
 				);
 			};
 
-			recognitionRef.current.onend = () => {
+			recognition.onend = () => {
 				setIsListening(false);
 			};
 
@@ -379,8 +384,18 @@ export const useVoice = () => {
 	const getCompatibility = useCallback(() => {
 		return {
 			speechRecognition:
-				!!(window as any).SpeechRecognition ||
-				!!(window as any).webkitSpeechRecognition,
+				!!(
+					window as unknown as Record<
+						string,
+						typeof SpeechRecognition
+					>
+				).SpeechRecognition ||
+				!!(
+					window as unknown as Record<
+						string,
+						typeof SpeechRecognition
+					>
+				).webkitSpeechRecognition,
 			speechSynthesis: 'speechSynthesis' in window,
 			mediaDevices: 'mediaDevices' in navigator,
 		};

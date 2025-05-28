@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 
 interface TitleConfig {
@@ -243,7 +243,10 @@ export const usePageTitle = (
 	config: Partial<TitleConfig> = {}
 ) => {
 	const location = useLocation();
-	const finalConfig = { ...defaultConfig, ...config };
+	const finalConfig = useMemo(
+		() => ({ ...defaultConfig, ...config }),
+		[config]
+	);
 
 	useEffect(() => {
 		let title: string;

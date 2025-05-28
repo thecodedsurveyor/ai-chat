@@ -206,6 +206,22 @@ const Navigation = () => {
 								)}
 							</motion.button>
 
+							{/* Login/Register Button */}
+							<motion.button
+								onClick={() =>
+									navigate('/auth')
+								}
+								className={`px-4 py-3 rounded-xl font-exo font-semibold border-2 transition-all duration-300 ${
+									isDark
+										? 'border-chat-accent text-chat-accent hover:bg-chat-accent hover:text-chat-primary'
+										: 'border-chat-light-accent text-chat-light-accent hover:bg-chat-light-accent hover:text-white'
+								}`}
+								whileHover={{ scale: 1.05 }}
+								whileTap={{ scale: 0.95 }}
+							>
+								Login
+							</motion.button>
+
 							{/* CTA Button */}
 							<motion.button
 								onClick={handleTryAI}
@@ -378,6 +394,25 @@ const Navigation = () => {
 											? 'Light'
 											: 'Dark'}{' '}
 										Mode
+									</button>
+
+									{/* Login Button */}
+									<button
+										onClick={() => {
+											navigate(
+												'/auth'
+											);
+											setIsMobileMenuOpen(
+												false
+											);
+										}}
+										className={`w-full py-3 px-4 rounded-xl font-exo font-semibold border-2 transition-all ${
+											isDark
+												? 'border-chat-accent text-chat-accent hover:bg-chat-accent hover:text-chat-primary'
+												: 'border-chat-light-accent text-chat-light-accent hover:bg-chat-light-accent hover:text-white'
+										}`}
+									>
+										Login / Register
 									</button>
 
 									{/* CTA Button */}

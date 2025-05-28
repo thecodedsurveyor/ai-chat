@@ -47,7 +47,7 @@ global.MediaRecorder = class MockMediaRecorder {
 	onerror: ((error: Error) => void) | null = null;
 	state: 'inactive' | 'recording' | 'paused' = 'inactive';
 
-	static isTypeSupported(type: string): boolean {
+	static isTypeSupported(): boolean {
 		return true;
 	}
 
