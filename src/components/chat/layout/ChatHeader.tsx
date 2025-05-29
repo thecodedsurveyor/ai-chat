@@ -9,6 +9,7 @@ import {
 	useActiveChat,
 } from '../../../stores';
 import ModelSelector from '../modals/ModelSelector';
+import UserProfile from '../../ui/UserProfile';
 
 interface ChatHeaderProps {
 	onGoBack: () => void;
@@ -122,9 +123,9 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 				)}
 			</div>
 
-			{/* Right Section - Reserved for future actions */}
+			{/* Right Section - User Profile */}
 			<div className='flex items-center gap-3 min-w-0 flex-1 justify-end'>
-				{/* Space reserved for future header actions */}
+				<UserProfile />
 			</div>
 		</header>
 	);

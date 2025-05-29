@@ -21,6 +21,9 @@ import {
 // Settings imports
 import { settingsManager } from '../../utils/settings';
 
+// Authentication imports
+import { authService } from '../../services/authService';
+
 // New component imports
 import ChatLayout from './layout/ChatLayout';
 import ChatMessages from './messages/ChatMessages';
@@ -46,6 +49,25 @@ const ChatBotApp = () => {
 	const { scrollRef, containerRef } = useAutoScroll([
 		messages,
 	]);
+
+	// Authentication check
+	useEffect(() => {
+		const user = authService.getUser();
+		const isAuthenticated =
+			authService.isAuthenticated();
+
+		if (!isAuthenticated || !user) {
+			console.log(
+				'User not authenticated, redirecting to auth page'
+			);
+			navigate('/auth');
+			return;
+		}
+
+		console.log(
+			`Welcome back, ${user.firstName}! You are authenticated.`
+		);
+	}, [navigate]);
 
 	// Initialize settings managers
 	useEffect(() => {
@@ -130,6 +152,11 @@ const ChatBotApp = () => {
 				return '';
 		}
 	};
+
+	// Don't render anything if not authenticated (will redirect)
+	if (!authService.isAuthenticated()) {
+		return null;
+	}
 
 	return (
 		<ToastContainer>

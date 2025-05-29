@@ -15,6 +15,8 @@ import Footer from './components/layout/Footer';
 import PageWrapper from './components/layout/PageWrapper';
 import AnalyticsPage from './pages/AnalyticsPage';
 import AuthPage from './pages/AuthPage';
+import ProfilePage from './pages/ProfilePage';
+import SettingsPage from './pages/SettingsPage';
 import {
 	Contact,
 	Terms,
@@ -61,6 +63,18 @@ const App = () => {
 							<Route
 								path='/auth'
 								element={<AuthPage />}
+							/>
+
+							{/* Profile page route */}
+							<Route
+								path='/profile'
+								element={<ProfilePage />}
+							/>
+
+							{/* Settings page route */}
+							<Route
+								path='/settings'
+								element={<SettingsPage />}
 							/>
 
 							{/* Landing page and other routes */}
