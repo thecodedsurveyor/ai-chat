@@ -1,133 +1,129 @@
 import React, { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { CheckCircle, XCircle, X } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
-import {
-	BiCheckCircle,
-	BiErrorCircle,
-	BiError,
-	BiInfoCircle,
-	BiX,
-} from 'react-icons/bi';
 
-export type ToastType =
-	| 'success'
-	| 'error'
-	| 'warning'
-	| 'info';
-
-export interface Toast {
+export interface ToastProps {
 	id: string;
-	type: ToastType;
+	type: 'success' | 'error' | 'info';
 	title: string;
 	message?: string;
 	duration?: number;
+	onClose: (id: string) => void;
 }
 
-interface ToastProps {
-	toast: Toast;
-	onRemove: (id: string) => void;
-}
-
-const Toast = ({ toast, onRemove }: ToastProps) => {
+const Toast: React.FC<ToastProps> = ({
+	id,
+	type,
+	title,
+	message,
+	duration = 5000,
+	onClose,
+}) => {
 	const { isDark } = useTheme();
-	const [isVisible, setIsVisible] = useState(false);
+	const [isVisible, setIsVisible] = useState(true);
 
 	useEffect(() => {
-		// Trigger animation
-		const timer = setTimeout(
-			() => setIsVisible(true),
-			10
-		);
-
-		// Auto remove
-		const removeTimer = setTimeout(() => {
+		const timer = setTimeout(() => {
 			setIsVisible(false);
-			setTimeout(() => onRemove(toast.id), 300);
-		}, toast.duration || 3000);
+			setTimeout(() => onClose(id), 300);
+		}, duration);
 
-		return () => {
-			clearTimeout(timer);
-			clearTimeout(removeTimer);
-		};
-	}, [toast.id, toast.duration, onRemove]);
+		return () => clearTimeout(timer);
+	}, [duration, id, onClose]);
 
-	const getToastStyles = () => {
-		const baseStyles = `transform transition-all duration-300 ${
-			isVisible
-				? 'translate-x-0 opacity-100'
-				: 'translate-x-full opacity-0'
-		}`;
-
-		switch (toast.type) {
-			case 'success':
-				return `${baseStyles} ${
-					isDark
-						? 'bg-green-900/90 border-green-500/50 text-green-100'
-						: 'bg-green-50 border-green-200 text-green-800'
-				}`;
-			case 'error':
-				return `${baseStyles} ${
-					isDark
-						? 'bg-red-900/90 border-red-500/50 text-red-100'
-						: 'bg-red-50 border-red-200 text-red-800'
-				}`;
-			case 'warning':
-				return `${baseStyles} ${
-					isDark
-						? 'bg-yellow-900/90 border-yellow-500/50 text-yellow-100'
-						: 'bg-yellow-50 border-yellow-200 text-yellow-800'
-				}`;
-			default:
-				return `${baseStyles} ${
-					isDark
-						? 'bg-blue-900/90 border-blue-500/50 text-blue-100'
-						: 'bg-blue-50 border-blue-200 text-blue-800'
-				}`;
-		}
+	const handleClose = () => {
+		setIsVisible(false);
+		setTimeout(() => onClose(id), 300);
 	};
 
 	const getIcon = () => {
-		switch (toast.type) {
+		switch (type) {
 			case 'success':
 				return (
-					<BiCheckCircle className='text-lg' />
+					<CheckCircle className='w-5 h-5 text-green-500' />
 				);
 			case 'error':
 				return (
-					<BiErrorCircle className='text-lg' />
+					<XCircle className='w-5 h-5 text-red-500' />
 				);
-			case 'warning':
-				return <BiError className='text-lg' />;
 			default:
-				return <BiInfoCircle className='text-lg' />;
+				return (
+					<CheckCircle className='w-5 h-5 text-blue-500' />
+				);
+		}
+	};
+
+	const getColors = () => {
+		if (isDark) {
+			switch (type) {
+				case 'success':
+					return 'bg-green-900/90 border-green-700 text-green-100';
+				case 'error':
+					return 'bg-red-900/90 border-red-700 text-red-100';
+				default:
+					return 'bg-blue-900/90 border-blue-700 text-blue-100';
+			}
+		} else {
+			switch (type) {
+				case 'success':
+					return 'bg-green-50 border-green-200 text-green-800';
+				case 'error':
+					return 'bg-red-50 border-red-200 text-red-800';
+				default:
+					return 'bg-blue-50 border-blue-200 text-blue-800';
+			}
 		}
 	};
 
 	return (
-		<div
-			className={`${getToastStyles()} flex items-start gap-3 p-4 rounded-lg border shadow-lg backdrop-blur-sm max-w-sm`}
-		>
-			<div className='flex-shrink-0 mt-0.5'>
-				{getIcon()}
-			</div>
+		<AnimatePresence>
+			{isVisible && (
+				<motion.div
+					initial={{
+						opacity: 0,
+						y: -50,
+						scale: 0.95,
+					}}
+					animate={{ opacity: 1, y: 0, scale: 1 }}
+					exit={{
+						opacity: 0,
+						y: -50,
+						scale: 0.95,
+					}}
+					transition={{
+						duration: 0.3,
+						ease: 'easeOut',
+					}}
+					className={`
+						relative flex items-start gap-3 p-4 rounded-lg border backdrop-blur-sm shadow-lg
+						${getColors()}
+					`}
+				>
+					<div className='flex-shrink-0 mt-0.5'>
+						{getIcon()}
+					</div>
 
-			<div className='flex-1 min-w-0'>
-				<h4 className='font-medium text-sm'>
-					{toast.title}
-				</h4>
-				{toast.message && (
-					<p className='text-xs mt-1 opacity-90'>
-						{toast.message}
-					</p>
-				)}
-			</div>
+					<div className='flex-1 min-w-0'>
+						<h4 className='font-semibold text-sm'>
+							{title}
+						</h4>
+						{message && (
+							<p className='mt-1 text-sm opacity-90'>
+								{message}
+							</p>
+						)}
+					</div>
 
-			<button
-				onClick={() => onRemove(toast.id)}
-				className='flex-shrink-0 opacity-70 hover:opacity-100 transition-opacity'
-			>
-				<BiX className='text-lg' />
-			</button>
-		</div>
+					<button
+						onClick={handleClose}
+						className='flex-shrink-0 p-1 rounded-md hover:bg-black/10 dark:hover:bg-white/10 transition-colors'
+					>
+						<X className='w-4 h-4' />
+					</button>
+				</motion.div>
+			)}
+		</AnimatePresence>
 	);
 };
 

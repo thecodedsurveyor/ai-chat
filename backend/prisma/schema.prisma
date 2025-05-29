@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mongodb"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id          String   @id @default(auto()) @map("_id") @db.ObjectId
+    email       String   @unique
+    firstName   String
+    lastName    String
+    password    String
+    isVerified  Boolean  @default(false)
+    avatar      String?
+    preferences Json? // Store user preferences like theme, language, etc.
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    // Relations
+    chats    Chat[]
+    sessions Session[]
+
+    @@map("users")
+}
+
+model Session {
+    id        String   @id @default(auto()) @map("_id") @db.ObjectId
+    userId    String   @db.ObjectId
+    token     String   @unique
+    expiresAt DateTime
+    createdAt DateTime @default(now())
+    userAgent String? // Store user agent for security
+    ipAddress String? // Store IP address for security
+
+    // Relations
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@map("sessions")
+}
+
+model Chat {
+    id                  String    @id @default(auto()) @map("_id") @db.ObjectId
+    userId              String    @db.ObjectId
+    displayId           String
+    messages            Json[] // Store messages as JSON array
+    category            String?   @default("general")
+    tags                String[]  @default([])
+    isPinned            Boolean   @default(false)
+    isFavorite          Boolean   @default(false)
+    isArchived          Boolean   @default(false)
+    totalMessages       Int       @default(0)
+    averageResponseTime Float? // Average response time in milliseconds
+    createdAt           DateTime  @default(now())
+    updatedAt           DateTime  @updatedAt
+    lastActivity        DateTime?
+
+    // Relations
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@map("chats")
+}
+
+// Model for storing chat analytics data
+model ChatAnalytics {
+    id                  String   @id @default(auto()) @map("_id") @db.ObjectId
+    userId              String   @db.ObjectId
+    date                DateTime @default(now())
+    totalChats          Int      @default(0)
+    totalMessages       Int      @default(0)
+    totalWords          Int      @default(0)
+    averageResponseTime Float? // in milliseconds
+    topCategories       Json[] // Array of {category: string, count: number}
+    topTags             Json[] // Array of {tag: string, count: number}
+    createdAt           DateTime @default(now())
+
+    @@map("chat_analytics")
+}
