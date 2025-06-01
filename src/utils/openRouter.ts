@@ -154,10 +154,6 @@ export function buildConversationHistory(
 			convertToApiMessage
 		);
 		messages.push(...historyMessages);
-
-		console.log(
-			`[Context Manager] Using ${selectedMessages.length} messages (≈${tokenCount} tokens) for context`
-		);
 	}
 
 	// Add the new user message
@@ -179,10 +175,6 @@ export function getAIMemory(
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	_currentChatId: string | null
 ): string {
-	console.warn(
-		'[DEPRECATED] getAIMemory is deprecated. Use buildConversationHistory for proper context-aware conversations.'
-	);
-
 	// Return empty string to disable old broken implementation
 	return '';
 }
@@ -195,10 +187,6 @@ export function formatContextAwareMessage(
 	memory: string | null,
 	currentMessage: string
 ): string {
-	console.warn(
-		'[DEPRECATED] formatContextAwareMessage is deprecated. Use buildConversationHistory for proper context-aware conversations.'
-	);
-
 	// Just return the current message to avoid breaking existing code
 	return currentMessage;
 }
@@ -261,6 +249,7 @@ export async function callOpenRouter(
 
 		if (!response.ok) {
 			const errorText = await response.text();
+
 			let errorMessage = `OpenRouter API error (${response.status}): ${response.statusText}`;
 
 			try {
@@ -274,13 +263,6 @@ export async function callOpenRouter(
 					errorMessage = `OpenRouter API error: ${errorText}`;
 				}
 			}
-
-			console.error('OpenRouter API Error Details:', {
-				status: response.status,
-				statusText: response.statusText,
-				model: finalConfig.model,
-				errorText,
-			});
 
 			throw new Error(errorMessage);
 		}
@@ -297,7 +279,9 @@ export async function callOpenRouter(
 			);
 		}
 
-		return data.choices[0].message.content.trim();
+		const content =
+			data.choices[0].message.content.trim();
+		return content;
 	} catch (error) {
 		if (error instanceof Error) {
 			throw error;

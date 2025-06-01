@@ -113,6 +113,7 @@ export const defaultSettings: AppSettings = {
 		crashReporting: true,
 		dataCollection: false,
 	},
+	autoSuggestions: true, // Enable auto-suggestions by default
 };
 
 // Settings Storage Key
@@ -144,14 +145,18 @@ export class SettingsManager {
 			const stored = localStorage.getItem(
 				SETTINGS_STORAGE_KEY
 			);
-			if (stored) {
-				const parsed = JSON.parse(stored);
-				return { ...defaultSettings, ...parsed };
+			if (!stored) {
+				return defaultSettings;
 			}
-		} catch (error) {
-			console.warn('Failed to load settings:', error);
+
+			const parsed = JSON.parse(
+				stored
+			) as Partial<AppSettings>;
+			return { ...defaultSettings, ...parsed };
+		} catch {
+			// Failed to load settings, use defaults
+			return defaultSettings;
 		}
-		return { ...defaultSettings };
 	}
 
 	// Save settings to localStorage
@@ -161,8 +166,8 @@ export class SettingsManager {
 				SETTINGS_STORAGE_KEY,
 				JSON.stringify(this.settings)
 			);
-		} catch (error) {
-			console.warn('Failed to save settings:', error);
+		} catch {
+			// Failed to save settings
 		}
 	}
 

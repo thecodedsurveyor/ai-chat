@@ -3,7 +3,6 @@ import React, {
 	useMemo,
 	useRef,
 	useEffect,
-	useState,
 } from 'react';
 import Picker from '@emoji-mart/react';
 import data from '@emoji-mart/data';
@@ -34,20 +33,23 @@ import {
 	MdEmojiEmotions,
 	MdSend,
 	MdMoreHoriz,
+	MdAutoAwesome,
+	MdOutlineAutoAwesome,
 } from 'react-icons/md';
 import type { EmojiData } from '../../../types';
 import VoiceControls from '../../voice/VoiceControls';
 import SmartAutoComplete from './SmartAutoComplete';
 
 import { settingsManager } from '../../../utils/settings';
+// Using only the context toast system
+import { useToast } from '../../../contexts/ToastContext';
 
 const ChatInput: React.FC = () => {
 	const { isDark } = useTheme();
 	const inputRef = useRef<HTMLInputElement>(null);
-	const [cursorPosition, setCursorPosition] = useState({
-		x: 0,
-		y: 0,
-	});
+
+	// Get toast context
+	const toast = useToast();
 
 	// Phase 2: Input state from store
 	const inputValue = useInputValue();
@@ -70,6 +72,7 @@ const ChatInput: React.FC = () => {
 		toggleConversationTemplates,
 		toggleAutoSuggestions,
 		closeAutoSuggestions,
+		toggleSettings,
 	} = useUIStore();
 
 	// Phase 3: Chat state from store
@@ -95,36 +98,36 @@ const ChatInput: React.FC = () => {
 	useEffect(() => {
 		// Debounce suggestions to avoid too many API calls
 		const debounceTimer = setTimeout(() => {
-			if (inputValue.trim().length >= 10) {
-				toggleAutoSuggestions();
+			// Only show suggestions if input is between 10 and 60 characters
+			if (
+				inputValue.trim().length >= 10 &&
+				inputValue.trim().length <= 60 &&
+				appSettings.autoSuggestions !== false
+			) {
+				// Only show suggestions if they're not already showing
+				if (!showAutoSuggestions) {
+					toggleAutoSuggestions();
+				}
 				// Auto suggestions is already implemented in SmartAutoComplete component
 				// We just need to pass the suggestions back to our store
 			} else {
-				closeAutoSuggestions();
-				clearSuggestions();
+				if (showAutoSuggestions) {
+					closeAutoSuggestions();
+					clearSuggestions();
+				}
 			}
 		}, 500);
 
 		return () => clearTimeout(debounceTimer);
 	}, [
 		inputValue,
+		showAutoSuggestions,
 		toggleAutoSuggestions,
 		closeAutoSuggestions,
 		clearSuggestions,
+		appSettings,
+		autoSuggestions.length,
 	]);
-
-	// Update cursor position when input changes
-	useEffect(() => {
-		if (inputRef.current) {
-			const rect =
-				inputRef.current.getBoundingClientRect();
-			// Calculate cursor position based on input element
-			setCursorPosition({
-				x: rect.left,
-				y: rect.bottom + 5, // Position below input with small gap
-			});
-		}
-	}, [inputValue]);
 
 	// Handle keyboard navigation for suggestions
 	const handleKeyDown = useCallback(
@@ -258,6 +261,55 @@ const ChatInput: React.FC = () => {
 		handleSendMessage();
 	};
 
+	// Toggle auto-suggestions with notification
+	const toggleAutoSuggestionsWithNotification =
+		useCallback(() => {
+			// Calculate the target state (opposite of current)
+			const newState = !showAutoSuggestions;
+
+			// Directly update the UI store with the new state
+			useUIStore.setState({
+				showAutoSuggestions: newState,
+			});
+
+			// If disabling, clear existing suggestions
+			if (!newState) {
+				clearSuggestions();
+			}
+
+			// Show appropriate toast based on the new state
+			if (newState) {
+				// ENABLED notification
+				toast.showSuccess(
+					'Auto-suggestions Enabled',
+					'Type at least 10 characters for suggestions (max 60)'
+				);
+
+				// Update user settings
+				settingsManager.updateSettings({
+					...appSettings,
+					autoSuggestions: true,
+				});
+			} else {
+				// DISABLED notification
+				toast.showInfo(
+					'Auto-suggestions Disabled',
+					'You can re-enable this feature anytime'
+				);
+
+				// Update user settings
+				settingsManager.updateSettings({
+					...appSettings,
+					autoSuggestions: false,
+				});
+			}
+		}, [
+			showAutoSuggestions,
+			clearSuggestions,
+			appSettings,
+			toast,
+		]);
+
 	return (
 		<form
 			onSubmit={handleSubmit}
@@ -365,6 +417,34 @@ const ChatInput: React.FC = () => {
 							}
 						/>
 					</div>
+
+					{/* Auto-suggestions Toggle Button */}
+					<button
+						type='button'
+						onClick={
+							toggleAutoSuggestionsWithNotification
+						}
+						className={`flex-shrink-0 p-3 text-2xl transition-colors ${
+							showAutoSuggestions
+								? isDark
+									? 'text-chat-pink hover:text-chat-orange'
+									: 'text-chat-purple hover:text-chat-orange'
+								: isDark
+								? 'text-chat-accent hover:text-chat-pink'
+								: 'text-chat-light-accent hover:text-chat-purple'
+						}`}
+						title={
+							showAutoSuggestions
+								? 'Disable auto-suggestions'
+								: 'Enable auto-suggestions'
+						}
+					>
+						{showAutoSuggestions ? (
+							<MdAutoAwesome />
+						) : (
+							<MdOutlineAutoAwesome />
+						)}
+					</button>
 				</div>
 
 				{/* Emoji Picker */}
@@ -377,6 +457,21 @@ const ChatInput: React.FC = () => {
 					</div>
 				)}
 
+				{/* Auto-suggestions */}
+				{showAutoSuggestions && (
+					<SmartAutoComplete
+						inputValue={inputValue}
+						onSelectSuggestion={
+							handleSelectSuggestion
+						}
+						isVisible={showAutoSuggestions}
+						onClose={() => {
+							closeAutoSuggestions();
+							clearSuggestions();
+						}}
+					/>
+				)}
+
 				{/* Input Field */}
 				<div className='flex-1 relative min-w-0'>
 					<input
@@ -386,79 +481,71 @@ const ChatInput: React.FC = () => {
 						onFocus={closeEmojiPicker}
 						onKeyDown={handleKeyDown}
 						ref={inputRef}
-						placeholder='Type your message here...'
+						placeholder={
+							showAutoSuggestions
+								? 'Type at least 10 characters for suggestions (max 60)...'
+								: 'Type your message here...'
+						}
 						className={`w-full text-base py-2 px-4 rounded-xl border-2 transition-all duration-300 focus:outline-none focus:ring-0 focus:scale-[1.02] ${
 							isDark
-								? 'bg-chat-secondary/50 text-white placeholder:text-chat-accent/60 border-chat-accent/30 focus:border-chat-pink hover:border-chat-orange/40'
-								: 'bg-gray-50 text-gray-800 placeholder:text-gray-500 border-chat-purple/30 focus:border-chat-pink hover:border-chat-purple/50'
+								? `bg-chat-secondary/50 text-white placeholder:text-chat-accent/60 border-chat-accent/30 focus:border-chat-pink hover:border-chat-orange/40 ${
+										showAutoSuggestions
+											? 'border-chat-pink/70'
+											: ''
+								  }`
+								: `bg-gray-50 text-gray-800 placeholder:text-gray-500 border-chat-purple/30 focus:border-chat-pink hover:border-chat-purple/50 ${
+										showAutoSuggestions
+											? 'border-chat-purple/70'
+											: ''
+								  }`
 						}`}
 					/>
 
-					{/* Auto-suggestions */}
-					{showAutoSuggestions &&
-						autoSuggestions.length > 0 && (
-							<SmartAutoComplete
-								inputValue={inputValue}
-								onSelectSuggestion={
-									handleSelectSuggestion
-								}
-								isVisible={
-									showAutoSuggestions
-								}
-								position={cursorPosition}
-								onClose={() => {
-									closeAutoSuggestions();
-									clearSuggestions();
-								}}
-							/>
-						)}
+					{/* Auto-suggestions active indicator */}
+					{showAutoSuggestions && (
+						<div className='absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center'>
+							<span
+								className={`text-xs px-2 py-1 rounded-full ${
+									isDark
+										? 'bg-chat-pink/20 text-chat-pink'
+										: 'bg-chat-purple/20 text-chat-purple'
+								}`}
+							>
+								{autoSuggestions.length}{' '}
+								suggestions
+							</span>
+						</div>
+					)}
 				</div>
 
 				{/* Send Button */}
 				<button
 					type='submit'
-					disabled={!inputValue.trim()}
-					className='flex-shrink-0 rounded-xl bg-gradient-to-r from-chat-pink to-chat-purple p-2 md:p-3 text-xl text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100'
+					className={`flex-shrink-0 p-3 rounded-full transition-all hover:scale-110 ${
+						isDark
+							? 'bg-chat-pink text-white hover:bg-chat-orange'
+							: 'bg-chat-purple text-white hover:bg-chat-pink'
+					}`}
+					title='Send message'
 				>
-					<MdSend />
+					<MdSend className='text-xl' />
 				</button>
 
-				{/* Mobile: Additional Options Button */}
-				<div className='md:hidden flex-shrink-0'>
-					<button
-						type='button'
-						onClick={toggleEmojiPicker}
-						className={`p-2 text-lg transition-colors ${
-							isDark
-								? 'text-chat-accent hover:text-chat-orange'
-								: 'text-chat-light-accent hover:text-chat-orange'
-						}`}
-						title='More options'
-					>
-						<MdMoreHoriz />
-					</button>
-				</div>
-			</div>
-
-			{/* Mobile: Secondary Row for Templates */}
-			<div className='md:hidden mt-2 flex items-center justify-center gap-2'>
+				{/* More Options (Mobile) */}
 				<button
 					type='button'
-					onClick={toggleConversationTemplates}
-					className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
-						isDark
-							? 'bg-chat-secondary/50 text-chat-accent hover:bg-chat-secondary'
-							: 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-					}`}
-					title='Conversation templates'
+					className='md:hidden flex-shrink-0 p-2 rounded-full text-lg'
+					onClick={toggleSettings}
 				>
-					<MdCollections />
-					<span>Templates</span>
+					<MdMoreHoriz
+						className={
+							isDark
+								? 'text-chat-accent'
+								: 'text-chat-light-accent'
+						}
+					/>
 				</button>
 			</div>
-
-			{/* Decorative elements */}
-			<div className='absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-1 bg-gradient-to-r from-chat-pink to-chat-purple rounded-full'></div>
 		</form>
 	);
 };

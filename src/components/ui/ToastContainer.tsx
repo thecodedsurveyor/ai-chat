@@ -44,6 +44,10 @@ const ToastContainer = ({
 	// Set global reference
 	useEffect(() => {
 		setToastManager(addToast);
+
+		return () => {
+			// Cleanup
+		};
 	}, [addToast]);
 
 	return (

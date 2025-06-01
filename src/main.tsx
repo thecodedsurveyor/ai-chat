@@ -62,14 +62,8 @@ if ('serviceWorker' in navigator) {
 					'/sw.js',
 					{
 						scope: '/',
-						updateViaCache: 'none', // Prevent caching of the service worker itself
 					}
 				);
-
-			console.log(
-				'Service Worker registered successfully:',
-				registration.scope
-			);
 
 			// Force immediate activation
 			if (registration.waiting) {
@@ -78,39 +72,23 @@ if ('serviceWorker' in navigator) {
 				});
 			}
 
-			// Listen for updates
-			registration.addEventListener(
-				'updatefound',
+			// Handle updates
+			navigator.serviceWorker.addEventListener(
+				'controllerchange',
 				() => {
-					const newWorker =
-						registration.installing;
-					if (newWorker) {
-						newWorker.addEventListener(
-							'statechange',
-							() => {
-								if (
-									newWorker.state ===
-										'installed' &&
-									navigator.serviceWorker
-										.controller
-								) {
-									// New version available
-									console.log(
-										'New version available - consider showing update prompt'
-									);
-									// Force reload to get the new version
-									window.location.reload();
-								}
-							}
-						);
+					if (
+						registration.active &&
+						registration.active.state ===
+							'activated'
+					) {
+						// New version available
+						// Force reload to get the new version
+						window.location.reload();
 					}
 				}
 			);
-		} catch (error) {
-			console.log(
-				'Service Worker registration failed:',
-				error
-			);
+		} catch {
+			// Service Worker registration failed - continue without it
 		}
 	});
 }

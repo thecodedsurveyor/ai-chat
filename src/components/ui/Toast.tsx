@@ -1,40 +1,56 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, XCircle, X } from 'lucide-react';
+import {
+	CheckCircle,
+	XCircle,
+	X,
+	Info,
+} from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 
-export interface ToastProps {
+export interface Toast {
 	id: string;
-	type: 'success' | 'error' | 'info';
+	type: 'success' | 'error' | 'warning' | 'info';
 	title: string;
 	message?: string;
 	duration?: number;
-	onClose: (id: string) => void;
+}
+
+interface ToastProps {
+	toast: Toast;
+	onRemove: (id: string) => void;
 }
 
 const Toast: React.FC<ToastProps> = ({
-	id,
-	type,
-	title,
-	message,
-	duration = 5000,
-	onClose,
+	toast,
+	onRemove,
 }) => {
 	const { isDark } = useTheme();
 	const [isVisible, setIsVisible] = useState(true);
 
+	// Default values in case toast is undefined
+	const id = toast?.id || 'default-id';
+	const type = toast?.type || 'info';
+	const title = toast?.title || 'Notification';
+	const message = toast?.message;
+	const duration = toast?.duration || 5000;
+
 	useEffect(() => {
+		if (!toast) {
+			return;
+		}
+
 		const timer = setTimeout(() => {
 			setIsVisible(false);
-			setTimeout(() => onClose(id), 300);
+			setTimeout(() => onRemove(id), 300);
 		}, duration);
 
 		return () => clearTimeout(timer);
-	}, [duration, id, onClose]);
+	}, [duration, id, onRemove, toast]);
 
 	const handleClose = () => {
 		setIsVisible(false);
-		setTimeout(() => onClose(id), 300);
+		setTimeout(() => onRemove(id), 300);
 	};
 
 	const getIcon = () => {
@@ -47,9 +63,13 @@ const Toast: React.FC<ToastProps> = ({
 				return (
 					<XCircle className='w-5 h-5 text-red-500' />
 				);
+			case 'warning':
+				return (
+					<Info className='w-5 h-5 text-yellow-500' />
+				);
 			default:
 				return (
-					<CheckCircle className='w-5 h-5 text-blue-500' />
+					<Info className='w-5 h-5 text-blue-500' />
 				);
 		}
 	};
@@ -61,6 +81,8 @@ const Toast: React.FC<ToastProps> = ({
 					return 'bg-green-900/90 border-green-700 text-green-100';
 				case 'error':
 					return 'bg-red-900/90 border-red-700 text-red-100';
+				case 'warning':
+					return 'bg-yellow-900/90 border-yellow-700 text-yellow-100';
 				default:
 					return 'bg-blue-900/90 border-blue-700 text-blue-100';
 			}
@@ -70,11 +92,18 @@ const Toast: React.FC<ToastProps> = ({
 					return 'bg-green-50 border-green-200 text-green-800';
 				case 'error':
 					return 'bg-red-50 border-red-200 text-red-800';
+				case 'warning':
+					return 'bg-yellow-50 border-yellow-200 text-yellow-800';
 				default:
 					return 'bg-blue-50 border-blue-200 text-blue-800';
 			}
 		}
 	};
+
+	// Don't render if toast is completely missing
+	if (!toast) {
+		return null;
+	}
 
 	return (
 		<AnimatePresence>
@@ -106,7 +135,7 @@ const Toast: React.FC<ToastProps> = ({
 
 					<div className='flex-1 min-w-0'>
 						<h4 className='font-semibold text-sm'>
-							{title}
+							{title || 'Notification'}
 						</h4>
 						{message && (
 							<p className='mt-1 text-sm opacity-90'>

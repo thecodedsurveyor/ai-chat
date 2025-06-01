@@ -57,16 +57,9 @@ const ChatBotApp = () => {
 			authService.isAuthenticated();
 
 		if (!isAuthenticated || !user) {
-			console.log(
-				'User not authenticated, redirecting to auth page'
-			);
 			navigate('/auth');
 			return;
 		}
-
-		console.log(
-			`Welcome back, ${user.firstName}! You are authenticated.`
-		);
 	}, [navigate]);
 
 	// Initialize settings managers

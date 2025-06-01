@@ -41,6 +41,8 @@ export const showToast = (
 ) => {
 	if (addToastGlobal) {
 		addToastGlobal(title, message, type, duration);
+	} else {
+		// Toast manager not initialized
 	}
 };
 
