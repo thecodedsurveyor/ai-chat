@@ -66,22 +66,15 @@ const PWAPrompt: React.FC = () => {
 				await deferredPrompt.userChoice;
 
 			if (choiceResult.outcome === 'accepted') {
-				console.log(
-					'User accepted the install prompt'
-				);
+				// User accepted the install prompt
 			} else {
-				console.log(
-					'User dismissed the install prompt'
-				);
+				// User dismissed the install prompt
 			}
 
 			setDeferredPrompt(null);
 			setIsVisible(false);
-		} catch (error) {
-			console.error(
-				'Error during installation:',
-				error
-			);
+		} catch {
+			// Error during installation
 		}
 	};
 

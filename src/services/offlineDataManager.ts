@@ -400,7 +400,7 @@ class OfflineDataManager {
 		if (!navigator.onLine) return;
 
 		try {
-			console.log('🔄 Starting offline data sync...');
+			// Starting offline data sync...
 
 			// Import services when needed to avoid circular dependencies
 			const { authService } = await import(
@@ -416,9 +416,9 @@ class OfflineDataManager {
 			// Sync messages
 			await this.syncMessages();
 
-			console.log('✅ Offline data sync completed');
-		} catch (error) {
-			console.error('❌ Sync failed:', error);
+			// Offline data sync completed
+		} catch {
+			// Sync failed
 		}
 	}
 
@@ -443,8 +443,8 @@ class OfflineDataManager {
 				localProfile.syncStatus = 'synced';
 				await this.saveUserProfile(localProfile);
 			}
-		} catch (error) {
-			console.error('Profile sync failed:', error);
+		} catch {
+			// Profile sync failed
 		}
 	}
 
@@ -460,11 +460,8 @@ class OfflineDataManager {
 				// In a full implementation, you'd sync with the backend
 				conversation.syncStatus = 'synced';
 				await this.saveConversation(conversation);
-			} catch (error) {
-				console.error(
-					'Conversation sync failed:',
-					error
-				);
+			} catch {
+				// Conversation sync failed
 			}
 		}
 	}
@@ -485,11 +482,8 @@ class OfflineDataManager {
 					// Mark as synced
 					message.syncStatus = 'synced';
 					await this.saveMessage(message);
-				} catch (error) {
-					console.error(
-						'Message sync failed:',
-						error
-					);
+				} catch {
+					// Message sync failed
 				}
 			}
 		}

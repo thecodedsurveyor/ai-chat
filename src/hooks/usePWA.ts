@@ -41,9 +41,6 @@ export function usePWA(): PWAState & PWAActions {
 	// Define the sync function first
 	const sync = useCallback(async (): Promise<void> => {
 		if (!navigator.onLine) {
-			console.log(
-				'🔄 Offline - sync will happen when online'
-			);
 			return;
 		}
 
@@ -51,14 +48,8 @@ export function usePWA(): PWAState & PWAActions {
 
 		try {
 			await offlineDataManager.performSync();
-			console.log(
-				'✅ Offline data synced successfully'
-			);
-		} catch (error) {
-			console.error(
-				'❌ Failed to sync offline data:',
-				error
-			);
+		} catch {
+			// Failed to sync offline data
 		} finally {
 			setState((prev) => ({
 				...prev,
@@ -69,9 +60,7 @@ export function usePWA(): PWAState & PWAActions {
 
 	// Define showOfflineNotification function
 	const showOfflineNotification = useCallback(() => {
-		console.log(
-			'📱 App is now offline - some features may be limited'
-		);
+		// App is now offline - some features may be limited
 		// You could show a toast notification here
 	}, []);
 
@@ -200,10 +189,6 @@ export function usePWA(): PWAState & PWAActions {
 					await navigator.serviceWorker.register(
 						'/sw.js'
 					);
-				console.log(
-					'✅ Service Worker registered:',
-					registration
-				);
 
 				// Check for updates
 				registration.addEventListener(
@@ -235,11 +220,8 @@ export function usePWA(): PWAState & PWAActions {
 						}
 					}
 				);
-			} catch (error) {
-				console.error(
-					'❌ Service Worker registration failed:',
-					error
-				);
+			} catch {
+				// Service Worker registration failed
 			}
 		}
 
@@ -249,14 +231,8 @@ export function usePWA(): PWAState & PWAActions {
 	const initializeOfflineData = async () => {
 		try {
 			await offlineDataManager.init();
-			console.log(
-				'✅ Offline data manager initialized'
-			);
-		} catch (error) {
-			console.error(
-				'❌ Failed to initialize offline data manager:',
-				error
-			);
+		} catch {
+			// Failed to initialize offline data manager
 		}
 	};
 
@@ -267,40 +243,25 @@ export function usePWA(): PWAState & PWAActions {
 			throw new Error('Install prompt not available');
 		}
 
-		try {
-			deferredPrompt.prompt();
-			const { outcome } =
-				await deferredPrompt.userChoice;
+		deferredPrompt.prompt();
+		const { outcome } = await deferredPrompt.userChoice;
 
-			if (outcome === 'accepted') {
-				setState((prev) => ({
-					...prev,
-					isInstalled: true,
-					isInstallable: false,
-				}));
-				console.log(
-					'✅ PWA installed successfully'
-				);
-			}
-
-			setDeferredPrompt(null);
-		} catch (error) {
-			console.error(
-				'❌ PWA installation failed:',
-				error
-			);
-			throw error;
+		if (outcome === 'accepted') {
+			setState((prev) => ({
+				...prev,
+				isInstalled: true,
+				isInstallable: false,
+			}));
 		}
+
+		setDeferredPrompt(null);
 	}, [deferredPrompt]);
 
 	const syncOfflineData = async () => {
 		try {
 			await offlineDataManager.performSync();
-		} catch (error) {
-			console.error(
-				'❌ Background sync failed:',
-				error
-			);
+		} catch {
+			// Background sync failed
 		}
 	};
 
@@ -312,15 +273,9 @@ export function usePWA(): PWAState & PWAActions {
 						await navigator.serviceWorker.getRegistration();
 					if (registration) {
 						await registration.update();
-						console.log(
-							'🔄 Checked for service worker updates'
-						);
 					}
-				} catch (error) {
-					console.error(
-						'❌ Failed to check for updates:',
-						error
-					);
+				} catch {
+					// Failed to check for updates
 				}
 			}
 		}, []);
