@@ -1,8 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import type {
-	MessageBookmark,
-	AIPersona,
-} from '../../../types';
+import type { AIPersona } from '../../../types';
 
 import AdvancedSearch from '../../search/AdvancedSearch';
 import ChatManager from './ChatManager';
@@ -10,7 +7,6 @@ import ConversationTemplates from '../../forms/ConversationTemplates';
 import FavoritesViewer from './FavoritesViewer';
 import PersonaSelector from './PersonaSelector';
 import ChatShareDialog from './ChatShareDialog';
-import BookmarksManager from './BookmarksManager';
 import SettingsPage from '../../settings/SettingsPage';
 import QuickResponses from '../input/QuickResponses';
 
@@ -40,8 +36,6 @@ const ModalContainer: React.FC = () => {
 		closePersonaSelector,
 		showChatShareDialog,
 		closeChatShareDialog,
-		showBookmarksManager,
-		closeBookmarksManager,
 		showSettings,
 		closeSettings,
 		showQuickResponses,
@@ -67,10 +61,6 @@ const ModalContainer: React.FC = () => {
 		useState<AIPersona>(() =>
 			PersonaManager.getDefaultPersona()
 		);
-
-	const [bookmarks, setBookmarks] = useState<
-		MessageBookmark[]
-	>([]);
 
 	// Get app settings
 	const appSettings = settingsManager.getSettings();
@@ -128,41 +118,6 @@ const ModalContainer: React.FC = () => {
 			closePersonaSelector();
 		},
 		[closePersonaSelector]
-	);
-
-	const handleBookmarkAccept = useCallback(
-		(bookmarkId: string) => {
-			setBookmarks((prev) =>
-				prev.map((bookmark) =>
-					bookmark.id === bookmarkId
-						? { ...bookmark, isAccepted: true }
-						: bookmark
-				)
-			);
-		},
-		[]
-	);
-
-	const handleBookmarkReject = useCallback(
-		(bookmarkId: string) => {
-			setBookmarks((prev) =>
-				prev.filter(
-					(bookmark) => bookmark.id !== bookmarkId
-				)
-			);
-		},
-		[]
-	);
-
-	const handleBookmarkDelete = useCallback(
-		(bookmarkId: string) => {
-			setBookmarks((prev) =>
-				prev.filter(
-					(bookmark) => bookmark.id !== bookmarkId
-				)
-			);
-		},
-		[]
 	);
 
 	const handleSettingsChange = useCallback(
@@ -245,25 +200,6 @@ const ModalContainer: React.FC = () => {
 						)!
 					}
 				/>
-			)}
-
-			{/* Bookmarks Manager Modal */}
-			{showBookmarksManager && (
-				<div className='fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50'>
-					<BookmarksManager
-						bookmarks={bookmarks}
-						onAcceptSuggestion={
-							handleBookmarkAccept
-						}
-						onRejectSuggestion={
-							handleBookmarkReject
-						}
-						onDeleteBookmark={
-							handleBookmarkDelete
-						}
-						onClose={closeBookmarksManager}
-					/>
-				</div>
 			)}
 
 			{/* Settings Modal */}

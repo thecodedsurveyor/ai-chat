@@ -5,26 +5,6 @@ export type MessageStatus =
 	| 'delivered'
 	| 'error';
 
-// Bookmark types for Smart Bookmarks feature
-export type BookmarkType =
-	| 'user'
-	| 'ai_suggested'
-	| 'system';
-
-export type MessageBookmark = {
-	id: string;
-	messageId: string;
-	chatId: string;
-	type: BookmarkType;
-	title: string;
-	description?: string;
-	tags: string[];
-	importance: 'low' | 'medium' | 'high';
-	createdAt: string;
-	aiConfidence?: number; // For AI-suggested bookmarks
-	isAccepted?: boolean; // For AI-suggested bookmarks
-};
-
 // Memory types for Smart Memory System
 export type MemoryContext = {
 	id: string;
@@ -86,8 +66,6 @@ export type Message = {
 	responseTime?: number; // AI response time in milliseconds
 	wordCount?: number; // Number of words in message
 	// Fields for enhanced features
-	bookmarks?: MessageBookmark[]; // For Smart Bookmarks
-	suggestedBookmarks?: MessageBookmark[]; // AI-suggested bookmarks pending approval
 	memoryReferences?: string[]; // Memory context IDs referenced in this message
 	contextUsed?: MemoryContext[]; // Memory contexts that influenced the AI response
 };

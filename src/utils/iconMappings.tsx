@@ -1,32 +1,31 @@
 import React from 'react';
 import {
-	BiCog,
-	BiX,
-	BiMenu,
-	BiChevronDown,
 	BiSearch,
-	BiFilter,
-	BiRefresh,
-	BiDownload,
 	BiCopy,
 	BiEdit,
 	BiTrash,
-	BiShare,
 	BiPlus,
-	BiBookmark,
-	BiStar,
+	BiX,
 	BiCheck,
-	BiError,
-	BiTime,
+	BiChevronDown,
 	BiUser,
-	BiChat,
+	BiCog,
+	BiMenu,
+	BiDownload,
+	BiRefresh,
+	BiShare,
+	BiTime,
+	BiPlay,
+	BiPause,
+	BiStop,
+	BiMusic,
+	BiFilter,
+	BiStar,
+	BiError,
 	BiShield,
 	BiGlobe,
 	BiBrain,
-	BiMusic,
-	BiPause,
-	BiPlay,
-	BiStop,
+	BiChat,
 } from 'react-icons/bi';
 
 import { FaPaperPlane, FaSmile } from 'react-icons/fa';
@@ -55,9 +54,6 @@ export const iconMappings: Record<
 	'bx-cog': (props: IconProps) => <BiCog {...props} />,
 	'bx-search': (props: IconProps) => (
 		<BiSearch {...props} />
-	),
-	'bx-bookmark': (props: IconProps) => (
-		<BiBookmark {...props} />
 	),
 
 	// Actions

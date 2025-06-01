@@ -12,7 +12,6 @@ interface UIState {
 	showFavoritesViewer: boolean;
 	showPersonaSelector: boolean;
 	showChatShareDialog: boolean;
-	showBookmarksManager: boolean;
 
 	// Actions
 	toggleChatList: () => void;
@@ -33,8 +32,6 @@ interface UIState {
 	closePersonaSelector: () => void;
 	toggleChatShareDialog: () => void;
 	closeChatShareDialog: () => void;
-	toggleBookmarksManager: () => void;
-	closeBookmarksManager: () => void;
 
 	// Utility actions
 	closeAll: () => void;
@@ -53,7 +50,6 @@ export const useUIStore = create<UIState>()(
 			showFavoritesViewer: false,
 			showPersonaSelector: false,
 			showChatShareDialog: false,
-			showBookmarksManager: false,
 
 			// Chat list actions
 			toggleChatList: () =>
@@ -138,15 +134,6 @@ export const useUIStore = create<UIState>()(
 			closeChatShareDialog: () =>
 				set({ showChatShareDialog: false }),
 
-			// Bookmarks manager actions
-			toggleBookmarksManager: () =>
-				set((state) => ({
-					showBookmarksManager:
-						!state.showBookmarksManager,
-				})),
-			closeBookmarksManager: () =>
-				set({ showBookmarksManager: false }),
-
 			// Close all modals/overlays
 			closeAll: () =>
 				set({
@@ -159,7 +146,6 @@ export const useUIStore = create<UIState>()(
 					showFavoritesViewer: false,
 					showPersonaSelector: false,
 					showChatShareDialog: false,
-					showBookmarksManager: false,
 				}),
 		}),
 		{
@@ -187,5 +173,3 @@ export const usePersonaSelectorState = () =>
 	useUIStore((state) => state.showPersonaSelector);
 export const useChatShareDialogState = () =>
 	useUIStore((state) => state.showChatShareDialog);
-export const useBookmarksManagerState = () =>
-	useUIStore((state) => state.showBookmarksManager);

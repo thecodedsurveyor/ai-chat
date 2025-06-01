@@ -10,7 +10,6 @@ export {
 	useFavoritesViewerState,
 	usePersonaSelectorState,
 	useChatShareDialogState,
-	useBookmarksManagerState,
 } from './uiStore';
 
 // Phase 2: Input Store exports
