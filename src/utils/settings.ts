@@ -263,24 +263,12 @@ export class SettingsManager {
 				'focus-indicators'
 			);
 		}
-
-		console.log('Settings applied:', {
-			theme: this.settings.theme,
-			typography: this.settings.typography,
-			layout: this.settings.layout,
-			accessibility: this.settings.accessibility,
-			bodyClasses: body.className,
-		});
 	}
 
 	// Apply theme (light/dark mode only)
 	private applyTheme(): void {
 		// Don't apply theme here - let ThemeContext handle it
 		// Just store the preference for settings UI
-		console.log(
-			'Theme preference saved:',
-			this.settings.theme.mode
-		);
 
 		// Dispatch a custom event to notify ThemeContext of the change
 		if (this.settings.theme.mode !== 'auto') {
