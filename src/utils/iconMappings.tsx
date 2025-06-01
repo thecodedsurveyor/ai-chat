@@ -173,8 +173,7 @@ export const getIcon = (
 		return FontAwesomeMap[faIconKey](props);
 	}
 
-	// Fallback to a default icon
-	console.warn(`Icon not found: ${iconName}`);
+	// Fallback to a default icon - silently return error icon without logging
 	return <BiError {...props} />;
 };
 

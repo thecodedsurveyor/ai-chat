@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, {
 	createContext,
 	useContext,
@@ -8,7 +9,7 @@ import Toast from '../components/ui/Toast';
 
 interface ToastData {
 	id: string;
-	type: 'success' | 'error' | 'info';
+	type: 'success' | 'error' | 'info' | 'warning';
 	title: string;
 	message?: string;
 	duration?: number;
@@ -89,12 +90,8 @@ export const ToastProvider: React.FC<
 				{toasts.map((toast) => (
 					<Toast
 						key={toast.id}
-						id={toast.id}
-						type={toast.type}
-						title={toast.title}
-						message={toast.message}
-						duration={toast.duration}
-						onClose={removeToast}
+						toast={toast}
+						onRemove={removeToast}
 					/>
 				))}
 			</div>

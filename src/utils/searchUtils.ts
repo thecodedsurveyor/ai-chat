@@ -133,11 +133,8 @@ export class SearchEngine {
 							// If no query but other filters match, mark as having matching messages
 							hasMatchingMessages = true;
 						}
-					} catch (error) {
-						console.warn(
-							'Error processing message:',
-							error
-						);
+					} catch {
+						// Silent error handling - skip message and continue
 						continue;
 					}
 				}
@@ -154,11 +151,8 @@ export class SearchEngine {
 						relevanceScore: 1,
 					});
 				}
-			} catch (error) {
-				console.warn(
-					'Error processing chat:',
-					error
-				);
+			} catch {
+				// Silent error handling - skip chat and continue
 				continue;
 			}
 		}

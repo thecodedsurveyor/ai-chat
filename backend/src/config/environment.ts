@@ -51,7 +51,7 @@ const config: EnvironmentConfig = {
 
 	// CORS Configuration
 	FRONTEND_URL:
-		process.env.FRONTEND_URL || 'http://localhost:5176',
+		process.env.FRONTEND_URL || 'http://localhost:5174',
 
 	// Rate Limiting
 	RATE_LIMIT_WINDOW_MS: parseInt(

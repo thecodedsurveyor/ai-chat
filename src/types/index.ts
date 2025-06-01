@@ -472,6 +472,7 @@ export type AppSettings = {
 		crashReporting: boolean;
 		dataCollection: boolean;
 	};
+	autoSuggestions?: boolean;
 };
 
 export type SettingsCategory =

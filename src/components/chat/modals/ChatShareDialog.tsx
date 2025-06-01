@@ -120,11 +120,8 @@ const ChatShareDialog: React.FC<ChatShareDialogProps> = ({
 				'Chat copied to clipboard!',
 				'success'
 			);
-		} catch (error) {
-			console.error(
-				'Failed to copy to clipboard:',
-				error
-			);
+		} catch {
+			// Silent error handling
 			showToast(
 				'Error',
 				'Failed to copy to clipboard',
@@ -147,11 +144,8 @@ const ChatShareDialog: React.FC<ChatShareDialogProps> = ({
 				'Chat URL copied to clipboard!',
 				'success'
 			);
-		} catch (error) {
-			console.error(
-				'Failed to copy chat URL:',
-				error
-			);
+		} catch {
+			// Silent error handling
 			showToast(
 				'Error',
 				'Failed to copy chat URL',
@@ -188,11 +182,8 @@ const ChatShareDialog: React.FC<ChatShareDialogProps> = ({
 				'Chat downloaded successfully!',
 				'success'
 			);
-		} catch (error) {
-			console.error(
-				'Failed to download chat:',
-				error
-			);
+		} catch {
+			// Silent error handling
 			showToast(
 				'Error',
 				'Failed to download chat',

@@ -34,11 +34,25 @@ import {
 import { ChatProvider } from './contexts/ChatContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './contexts/ToastContext';
+import ToastContainer from './components/ui/ToastContainer';
 import ScrollToTop from './components/ui/ScrollToTop';
 import BackToTop from './components/ui/BackToTop';
 import { useChats } from './stores/chatStore';
 
 const queryClient = new QueryClient();
+
+// Simple test component to help diagnose issues
+const TestPage = () => (
+	<div className='p-10 text-center'>
+		<h1 className='text-2xl font-bold mb-4'>
+			Test Page Working
+		</h1>
+		<p>
+			If you can see this, basic routing is working
+			correctly.
+		</p>
+	</div>
+);
 
 // Wrapper component to provide chats data to AnalyticsPage
 const AnalyticsPageWrapper = () => {
@@ -56,191 +70,203 @@ const App = () => {
 		<QueryClientProvider client={queryClient}>
 			<ThemeProvider>
 				<ToastProvider>
-					<Router>
-						<ScrollToTop />
-						<Routes>
-							{/* Auth page route */}
-							<Route
-								path='/auth'
-								element={<AuthPage />}
-							/>
+					<ToastContainer>
+						<Router>
+							<ScrollToTop />
+							<Routes>
+								{/* Test route */}
+								<Route
+									path='/test'
+									element={<TestPage />}
+								/>
 
-							{/* Profile page route */}
-							<Route
-								path='/profile'
-								element={<ProfilePage />}
-							/>
+								{/* Auth page route */}
+								<Route
+									path='/auth'
+									element={<AuthPage />}
+								/>
 
-							{/* Settings page route */}
-							<Route
-								path='/settings'
-								element={<SettingsPage />}
-							/>
+								{/* Profile page route */}
+								<Route
+									path='/profile'
+									element={
+										<ProfilePage />
+									}
+								/>
 
-							{/* Landing page and other routes */}
-							<Route
-								path='/'
-								element={
-									<PageWrapper>
-										<Navigation />
-										<LandingPage />
-										<Footer />
-										<BackToTop />
-									</PageWrapper>
-								}
-							/>
-							<Route
-								path='/about'
-								element={
-									<PageWrapper>
-										<Navigation />
-										<About />
-										<Footer />
-										<BackToTop />
-									</PageWrapper>
-								}
-							/>
-							<Route
-								path='/contact'
-								element={
-									<PageWrapper>
-										<Navigation />
-										<Contact />
-										<Footer />
-										<BackToTop />
-									</PageWrapper>
-								}
-							/>
-							<Route
-								path='/terms'
-								element={
-									<PageWrapper>
-										<Navigation />
-										<Terms />
-										<Footer />
-										<BackToTop />
-									</PageWrapper>
-								}
-							/>
-							<Route
-								path='/privacy'
-								element={
-									<PageWrapper>
-										<Navigation />
-										<Privacy />
-										<Footer />
-										<BackToTop />
-									</PageWrapper>
-								}
-							/>
-							{/* Dedicated AI Chat route */}
-							<Route
-								path='/ai-chat'
-								element={
-									<ChatProvider>
-										<ChatBotApp />
-									</ChatProvider>
-								}
-							/>
-							{/* Analytics route */}
-							<Route
-								path='/analytics'
-								element={
-									<AnalyticsPageWrapper />
-								}
-							/>
-							{/* New footer pages */}
-							<Route
-								path='/pricing'
-								element={
-									<PageWrapper>
-										<Navigation />
-										<Pricing />
-										<Footer />
-										<BackToTop />
-									</PageWrapper>
-								}
-							/>
-							<Route
-								path='/blog'
-								element={
-									<PageWrapper>
-										<Navigation />
-										<Blog />
-										<Footer />
-										<BackToTop />
-									</PageWrapper>
-								}
-							/>
-							<Route
-								path='/careers'
-								element={
-									<PageWrapper>
-										<Navigation />
-										<Careers />
-										<Footer />
-										<BackToTop />
-									</PageWrapper>
-								}
-							/>
-							<Route
-								path='/cookies'
-								element={
-									<PageWrapper>
-										<Navigation />
-										<CookiePolicy />
-										<Footer />
-										<BackToTop />
-									</PageWrapper>
-								}
-							/>
-							<Route
-								path='/gdpr'
-								element={
-									<PageWrapper>
-										<Navigation />
-										<GDPR />
-										<Footer />
-										<BackToTop />
-									</PageWrapper>
-								}
-							/>
-							<Route
-								path='/help'
-								element={
-									<PageWrapper>
-										<Navigation />
-										<HelpCenter />
-										<Footer />
-										<BackToTop />
-									</PageWrapper>
-								}
-							/>
-							<Route
-								path='/status'
-								element={
-									<PageWrapper>
-										<Navigation />
-										<Status />
-										<Footer />
-										<BackToTop />
-									</PageWrapper>
-								}
-							/>
-							{/* Public Routes */}
-							<Route
-								path='/features'
-								element={
-									<PageWrapper>
-										<Navigation />
-										<Features />
-										<Footer />
-										<BackToTop />
-									</PageWrapper>
-								}
-							/>
-						</Routes>
-					</Router>
+								{/* Settings page route */}
+								<Route
+									path='/settings'
+									element={
+										<SettingsPage />
+									}
+								/>
+
+								{/* Landing page and other routes */}
+								<Route
+									path='/'
+									element={
+										<PageWrapper>
+											<Navigation />
+											<LandingPage />
+											<Footer />
+											<BackToTop />
+										</PageWrapper>
+									}
+								/>
+								<Route
+									path='/about'
+									element={
+										<PageWrapper>
+											<Navigation />
+											<About />
+											<Footer />
+											<BackToTop />
+										</PageWrapper>
+									}
+								/>
+								<Route
+									path='/contact'
+									element={
+										<PageWrapper>
+											<Navigation />
+											<Contact />
+											<Footer />
+											<BackToTop />
+										</PageWrapper>
+									}
+								/>
+								<Route
+									path='/terms'
+									element={
+										<PageWrapper>
+											<Navigation />
+											<Terms />
+											<Footer />
+											<BackToTop />
+										</PageWrapper>
+									}
+								/>
+								<Route
+									path='/privacy'
+									element={
+										<PageWrapper>
+											<Navigation />
+											<Privacy />
+											<Footer />
+											<BackToTop />
+										</PageWrapper>
+									}
+								/>
+								{/* Dedicated AI Chat route */}
+								<Route
+									path='/ai-chat'
+									element={
+										<ChatProvider>
+											<ChatBotApp />
+										</ChatProvider>
+									}
+								/>
+								{/* Analytics route */}
+								<Route
+									path='/analytics'
+									element={
+										<AnalyticsPageWrapper />
+									}
+								/>
+								{/* New footer pages */}
+								<Route
+									path='/pricing'
+									element={
+										<PageWrapper>
+											<Navigation />
+											<Pricing />
+											<Footer />
+											<BackToTop />
+										</PageWrapper>
+									}
+								/>
+								<Route
+									path='/blog'
+									element={
+										<PageWrapper>
+											<Navigation />
+											<Blog />
+											<Footer />
+											<BackToTop />
+										</PageWrapper>
+									}
+								/>
+								<Route
+									path='/careers'
+									element={
+										<PageWrapper>
+											<Navigation />
+											<Careers />
+											<Footer />
+											<BackToTop />
+										</PageWrapper>
+									}
+								/>
+								<Route
+									path='/cookies'
+									element={
+										<PageWrapper>
+											<Navigation />
+											<CookiePolicy />
+											<Footer />
+											<BackToTop />
+										</PageWrapper>
+									}
+								/>
+								<Route
+									path='/gdpr'
+									element={
+										<PageWrapper>
+											<Navigation />
+											<GDPR />
+											<Footer />
+											<BackToTop />
+										</PageWrapper>
+									}
+								/>
+								<Route
+									path='/help'
+									element={
+										<PageWrapper>
+											<Navigation />
+											<HelpCenter />
+											<Footer />
+											<BackToTop />
+										</PageWrapper>
+									}
+								/>
+								<Route
+									path='/status'
+									element={
+										<PageWrapper>
+											<Navigation />
+											<Status />
+											<Footer />
+											<BackToTop />
+										</PageWrapper>
+									}
+								/>
+								{/* Public Routes */}
+								<Route
+									path='/features'
+									element={
+										<PageWrapper>
+											<Navigation />
+											<Features />
+											<Footer />
+											<BackToTop />
+										</PageWrapper>
+									}
+								/>
+							</Routes>
+						</Router>
+					</ToastContainer>
 				</ToastProvider>
 			</ThemeProvider>
 			<ReactQueryDevtools />

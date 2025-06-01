@@ -147,11 +147,8 @@ export class PersonaManager {
 				this.STORAGE_KEY
 			);
 			return stored ? JSON.parse(stored) : [];
-		} catch (error) {
-			console.error(
-				'Error loading custom personas:',
-				error
-			);
+		} catch {
+			// Silent error handling - could not load custom personas
 			return [];
 		}
 	}
@@ -173,11 +170,8 @@ export class PersonaManager {
 				this.STORAGE_KEY,
 				JSON.stringify(customPersonas)
 			);
-		} catch (error) {
-			console.error(
-				'Error saving custom persona:',
-				error
-			);
+		} catch {
+			// Silent error handling - could not save custom persona
 		}
 
 		return newPersona;
@@ -198,11 +192,8 @@ export class PersonaManager {
 					JSON.stringify(updatedPersonas)
 				);
 				return true;
-			} catch (error) {
-				console.error(
-					'Error deleting custom persona:',
-					error
-				);
+			} catch {
+				// Silent error handling - could not delete custom persona
 			}
 		}
 
@@ -230,11 +221,8 @@ export class PersonaManager {
 					JSON.stringify(customPersonas)
 				);
 				return true;
-			} catch (error) {
-				console.error(
-					'Error updating custom persona:',
-					error
-				);
+			} catch {
+				// Silent error handling - could not update custom persona
 			}
 		}
 

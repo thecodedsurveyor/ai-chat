@@ -13,61 +13,56 @@ export class ExportManager {
 		chats: Chat[],
 		options: ExportOptions
 	): Promise<void> {
-		try {
-			const filteredChats = this.filterChats(
-				chats,
-				options
-			);
-			const exportData = this.createExportData(
-				filteredChats,
-				options
-			);
+		const filteredChats = this.filterChats(
+			chats,
+			options
+		);
+		const exportData = this.createExportData(
+			filteredChats,
+			options
+		);
 
-			let content: string;
-			let filename: string;
-			let mimeType: string;
+		let content: string;
+		let filename: string;
+		let mimeType: string;
 
-			switch (options.format) {
-				case 'json':
-					content = this.exportToJSON(exportData);
-					filename = `ai-chat-export-${this.getDateString()}.json`;
-					mimeType = 'application/json';
-					break;
-				case 'txt':
-					content = this.exportToTXT(
-						exportData,
-						options
-					);
-					filename = `ai-chat-export-${this.getDateString()}.txt`;
-					mimeType = 'text/plain';
-					break;
-				case 'csv':
-					content = this.exportToCSV(
-						exportData,
-						options
-					);
-					filename = `ai-chat-export-${this.getDateString()}.csv`;
-					mimeType = 'text/csv';
-					break;
-				case 'markdown':
-					content = this.exportToMarkdown(
-						exportData,
-						options
-					);
-					filename = `ai-chat-export-${this.getDateString()}.md`;
-					mimeType = 'text/markdown';
-					break;
-				default:
-					throw new Error(
-						`Unsupported export format: ${options.format}`
-					);
-			}
-
-			this.downloadFile(content, filename, mimeType);
-		} catch (error) {
-			console.error('Export failed:', error);
-			throw error;
+		switch (options.format) {
+			case 'json':
+				content = this.exportToJSON(exportData);
+				filename = `ai-chat-export-${this.getDateString()}.json`;
+				mimeType = 'application/json';
+				break;
+			case 'txt':
+				content = this.exportToTXT(
+					exportData,
+					options
+				);
+				filename = `ai-chat-export-${this.getDateString()}.txt`;
+				mimeType = 'text/plain';
+				break;
+			case 'csv':
+				content = this.exportToCSV(
+					exportData,
+					options
+				);
+				filename = `ai-chat-export-${this.getDateString()}.csv`;
+				mimeType = 'text/csv';
+				break;
+			case 'markdown':
+				content = this.exportToMarkdown(
+					exportData,
+					options
+				);
+				filename = `ai-chat-export-${this.getDateString()}.md`;
+				mimeType = 'text/markdown';
+				break;
+			default:
+				throw new Error(
+					`Unsupported export format: ${options.format}`
+				);
 		}
+
+		this.downloadFile(content, filename, mimeType);
 	}
 
 	/**
