@@ -266,6 +266,12 @@ async function handleOnlineOnlyRequest(request) {
 // Default cache-first strategy
 async function handleDefaultRequest(request) {
 	try {
+		// Skip caching chrome-extension URLs
+		const url = new URL(request.url);
+		if (url.protocol === 'chrome-extension:') {
+			return fetch(request);
+		}
+
 		const cache = await caches.open(CACHE_NAME);
 		const cachedResponse = await cache.match(request);
 
