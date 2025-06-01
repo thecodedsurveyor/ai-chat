@@ -78,6 +78,8 @@ export default defineConfig({
     port: 5173,
     strictPort: false, // Allow fallback to another port if 5173 is in use
     hmr: {
+      host: 'localhost',
+      protocol: 'ws',
       overlay: true,
     },
   },
