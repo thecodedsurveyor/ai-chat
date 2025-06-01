@@ -12,6 +12,7 @@ interface UIState {
 	showFavoritesViewer: boolean;
 	showPersonaSelector: boolean;
 	showChatShareDialog: boolean;
+	showAutoSuggestions: boolean;
 
 	// Actions
 	toggleChatList: () => void;
@@ -32,6 +33,8 @@ interface UIState {
 	closePersonaSelector: () => void;
 	toggleChatShareDialog: () => void;
 	closeChatShareDialog: () => void;
+	toggleAutoSuggestions: () => void;
+	closeAutoSuggestions: () => void;
 
 	// Utility actions
 	closeAll: () => void;
@@ -50,6 +53,7 @@ export const useUIStore = create<UIState>()(
 			showFavoritesViewer: false,
 			showPersonaSelector: false,
 			showChatShareDialog: false,
+			showAutoSuggestions: false,
 
 			// Chat list actions
 			toggleChatList: () =>
@@ -134,6 +138,15 @@ export const useUIStore = create<UIState>()(
 			closeChatShareDialog: () =>
 				set({ showChatShareDialog: false }),
 
+			// Auto suggestions actions
+			toggleAutoSuggestions: () =>
+				set((state) => ({
+					showAutoSuggestions:
+						!state.showAutoSuggestions,
+				})),
+			closeAutoSuggestions: () =>
+				set({ showAutoSuggestions: false }),
+
 			// Close all modals/overlays
 			closeAll: () =>
 				set({
@@ -146,6 +159,7 @@ export const useUIStore = create<UIState>()(
 					showFavoritesViewer: false,
 					showPersonaSelector: false,
 					showChatShareDialog: false,
+					showAutoSuggestions: false,
 				}),
 		}),
 		{
@@ -173,3 +187,5 @@ export const usePersonaSelectorState = () =>
 	useUIStore((state) => state.showPersonaSelector);
 export const useChatShareDialogState = () =>
 	useUIStore((state) => state.showChatShareDialog);
+export const useAutoSuggestionsState = () =>
+	useUIStore((state) => state.showAutoSuggestions);

@@ -1,4 +1,10 @@
-import React, { useCallback, useMemo } from 'react';
+import React, {
+	useCallback,
+	useMemo,
+	useRef,
+	useEffect,
+	useState,
+} from 'react';
 import Picker from '@emoji-mart/react';
 import data from '@emoji-mart/data';
 import { useTheme } from '../../../contexts/ThemeContext';
@@ -7,11 +13,13 @@ import { useTheme } from '../../../contexts/ThemeContext';
 import {
 	useEmojiPickerState,
 	useUIStore,
+	useAutoSuggestionsState,
 } from '../../../stores/uiStore';
 // Phase 2: Input Store import
 import {
 	useInputValue,
 	useInputStore,
+	useAutoSuggestions,
 } from '../../../stores/inputStore';
 // Phase 3: Chat Store import
 import {
@@ -29,24 +37,39 @@ import {
 } from 'react-icons/md';
 import type { EmojiData } from '../../../types';
 import VoiceControls from '../../voice/VoiceControls';
+import SmartAutoComplete from './SmartAutoComplete';
 
 import { settingsManager } from '../../../utils/settings';
 
 const ChatInput: React.FC = () => {
 	const { isDark } = useTheme();
+	const inputRef = useRef<HTMLInputElement>(null);
+	const [cursorPosition, setCursorPosition] = useState({
+		x: 0,
+		y: 0,
+	});
 
 	// Phase 2: Input state from store
 	const inputValue = useInputValue();
-	const { updateInputValue, appendToInput, clearInput } =
-		useInputStore();
+	const autoSuggestions = useAutoSuggestions();
+	const {
+		updateInputValue,
+		appendToInput,
+		clearInput,
+		clearSuggestions,
+		setInputValue,
+	} = useInputStore();
 
 	// Phase 1: UI state from Zustand store
 	const showEmojiPicker = useEmojiPickerState();
+	const showAutoSuggestions = useAutoSuggestionsState();
 	const {
 		toggleEmojiPicker,
 		closeEmojiPicker,
 		toggleQuickResponses,
 		toggleConversationTemplates,
+		toggleAutoSuggestions,
+		closeAutoSuggestions,
 	} = useUIStore();
 
 	// Phase 3: Chat state from store
@@ -66,6 +89,109 @@ const ChatInput: React.FC = () => {
 			? aiMessages[aiMessages.length - 1].text
 			: undefined;
 	}, [messages]);
+
+	// Add auto-suggestion functions after lastAIMessage logic
+	// Get auto-suggestions using the SmartAutoComplete component
+	useEffect(() => {
+		// Debounce suggestions to avoid too many API calls
+		const debounceTimer = setTimeout(() => {
+			if (inputValue.trim().length >= 10) {
+				toggleAutoSuggestions();
+				// Auto suggestions is already implemented in SmartAutoComplete component
+				// We just need to pass the suggestions back to our store
+			} else {
+				closeAutoSuggestions();
+				clearSuggestions();
+			}
+		}, 500);
+
+		return () => clearTimeout(debounceTimer);
+	}, [
+		inputValue,
+		toggleAutoSuggestions,
+		closeAutoSuggestions,
+		clearSuggestions,
+	]);
+
+	// Update cursor position when input changes
+	useEffect(() => {
+		if (inputRef.current) {
+			const rect =
+				inputRef.current.getBoundingClientRect();
+			// Calculate cursor position based on input element
+			setCursorPosition({
+				x: rect.left,
+				y: rect.bottom + 5, // Position below input with small gap
+			});
+		}
+	}, [inputValue]);
+
+	// Handle keyboard navigation for suggestions
+	const handleKeyDown = useCallback(
+		(e: React.KeyboardEvent) => {
+			// Only process if we have suggestions and they're visible
+			if (
+				!showAutoSuggestions ||
+				autoSuggestions.length === 0
+			)
+				return;
+
+			switch (e.key) {
+				case 'ArrowDown':
+					e.preventDefault();
+					useInputStore
+						.getState()
+						.selectNextSuggestion();
+					break;
+				case 'ArrowUp':
+					e.preventDefault();
+					useInputStore
+						.getState()
+						.selectPrevSuggestion();
+					break;
+				case 'Tab':
+				case 'Enter': {
+					if (e.key === 'Tab') e.preventDefault();
+					const selectedSuggestion = useInputStore
+						.getState()
+						.getSelectedSuggestion();
+					if (selectedSuggestion) {
+						setInputValue(
+							selectedSuggestion.text
+						);
+						clearSuggestions();
+						closeAutoSuggestions();
+					}
+					break;
+				}
+				case 'Escape':
+					closeAutoSuggestions();
+					clearSuggestions();
+					break;
+			}
+		},
+		[
+			showAutoSuggestions,
+			autoSuggestions.length,
+			setInputValue,
+			clearSuggestions,
+			closeAutoSuggestions,
+		]
+	);
+
+	// Handle suggestion selection
+	const handleSelectSuggestion = useCallback(
+		(suggestion: string) => {
+			setInputValue(suggestion);
+			clearSuggestions();
+			closeAutoSuggestions();
+		},
+		[
+			setInputValue,
+			clearSuggestions,
+			closeAutoSuggestions,
+		]
+	);
 
 	// Local handlers
 	const handleSendMessage = useCallback(() => {
@@ -258,6 +384,8 @@ const ChatInput: React.FC = () => {
 						value={inputValue}
 						onChange={updateInputValue}
 						onFocus={closeEmojiPicker}
+						onKeyDown={handleKeyDown}
+						ref={inputRef}
 						placeholder='Type your message here...'
 						className={`w-full text-base py-2 px-4 rounded-xl border-2 transition-all duration-300 focus:outline-none focus:ring-0 focus:scale-[1.02] ${
 							isDark
@@ -265,6 +393,25 @@ const ChatInput: React.FC = () => {
 								: 'bg-gray-50 text-gray-800 placeholder:text-gray-500 border-chat-purple/30 focus:border-chat-pink hover:border-chat-purple/50'
 						}`}
 					/>
+
+					{/* Auto-suggestions */}
+					{showAutoSuggestions &&
+						autoSuggestions.length > 0 && (
+							<SmartAutoComplete
+								inputValue={inputValue}
+								onSelectSuggestion={
+									handleSelectSuggestion
+								}
+								isVisible={
+									showAutoSuggestions
+								}
+								position={cursorPosition}
+								onClose={() => {
+									closeAutoSuggestions();
+									clearSuggestions();
+								}}
+							/>
+						)}
 				</div>
 
 				{/* Send Button */}
