@@ -64,11 +64,6 @@ class AuthService {
 		data: RegisterData
 	): Promise<AuthResponse> {
 		try {
-			console.log(
-				'🚀 Registration attempt with data:',
-				data
-			);
-
 			const response = await fetch(
 				`${API_BASE_URL}/auth/register`,
 				{
@@ -80,21 +75,8 @@ class AuthService {
 				}
 			);
 
-			console.log(
-				'📡 Response status:',
-				response.status
-			);
-			console.log(
-				'📡 Response headers:',
-				Object.fromEntries(
-					response.headers.entries()
-				)
-			);
-
 			const result: AuthResponse =
 				await response.json();
-
-			console.log('📦 Response data:', result);
 
 			if (result.success && result.data) {
 				this.token = result.data.token;
@@ -109,8 +91,7 @@ class AuthService {
 			}
 
 			return result;
-		} catch (error) {
-			console.error('Registration error:', error);
+		} catch {
 			return {
 				success: false,
 				message: 'Network error. Please try again.',
@@ -120,11 +101,6 @@ class AuthService {
 
 	async login(data: LoginData): Promise<AuthResponse> {
 		try {
-			console.log('🔐 Login attempt with data:', {
-				email: data.email,
-				password: '[REDACTED]',
-			});
-
 			const response = await fetch(
 				`${API_BASE_URL}/auth/login`,
 				{
@@ -136,21 +112,8 @@ class AuthService {
 				}
 			);
 
-			console.log(
-				'📡 Response status:',
-				response.status
-			);
-			console.log(
-				'📡 Response headers:',
-				Object.fromEntries(
-					response.headers.entries()
-				)
-			);
-
 			const result: AuthResponse =
 				await response.json();
-
-			console.log('📦 Response data:', result);
 
 			if (result.success && result.data) {
 				this.token = result.data.token;
@@ -165,8 +128,7 @@ class AuthService {
 			}
 
 			return result;
-		} catch (error) {
-			console.error('Login error:', error);
+		} catch {
 			return {
 				success: false,
 				message: 'Network error. Please try again.',
@@ -178,8 +140,6 @@ class AuthService {
 		data: ChangePasswordData
 	): Promise<AuthResponse> {
 		try {
-			console.log('🔑 Password change attempt');
-
 			const response = await fetch(
 				`${API_BASE_URL}/auth/change-password`,
 				{
@@ -192,15 +152,8 @@ class AuthService {
 				}
 			);
 
-			console.log(
-				'📡 Response status:',
-				response.status
-			);
-
 			const result: AuthResponse =
 				await response.json();
-
-			console.log('📦 Response data:', result);
 
 			// If password change is successful, the backend invalidates all sessions
 			// So we need to logout the user and redirect to login
@@ -209,8 +162,7 @@ class AuthService {
 			}
 
 			return result;
-		} catch (error) {
-			console.error('Change password error:', error);
+		} catch {
 			return {
 				success: false,
 				message: 'Network error. Please try again.',
@@ -220,8 +172,6 @@ class AuthService {
 
 	async deleteAccount(): Promise<AuthResponse> {
 		try {
-			console.log('🗑️ Account deletion attempt');
-
 			const response = await fetch(
 				`${API_BASE_URL}/auth/delete-account`,
 				{
@@ -233,15 +183,8 @@ class AuthService {
 				}
 			);
 
-			console.log(
-				'📡 Response status:',
-				response.status
-			);
-
 			const result: AuthResponse =
 				await response.json();
-
-			console.log('📦 Response data:', result);
 
 			// If account deletion is successful, logout and clear all data
 			if (result.success) {
@@ -249,8 +192,7 @@ class AuthService {
 			}
 
 			return result;
-		} catch (error) {
-			console.error('Delete account error:', error);
+		} catch {
 			return {
 				success: false,
 				message: 'Network error. Please try again.',
@@ -269,8 +211,8 @@ class AuthService {
 					},
 				});
 			}
-		} catch (error) {
-			console.error('Logout error:', error);
+		} catch {
+			// Logout error
 		} finally {
 			this.token = null;
 			localStorage.removeItem('authToken');
@@ -326,8 +268,7 @@ class AuthService {
 			}
 
 			return result;
-		} catch (error) {
-			console.error('Get profile error:', error);
+		} catch {
 			return {
 				success: false,
 				message: 'Network error. Please try again.',
@@ -366,8 +307,7 @@ class AuthService {
 			}
 
 			return result;
-		} catch (error) {
-			console.error('Update profile error:', error);
+		} catch {
 			return {
 				success: false,
 				message: 'Network error. Please try again.',
