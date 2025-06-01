@@ -6,6 +6,9 @@ import {
 	getProfile,
 	updateProfile,
 	changePassword,
+	requestPasswordReset,
+	resetPassword,
+	deleteAccount,
 } from '../controllers/authController';
 import { authenticateToken } from '../middleware/auth';
 import { validate } from '../middleware/validation';
@@ -26,6 +29,18 @@ router.post(
 	login
 );
 
+router.post(
+	'/request-password-reset',
+	validate(ValidationUtils.requestPasswordResetSchema),
+	requestPasswordReset
+);
+
+router.post(
+	'/reset-password',
+	validate(ValidationUtils.resetPasswordSchema),
+	resetPassword
+);
+
 // Protected routes
 router.post('/logout', authenticateToken, logout);
 
@@ -43,5 +58,7 @@ router.put(
 	authenticateToken,
 	changePassword
 );
+
+router.delete('/delete-account', authenticateToken, deleteAccount);
 
 export default router;

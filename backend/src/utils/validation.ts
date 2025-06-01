@@ -192,4 +192,53 @@ export class ValidationUtils {
 
 		return { page: pageNum, limit: limitNum };
 	}
+
+	/**
+	 * Password reset request validation schema
+	 */
+	static readonly requestPasswordResetSchema = Joi.object(
+		{
+			email: Joi.string()
+				.email()
+				.required()
+				.messages({
+					'string.email':
+						'Please provide a valid email address',
+					'any.required': 'Email is required',
+				}),
+		}
+	);
+
+	/**
+	 * Password reset validation schema
+	 */
+	static readonly resetPasswordSchema = Joi.object({
+		token: Joi.string()
+			.min(32)
+			.max(128)
+			.required()
+			.messages({
+				'string.min': 'Invalid reset token',
+				'string.max': 'Invalid reset token',
+				'any.required': 'Reset token is required',
+			}),
+		email: Joi.string().email().required().messages({
+			'string.email':
+				'Please provide a valid email address',
+			'any.required': 'Email is required',
+		}),
+		newPassword: Joi.string()
+			.min(8)
+			.pattern(
+				/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?])/
+			)
+			.required()
+			.messages({
+				'string.min':
+					'Password must be at least 8 characters long',
+				'string.pattern.base':
+					'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
+				'any.required': 'New password is required',
+			}),
+	});
 }

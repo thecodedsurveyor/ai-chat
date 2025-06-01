@@ -10,7 +10,7 @@ export class JWTUtils {
 		payload: Omit<JWTPayload, 'iat' | 'exp'>
 	): string {
 		return jwt.sign(payload, config.JWT_SECRET, {
-			expiresIn: config.JWT_EXPIRE,
+			expiresIn: '15m',
 		});
 	}
 
@@ -24,7 +24,7 @@ export class JWTUtils {
 			payload,
 			config.JWT_REFRESH_SECRET,
 			{
-				expiresIn: config.JWT_REFRESH_EXPIRE,
+				expiresIn: '7d',
 			}
 		);
 	}
@@ -49,9 +49,9 @@ export class JWTUtils {
 		try {
 			return jwt.verify(
 				token,
-				config.JWT_SECRET
+				config.JWT_SECRET as string
 			) as JWTPayload;
-		} catch (error) {
+		} catch {
 			throw new Error('Invalid access token');
 		}
 	}
@@ -63,9 +63,9 @@ export class JWTUtils {
 		try {
 			return jwt.verify(
 				token,
-				config.JWT_REFRESH_SECRET
+				config.JWT_REFRESH_SECRET as string
 			) as JWTPayload;
-		} catch (error) {
+		} catch {
 			throw new Error('Invalid refresh token');
 		}
 	}
@@ -76,7 +76,7 @@ export class JWTUtils {
 	static decodeToken(token: string): JWTPayload | null {
 		try {
 			return jwt.decode(token) as JWTPayload;
-		} catch (error) {
+		} catch {
 			return null;
 		}
 	}

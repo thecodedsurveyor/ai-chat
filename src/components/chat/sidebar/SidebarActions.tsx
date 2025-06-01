@@ -6,8 +6,6 @@ import {
 	MdBarChart,
 	MdPerson,
 	MdCollections,
-	MdBookmark,
-	MdSettings,
 	MdShare,
 	MdAdd,
 	MdStar,
@@ -23,8 +21,6 @@ interface SidebarActionsProps {
 	onTogglePersonaSelector: () => void;
 	onToggleConversationTemplates: () => void;
 	onToggleFavoritesViewer: () => void;
-	onToggleBookmarksManager: () => void;
-	onToggleSettings: () => void;
 	onShareChat: () => void;
 	onCreateNewChat: () => void;
 }
@@ -36,8 +32,6 @@ const SidebarActions: React.FC<SidebarActionsProps> = ({
 	onTogglePersonaSelector,
 	onToggleConversationTemplates,
 	onToggleFavoritesViewer,
-	onToggleBookmarksManager,
-	onToggleSettings,
 	onShareChat,
 	onCreateNewChat,
 }) => {
@@ -201,21 +195,6 @@ const SidebarActions: React.FC<SidebarActionsProps> = ({
 							<MdStar className='text-lg' />
 							<span>Favorites</span>
 						</button>
-						<button
-							onClick={
-								onToggleBookmarksManager
-							}
-							className={cn(
-								collapsibleButtonClass,
-								'col-span-2',
-								isDark
-									? 'bg-orange-500/15 text-orange-400 hover:bg-orange-500/25 border-orange-500/30'
-									: 'bg-orange-50 text-orange-700 hover:bg-orange-100 border-orange-200'
-							)}
-						>
-							<MdBookmark className='text-lg' />
-							<span>Bookmarks</span>
-						</button>
 					</div>
 				</div>
 			</div>
@@ -274,18 +253,6 @@ const SidebarActions: React.FC<SidebarActionsProps> = ({
 						>
 							<MdPerson className='text-lg' />
 							<span>Persona</span>
-						</button>
-						<button
-							onClick={onToggleSettings}
-							className={cn(
-								collapsibleButtonClass,
-								isDark
-									? 'bg-blue-500/15 text-blue-400 hover:bg-blue-500/25 border-blue-500/30'
-									: 'bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200'
-							)}
-						>
-							<MdSettings className='text-lg' />
-							<span>Settings</span>
 						</button>
 					</div>
 				</div>

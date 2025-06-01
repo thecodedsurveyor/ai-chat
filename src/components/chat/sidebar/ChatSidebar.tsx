@@ -30,8 +30,6 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
 		togglePersonaSelector,
 		toggleConversationTemplates,
 		toggleFavoritesViewer,
-		toggleBookmarksManager,
-		toggleSettings,
 		toggleChatShareDialog,
 	} = useUIStore();
 
@@ -164,10 +162,6 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
 				onToggleFavoritesViewer={
 					toggleFavoritesViewer
 				}
-				onToggleBookmarksManager={
-					toggleBookmarksManager
-				}
-				onToggleSettings={toggleSettings}
 				onShareChat={handleShareChat}
 				onCreateNewChat={handleCreateNewChat}
 			/>

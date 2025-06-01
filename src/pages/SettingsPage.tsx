@@ -4,12 +4,17 @@ import { ArrowLeft } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { authService } from '../services/authService';
 import { settingsManager } from '../utils/settings';
+import { usePageTitle } from '../hooks/usePageTitle';
 import SettingsComponent from '../components/settings/SettingsPage';
 import type { AppSettings } from '../types';
 
 const SettingsPage: React.FC = () => {
 	const { isDark } = useTheme();
 	const navigate = useNavigate();
+
+	// Set page title
+	usePageTitle('Settings');
+
 	const [settings, setSettings] = useState<AppSettings>(
 		settingsManager.getSettings()
 	);

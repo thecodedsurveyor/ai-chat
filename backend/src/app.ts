@@ -4,6 +4,8 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import config from './config/environment';
 import authRoutes from './routes/authRoutes';
+import conversationRoutes from './routes/conversationRoutes';
+import messageRoutes from './routes/messageRoutes';
 import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
@@ -14,7 +16,35 @@ app.use(helmet());
 // CORS configuration
 app.use(
 	cors({
-		origin: config.FRONTEND_URL,
+		origin: (origin, callback) => {
+			// Allow requests with no origin (like mobile apps or curl requests)
+			if (!origin) return callback(null, true);
+
+			// Parse the frontend URL from config
+			const configUrl = new URL(config.FRONTEND_URL);
+			const allowedOrigins = [
+				config.FRONTEND_URL,
+				// Add variations of localhost with different ports
+				'http://localhost:5173',
+				'http://localhost:5174',
+				'http://localhost:5175',
+				'http://localhost:5176',
+				'http://localhost:5177',
+				'http://localhost:5178',
+				'http://localhost:5179',
+				// Use the same host but with different protocol
+				`https://${configUrl.host}`,
+			];
+
+			if (
+				allowedOrigins.indexOf(origin) !== -1 ||
+				config.NODE_ENV !== 'production'
+			) {
+				callback(null, true);
+			} else {
+				callback(new Error('Not allowed by CORS'));
+			}
+		},
 		credentials: true,
 		methods: [
 			'GET',
@@ -52,8 +82,20 @@ app.get('/health', (req, res) => {
 	});
 });
 
+// API health check endpoint
+app.get('/api/health', (req, res) => {
+	res.json({
+		success: true,
+		message: 'API is running',
+		timestamp: new Date().toISOString(),
+		database: 'connected',
+	});
+});
+
 // API routes
 app.use('/api/auth', authRoutes);
+app.use('/api/conversations', conversationRoutes);
+app.use('/api/messages', messageRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {

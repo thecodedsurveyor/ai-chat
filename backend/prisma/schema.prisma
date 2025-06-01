@@ -11,20 +11,23 @@ datasource db {
 }
 
 model User {
-    id          String   @id @default(auto()) @map("_id") @db.ObjectId
-    email       String   @unique
-    firstName   String
-    lastName    String
-    password    String
-    isVerified  Boolean  @default(false)
-    avatar      String?
-    preferences Json? // Store user preferences like theme, language, etc.
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+    id                   String    @id @default(auto()) @map("_id") @db.ObjectId
+    email                String    @unique
+    firstName            String
+    lastName             String
+    password             String
+    isVerified           Boolean   @default(false)
+    avatar               String?
+    preferences          Json? // Store user preferences like theme, language, etc.
+    passwordResetToken   String? // Token for password reset
+    passwordResetExpires DateTime? // Expiration time for password reset token
+    createdAt            DateTime  @default(now())
+    updatedAt            DateTime  @updatedAt
 
     // Relations
-    chats    Chat[]
-    sessions Session[]
+    chats         Chat[]
+    sessions      Session[]
+    conversations Conversation[]
 
     @@map("users")
 }
@@ -64,6 +67,43 @@ model Chat {
     user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@map("chats")
+}
+
+// New conversation model for proper message persistence
+model Conversation {
+    id            String    @id @default(auto()) @map("_id") @db.ObjectId
+    userId        String    @db.ObjectId
+    title         String?   @default("New Conversation")
+    isArchived    Boolean   @default(false)
+    isPinned      Boolean   @default(false)
+    isFavorite    Boolean   @default(false)
+    totalMessages Int       @default(0)
+    lastMessageAt DateTime?
+    createdAt     DateTime  @default(now())
+    updatedAt     DateTime  @updatedAt
+
+    // Relations
+    user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    messages Message[]
+
+    @@map("conversations")
+}
+
+// Message model for individual messages
+model Message {
+    id             String   @id @default(auto()) @map("_id") @db.ObjectId
+    conversationId String   @db.ObjectId
+    role           String // 'user' or 'assistant'
+    content        String
+    tokens         Int? // Token count for this message
+    model          String? // AI model used (e.g., 'gpt-4', 'claude-3')
+    metadata       Json? // Additional metadata like processing time, etc.
+    createdAt      DateTime @default(now())
+
+    // Relations
+    conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+    @@map("messages")
 }
 
 // Model for storing chat analytics data

@@ -12,13 +12,25 @@ import {
 	Heart,
 	Star,
 	ArrowLeft,
+	Check,
+	X,
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useToast } from '../contexts/ToastContext';
 import { authService } from '../services/authService';
+import { usePageTitle } from '../hooks/usePageTitle';
 import Footer from '../components/layout/Footer';
 
 type AuthMode = 'login' | 'register' | 'forgot-password';
+
+// Password validation interface
+interface PasswordValidation {
+	minLength: boolean;
+	hasUppercase: boolean;
+	hasLowercase: boolean;
+	hasNumber: boolean;
+	hasSpecialChar: boolean;
+}
 
 const AuthPage = () => {
 	const { isDark } = useTheme();
@@ -39,6 +51,49 @@ const AuthPage = () => {
 		agreeTerms: false,
 	});
 
+	// Password validation state
+	const [passwordValidation, setPasswordValidation] =
+		useState<PasswordValidation>({
+			minLength: false,
+			hasUppercase: false,
+			hasLowercase: false,
+			hasNumber: false,
+			hasSpecialChar: false,
+		});
+	const [
+		showPasswordRequirements,
+		setShowPasswordRequirements,
+	] = useState(false);
+
+	// Set page title based on auth mode
+	const getAuthTitle = () => {
+		switch (authMode) {
+			case 'register':
+				return 'Signup';
+			case 'forgot-password':
+				return 'Reset Password';
+			default:
+				return 'Login | Signup';
+		}
+	};
+
+	usePageTitle(getAuthTitle());
+
+	// Validate password in real-time
+	const validatePassword = (
+		password: string
+	): PasswordValidation => {
+		return {
+			minLength: password.length >= 8,
+			hasUppercase: /[A-Z]/.test(password),
+			hasLowercase: /[a-z]/.test(password),
+			hasNumber: /\d/.test(password),
+			hasSpecialChar: /[!@#$%^&*(),.?":{}|<>]/.test(
+				password
+			),
+		};
+	};
+
 	const handleInputChange = (
 		e: React.ChangeEvent<HTMLInputElement>
 	) => {
@@ -47,6 +102,13 @@ const AuthPage = () => {
 			...prev,
 			[name]: type === 'checkbox' ? checked : value,
 		}));
+
+		// Real-time password validation
+		if (name === 'password') {
+			const validation = validatePassword(value);
+			setPasswordValidation(validation);
+			setShowPasswordRequirements(true);
+		}
 	};
 
 	const resetForm = () => {
@@ -60,6 +122,14 @@ const AuthPage = () => {
 		});
 		setShowPassword(false);
 		setShowConfirmPassword(false);
+		setShowPasswordRequirements(false);
+		setPasswordValidation({
+			minLength: false,
+			hasUppercase: false,
+			hasLowercase: false,
+			hasNumber: false,
+			hasSpecialChar: false,
+		});
 	};
 
 	const handleSubmit = async (e: React.FormEvent) => {
@@ -104,7 +174,9 @@ const AuthPage = () => {
 				} else {
 					showError(
 						'Registration Failed',
-						result.message
+						getSpecificErrorMessage(
+							result.message
+						)
 					);
 				}
 			} else if (authMode === 'login') {
@@ -122,7 +194,9 @@ const AuthPage = () => {
 				} else {
 					showError(
 						'Login Failed',
-						result.message
+						getSpecificErrorMessage(
+							result.message
+						)
 					);
 				}
 			} else if (authMode === 'forgot-password') {
@@ -208,6 +282,26 @@ const AuthPage = () => {
 			default:
 				return 'Sign In';
 		}
+	};
+
+	// Extract specific error message from backend response
+	const getSpecificErrorMessage = (
+		message: string
+	): string => {
+		// If the message contains validation details, extract them
+		if (message.includes('Password must contain')) {
+			return message;
+		}
+		if (message.includes('Email')) {
+			return message;
+		}
+		if (
+			message.includes('validation failed') ||
+			message.includes('Validation failed')
+		) {
+			return 'Please check your input and try again. Make sure your password meets all requirements.';
+		}
+		return message;
 	};
 
 	return (
@@ -713,6 +807,139 @@ const AuthPage = () => {
 														</div>
 													</motion.div>
 												)}
+
+												{/* Password Requirements (Registration only) */}
+												{authMode ===
+													'register' &&
+													showPasswordRequirements &&
+													formData.password && (
+														<motion.div
+															variants={
+																itemVariants
+															}
+															className={`p-4 rounded-xl border ${
+																isDark
+																	? 'bg-white/5 border-white/10'
+																	: 'bg-gray-50 border-gray-200'
+															}`}
+														>
+															<p
+																className={`text-sm font-medium mb-3 ${
+																	isDark
+																		? 'text-gray-300'
+																		: 'text-gray-700'
+																}`}
+															>
+																Password
+																Requirements:
+															</p>
+															<div className='grid grid-cols-1 gap-2'>
+																<div className='flex items-center gap-2'>
+																	{passwordValidation.minLength ? (
+																		<Check className='w-4 h-4 text-green-500' />
+																	) : (
+																		<X className='w-4 h-4 text-red-500' />
+																	)}
+																	<span
+																		className={`text-sm ${
+																			passwordValidation.minLength
+																				? 'text-green-500'
+																				: isDark
+																				? 'text-gray-400'
+																				: 'text-gray-600'
+																		}`}
+																	>
+																		At
+																		least
+																		8
+																		characters
+																	</span>
+																</div>
+																<div className='flex items-center gap-2'>
+																	{passwordValidation.hasUppercase ? (
+																		<Check className='w-4 h-4 text-green-500' />
+																	) : (
+																		<X className='w-4 h-4 text-red-500' />
+																	)}
+																	<span
+																		className={`text-sm ${
+																			passwordValidation.hasUppercase
+																				? 'text-green-500'
+																				: isDark
+																				? 'text-gray-400'
+																				: 'text-gray-600'
+																		}`}
+																	>
+																		One
+																		uppercase
+																		letter
+																	</span>
+																</div>
+																<div className='flex items-center gap-2'>
+																	{passwordValidation.hasLowercase ? (
+																		<Check className='w-4 h-4 text-green-500' />
+																	) : (
+																		<X className='w-4 h-4 text-red-500' />
+																	)}
+																	<span
+																		className={`text-sm ${
+																			passwordValidation.hasLowercase
+																				? 'text-green-500'
+																				: isDark
+																				? 'text-gray-400'
+																				: 'text-gray-600'
+																		}`}
+																	>
+																		One
+																		lowercase
+																		letter
+																	</span>
+																</div>
+																<div className='flex items-center gap-2'>
+																	{passwordValidation.hasNumber ? (
+																		<Check className='w-4 h-4 text-green-500' />
+																	) : (
+																		<X className='w-4 h-4 text-red-500' />
+																	)}
+																	<span
+																		className={`text-sm ${
+																			passwordValidation.hasNumber
+																				? 'text-green-500'
+																				: isDark
+																				? 'text-gray-400'
+																				: 'text-gray-600'
+																		}`}
+																	>
+																		One
+																		number
+																	</span>
+																</div>
+																<div className='flex items-center gap-2'>
+																	{passwordValidation.hasSpecialChar ? (
+																		<Check className='w-4 h-4 text-green-500' />
+																	) : (
+																		<X className='w-4 h-4 text-red-500' />
+																	)}
+																	<span
+																		className={`text-sm ${
+																			passwordValidation.hasSpecialChar
+																				? 'text-green-500'
+																				: isDark
+																				? 'text-gray-400'
+																				: 'text-gray-600'
+																		}`}
+																	>
+																		One
+																		special
+																		character
+																		(!@#$%^&*(),.?":
+																		{}
+																		|&lt;&gt;)
+																	</span>
+																</div>
+															</div>
+														</motion.div>
+													)}
 
 												{/* Confirm Password Field (Registration only) */}
 												{authMode ===
