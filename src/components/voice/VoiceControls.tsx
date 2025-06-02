@@ -127,7 +127,6 @@ const VoiceControls: React.FC<VoiceControlsProps> = ({
 			React.SetStateAction<number>
 		>
 	): void => {
-		console.log('Stopping voice recognition');
 		if (recognition) {
 			recognition.stop();
 			setListeningState(false);
@@ -392,10 +391,6 @@ const VoiceControls: React.FC<VoiceControlsProps> = ({
 						}
 					}
 					if (finalTranscript) {
-						console.log(
-							'Speech recognized:',
-							finalTranscript
-						);
 						setTranscript(finalTranscript);
 						processVoiceInput(finalTranscript);
 					}
