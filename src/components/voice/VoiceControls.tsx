@@ -72,18 +72,6 @@ const VoiceControls: React.FC<VoiceControlsProps> = ({
 	const analyserRef = useRef<AnalyserNode | null>(null);
 	const animationRef = useRef<number | null>(null);
 
-	// Stop listening
-	const stopListening = useCallback(() => {
-		if (recognitionRef.current && isListening) {
-			recognitionRef.current.stop();
-			setIsListening(false);
-			setAudioLevel(0);
-			if (animationRef.current) {
-				cancelAnimationFrame(animationRef.current);
-			}
-		}
-	}, [isListening]);
-
 	// Stop speaking
 	const stopSpeaking = useCallback(() => {
 		if (synthRef.current) {
@@ -128,7 +116,29 @@ const VoiceControls: React.FC<VoiceControlsProps> = ({
 		[voiceSettings, voices]
 	);
 
-	// Process voice input - defined before useEffect that uses it
+	// Declare stopListening as a function first to avoid circular dependencies
+	const stopListeningFn = (
+		recognition: SpeechRecognition | null,
+		animate: number | null,
+		setListeningState: React.Dispatch<
+			React.SetStateAction<boolean>
+		>,
+		setAudioLevelState: React.Dispatch<
+			React.SetStateAction<number>
+		>
+	): void => {
+		console.log('Stopping voice recognition');
+		if (recognition) {
+			recognition.stop();
+			setListeningState(false);
+			setAudioLevelState(0);
+			if (animate) {
+				cancelAnimationFrame(animate);
+			}
+		}
+	};
+
+	// Process voice input
 	const processVoiceInput = useCallback(
 		(text: string) => {
 			const lowerText = text.toLowerCase().trim();
@@ -236,7 +246,14 @@ const VoiceControls: React.FC<VoiceControlsProps> = ({
 				lowerText.includes('stop listening') ||
 				lowerText.includes('stop recording')
 			) {
-				stopListening();
+				if (recognitionRef.current) {
+					stopListeningFn(
+						recognitionRef.current,
+						animationRef.current,
+						setIsListening,
+						setAudioLevel
+					);
+				}
 				commandProcessed = true;
 			} else if (
 				lowerText.includes('stop speaking') ||
@@ -262,10 +279,84 @@ const VoiceControls: React.FC<VoiceControlsProps> = ({
 			lastProcessedCommand,
 			onVoiceCommand,
 			onVoiceInput,
-			stopListening,
 			stopSpeaking,
 		]
 	);
+
+	// Start audio level monitoring
+	const startAudioMonitoring = useCallback(async () => {
+		try {
+			const stream =
+				await navigator.mediaDevices.getUserMedia({
+					audio: true,
+				});
+			audioContextRef.current = new AudioContext();
+			analyserRef.current =
+				audioContextRef.current.createAnalyser();
+			const source =
+				audioContextRef.current.createMediaStreamSource(
+					stream
+				);
+
+			source.connect(analyserRef.current);
+			analyserRef.current.fftSize = 256;
+
+			const dataArray = new Uint8Array(
+				analyserRef.current.frequencyBinCount
+			);
+
+			const updateAudioLevel = () => {
+				if (analyserRef.current && isListening) {
+					analyserRef.current.getByteFrequencyData(
+						dataArray
+					);
+					const average =
+						dataArray.reduce(
+							(sum, value) => sum + value,
+							0
+						) / dataArray.length;
+					const normalizedLevel = average / 255;
+					setAudioLevel(normalizedLevel);
+
+					animationRef.current =
+						requestAnimationFrame(
+							updateAudioLevel
+						);
+				}
+			};
+
+			updateAudioLevel();
+		} catch (error) {
+			console.error(
+				'Error accessing microphone:',
+				error
+			);
+			setIsListening(false);
+		}
+	}, [isListening]);
+
+	// Start listening
+	const startListening = useCallback(() => {
+		if (recognitionRef.current && !isListening) {
+			try {
+				recognitionRef.current.lang =
+					voiceSettings.language;
+				recognitionRef.current.start();
+				setIsListening(true);
+				setTranscript('');
+				startAudioMonitoring();
+			} catch (error) {
+				console.error(
+					'Error starting recognition:',
+					error
+				);
+			}
+		}
+	}, [
+		isListening,
+		voiceSettings.language,
+		startAudioMonitoring,
+	]);
 
 	// Initialize speech recognition and synthesis
 	useEffect(() => {
@@ -301,6 +392,10 @@ const VoiceControls: React.FC<VoiceControlsProps> = ({
 						}
 					}
 					if (finalTranscript) {
+						console.log(
+							'Speech recognized:',
+							finalTranscript
+						);
 						setTranscript(finalTranscript);
 						processVoiceInput(finalTranscript);
 					}
@@ -321,6 +416,10 @@ const VoiceControls: React.FC<VoiceControlsProps> = ({
 				};
 			}
 			setIsSupported(true);
+		} else {
+			console.warn(
+				'Speech Recognition API not supported in this browser'
+			);
 		}
 
 		// Initialize speech synthesis
@@ -334,7 +433,13 @@ const VoiceControls: React.FC<VoiceControlsProps> = ({
 			};
 
 			loadVoices();
-			synthRef.current.onvoiceschanged = loadVoices;
+			if (
+				synthRef.current.onvoiceschanged !==
+				undefined
+			) {
+				synthRef.current.onvoiceschanged =
+					loadVoices;
+			}
 		}
 
 		return () => {
@@ -349,78 +454,6 @@ const VoiceControls: React.FC<VoiceControlsProps> = ({
 			}
 		};
 	}, [voiceSettings.language, processVoiceInput]);
-
-	// Start audio level monitoring
-	const startAudioMonitoring = useCallback(async () => {
-		try {
-			const stream =
-				await navigator.mediaDevices.getUserMedia({
-					audio: true,
-				});
-			audioContextRef.current = new AudioContext();
-			analyserRef.current =
-				audioContextRef.current.createAnalyser();
-			const source =
-				audioContextRef.current.createMediaStreamSource(
-					stream
-				);
-
-			source.connect(analyserRef.current);
-			analyserRef.current.fftSize = 256;
-
-			const dataArray = new Uint8Array(
-				analyserRef.current.frequencyBinCount
-			);
-
-			const updateAudioLevel = () => {
-				if (analyserRef.current && isListening) {
-					analyserRef.current.getByteFrequencyData(
-						dataArray
-					);
-					const average =
-						dataArray.reduce(
-							(sum, value) => sum + value,
-							0
-						) / dataArray.length;
-					setAudioLevel(average / 255);
-					animationRef.current =
-						requestAnimationFrame(
-							updateAudioLevel
-						);
-				}
-			};
-
-			updateAudioLevel();
-		} catch (error) {
-			console.error(
-				'Error accessing microphone:',
-				error
-			);
-		}
-	}, [isListening]);
-
-	// Start listening
-	const startListening = useCallback(() => {
-		if (recognitionRef.current && !isListening) {
-			try {
-				recognitionRef.current.lang =
-					voiceSettings.language;
-				recognitionRef.current.start();
-				setIsListening(true);
-				setTranscript('');
-				startAudioMonitoring();
-			} catch (error) {
-				console.error(
-					'Error starting recognition:',
-					error
-				);
-			}
-		}
-	}, [
-		isListening,
-		voiceSettings.language,
-		startAudioMonitoring,
-	]);
 
 	// Audio visualizer component
 	const AudioVisualizer = () => (
@@ -477,7 +510,13 @@ const VoiceControls: React.FC<VoiceControlsProps> = ({
 			<motion.button
 				onClick={
 					isListening
-						? stopListening
+						? () =>
+								stopListeningFn(
+									recognitionRef.current,
+									animationRef.current,
+									setIsListening,
+									setAudioLevel
+								)
 						: startListening
 				}
 				className={cn(
