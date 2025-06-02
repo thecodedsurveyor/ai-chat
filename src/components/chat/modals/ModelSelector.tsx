@@ -40,16 +40,16 @@ const ModelSelector: React.FC = () => {
 
 	// Get model provider info
 	const getModelInfo = (modelKey: string) => {
-		if (modelKey.includes('GEMINI')) {
+		if (modelKey.includes('DEEPSEEK')) {
 			return {
-				color: 'from-blue-500 to-cyan-600',
-				provider: 'Google',
+				color: 'from-emerald-500 to-teal-600',
+				provider: 'DeepSeek',
 				bgColor: isDark
-					? 'bg-blue-500/20'
-					: 'bg-blue-50',
+					? 'bg-emerald-500/20'
+					: 'bg-emerald-50',
 				textColor: isDark
-					? 'text-blue-400'
-					: 'text-blue-700',
+					? 'text-emerald-400'
+					: 'text-emerald-700',
 			};
 		} else if (
 			modelKey.includes('LLAMA') ||

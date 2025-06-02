@@ -2,7 +2,8 @@ import type { Chat, Message } from '../types';
 
 // Available OpenRouter models - All FREE
 export const OPENROUTER_MODELS = {
-	GEMINI_2_FLASH_FREE: 'google/gemini-2.0-flash-exp:free',
+	DEEPSEEK_R1T_CHIMERA_FREE:
+		'tngtech/deepseek-r1t-chimera:free',
 	LLAMA_3_8B_GROQ: 'meta-llama/llama-3-8b-instruct',
 	LLAMA_3_70B_GROQ: 'meta-llama/llama-3-70b-instruct',
 	LLAMA_3_1_8B_FREE:
@@ -23,7 +24,7 @@ export interface OpenRouterConfig {
 
 // Default configuration
 export const DEFAULT_CONFIG: OpenRouterConfig = {
-	model: OPENROUTER_MODELS.GEMINI_2_FLASH_FREE,
+	model: OPENROUTER_MODELS.DEEPSEEK_R1T_CHIMERA_FREE,
 	max_tokens: 1000,
 	temperature: 0.7,
 	top_p: 0.9,

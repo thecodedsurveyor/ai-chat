@@ -485,7 +485,7 @@ export type SettingsCategory =
 
 export type SettingsPageProps = {
 	isVisible: boolean;
-	onClose: () => void;
+	onClose?: () => void;
 	settings: AppSettings;
 	onSettingsChange: (
 		settings: Partial<AppSettings>

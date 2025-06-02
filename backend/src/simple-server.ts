@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 
 const app = express();
-const PORT = 3001;
+const PORT = 3003;
 
 // Basic middleware
 app.use(

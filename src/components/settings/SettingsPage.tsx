@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-	Settings,
 	Monitor,
 	Sun,
 	Moon,
 	Volume2,
 	VolumeX,
 	RotateCcw,
-	X,
 	AlertCircle,
 } from 'lucide-react';
 import type {
@@ -33,7 +31,6 @@ import {
 
 const SettingsPage: React.FC<SettingsPageProps> = ({
 	isVisible,
-	onClose,
 	settings,
 	onSettingsChange,
 }) => {
@@ -131,40 +128,14 @@ const SettingsPage: React.FC<SettingsPageProps> = ({
 	if (!isVisible) return null;
 
 	return (
-		<div className='fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black bg-opacity-50'>
+		<div className='w-full h-full flex items-center justify-center'>
 			<motion.div
 				initial={{ opacity: 0, scale: 0.95 }}
 				animate={{ opacity: 1, scale: 1 }}
 				exit={{ opacity: 0, scale: 0.95 }}
-				className='bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-6xl h-[95vh] sm:h-[90vh] flex flex-col lg:flex-row overflow-hidden'
+				className='bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-6xl min-h-[600px] flex flex-col lg:flex-row overflow-hidden'
 			>
-				{/* Mobile Header - Only visible on small screens */}
-				<div className='lg:hidden p-4 border-b border-gray-200 dark:border-gray-700'>
-					<div className='flex items-center justify-between'>
-						<div className='flex items-center space-x-3'>
-							<div className='p-2 bg-blue-100 dark:bg-blue-900 rounded-lg'>
-								<Settings className='w-5 h-5 text-blue-600 dark:text-blue-400' />
-							</div>
-							<div>
-								<h2 className='text-xl font-semibold text-gray-900 dark:text-gray-100'>
-									Settings
-								</h2>
-								<p className='text-sm text-gray-500 dark:text-gray-400'>
-									Customize your
-									experience
-								</p>
-							</div>
-						</div>
-						<button
-							onClick={onClose}
-							className='p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors'
-						>
-							<X className='w-5 h-5' />
-						</button>
-					</div>
-				</div>
-
-				{/* Mobile Category Selector */}
+				{/* Mobile Category Selector - Only visible on small screens */}
 				<div className='lg:hidden p-4 border-b border-gray-200 dark:border-gray-700'>
 					<select
 						value={activeCategory}
@@ -189,32 +160,6 @@ const SettingsPage: React.FC<SettingsPageProps> = ({
 
 				{/* Sidebar - Hidden on mobile */}
 				<div className='hidden lg:flex w-80 bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 flex-col'>
-					{/* Header */}
-					<div className='p-6 border-b border-gray-200 dark:border-gray-700'>
-						<div className='flex items-center justify-between'>
-							<div className='flex items-center space-x-3'>
-								<div className='p-2 bg-blue-100 dark:bg-blue-900 rounded-lg'>
-									<Settings className='w-5 h-5 text-blue-600 dark:text-blue-400' />
-								</div>
-								<div>
-									<h2 className='text-xl font-semibold text-gray-900 dark:text-gray-100'>
-										Settings
-									</h2>
-									<p className='text-sm text-gray-500 dark:text-gray-400'>
-										Customize your
-										experience
-									</p>
-								</div>
-							</div>
-							<button
-								onClick={onClose}
-								className='p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors'
-							>
-								<X className='w-5 h-5' />
-							</button>
-						</div>
-					</div>
-
 					{/* Categories */}
 					<div className='flex-1 p-4 space-y-2 overflow-y-auto'>
 						{categories.map((category) => {

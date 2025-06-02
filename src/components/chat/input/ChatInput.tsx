@@ -7,13 +7,10 @@ import React, {
 import Picker from '@emoji-mart/react';
 import data from '@emoji-mart/data';
 import { useTheme } from '../../../contexts/ThemeContext';
+import { useNavigate } from 'react-router-dom';
 
 // Phase 1: UI Store import
-import {
-	useEmojiPickerState,
-	useUIStore,
-	useAutoSuggestionsState,
-} from '../../../stores/uiStore';
+import { useUIStore } from '../../../stores/uiStore';
 // Phase 2: Input Store import
 import {
 	useInputValue,
@@ -47,6 +44,7 @@ import { useToast } from '../../../contexts/ToastContext';
 const ChatInput: React.FC = () => {
 	const { isDark } = useTheme();
 	const inputRef = useRef<HTMLInputElement>(null);
+	const navigate = useNavigate();
 
 	// Get toast context
 	const toast = useToast();
@@ -62,17 +60,16 @@ const ChatInput: React.FC = () => {
 		setInputValue,
 	} = useInputStore();
 
-	// Phase 1: UI state from Zustand store
-	const showEmojiPicker = useEmojiPickerState();
-	const showAutoSuggestions = useAutoSuggestionsState();
+	// Get UI state from Zustand store
 	const {
 		toggleEmojiPicker,
 		closeEmojiPicker,
+		showEmojiPicker,
 		toggleQuickResponses,
 		toggleConversationTemplates,
-		toggleAutoSuggestions,
+		toggleAutoSuggestions: toggleAutoSuggestionsAction,
 		closeAutoSuggestions,
-		toggleSettings,
+		showAutoSuggestions,
 	} = useUIStore();
 
 	// Phase 3: Chat state from store
@@ -106,7 +103,7 @@ const ChatInput: React.FC = () => {
 			) {
 				// Only show suggestions if they're not already showing
 				if (!showAutoSuggestions) {
-					toggleAutoSuggestions();
+					toggleAutoSuggestionsAction();
 				}
 				// Auto suggestions is already implemented in SmartAutoComplete component
 				// We just need to pass the suggestions back to our store
@@ -122,7 +119,7 @@ const ChatInput: React.FC = () => {
 	}, [
 		inputValue,
 		showAutoSuggestions,
-		toggleAutoSuggestions,
+		toggleAutoSuggestionsAction,
 		closeAutoSuggestions,
 		clearSuggestions,
 		appSettings,
@@ -309,6 +306,10 @@ const ChatInput: React.FC = () => {
 			appSettings,
 			toast,
 		]);
+
+	const handleSettingsNavigation = () => {
+		navigate('/settings');
+	};
 
 	return (
 		<form
@@ -535,7 +536,7 @@ const ChatInput: React.FC = () => {
 				<button
 					type='button'
 					className='md:hidden flex-shrink-0 p-2 rounded-full text-lg'
-					onClick={toggleSettings}
+					onClick={handleSettingsNavigation}
 				>
 					<MdMoreHoriz
 						className={

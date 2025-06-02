@@ -4,7 +4,7 @@ const path = require('path');
 // Complete .env content with working MongoDB Atlas connection and JWT secrets
 const envContent = `# Backend Configuration
 NODE_ENV=development
-PORT=3001
+PORT=3003
 
 # Database Configuration - MongoDB Atlas (Working Connection!)
 DATABASE_URL=mongodb+srv://demo-user:demo123pass@cluster0.mongodb.net/ai-chatbot?retryWrites=true&w=majority
@@ -16,7 +16,7 @@ JWT_EXPIRE=15m
 JWT_REFRESH_EXPIRE=7d
 
 # CORS Configuration
-FRONTEND_URL=http://localhost:5176
+FRONTEND_URL=http://localhost:5174
 
 # Rate Limiting
 RATE_LIMIT_WINDOW_MS=900000

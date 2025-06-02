@@ -46,7 +46,7 @@ const config: EnvironmentConfig = {
 		process.env.JWT_REFRESH_EXPIRE || '7d',
 
 	// Server Configuration
-	PORT: parseInt(process.env.PORT || '3001', 10),
+	PORT: parseInt(process.env.PORT || '3003', 10),
 	NODE_ENV: process.env.NODE_ENV || 'development',
 
 	// CORS Configuration
