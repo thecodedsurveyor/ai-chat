@@ -98,39 +98,71 @@ export const passwordResetEmailTemplate = ({
     }
   </style>
 </head>
-<body style="background-color: #f6f6f6; font-family: sans-serif; -webkit-font-smoothing: antialiased; font-size: 14px; line-height: 1.4; margin: 0; padding: 0; -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%;">
+<body style="background-color: #f4f7ff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; -webkit-font-smoothing: antialiased; font-size: 16px; line-height: 1.5; margin: 0; padding: 0; -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%;">
   <span class="preheader" style="color: transparent; display: none; height: 0; max-height: 0; max-width: 0; opacity: 0; overflow: hidden; mso-hide: all; visibility: hidden; width: 0;">Reset your password for ${appName}</span>
-  <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="body" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #f6f6f6; width: 100%;" width="100%" bgcolor="#f6f6f6">
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="body" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #f4f7ff; width: 100%;" width="100%" bgcolor="#f4f7ff">
     <tr>
-      <td style="font-family: sans-serif; font-size: 14px; vertical-align: top;" valign="top">&nbsp;</td>
-      <td class="container" style="font-family: sans-serif; font-size: 14px; vertical-align: top; display: block; max-width: 580px; padding: 10px; width: 580px; margin: 0 auto;" width="580" valign="top">
-        <div class="content" style="box-sizing: border-box; display: block; margin: 0 auto; max-width: 580px; padding: 10px;">
+      <td style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 16px; vertical-align: top;" valign="top">&nbsp;</td>
+      <td class="container" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 16px; vertical-align: top; display: block; max-width: 600px; padding: 30px 10px; width: 600px; margin: 0 auto;" width="600" valign="top">
+        <div class="content" style="box-sizing: border-box; display: block; margin: 0 auto; max-width: 600px; padding: 0;">
+          
+          <!-- HEADER WITH LOGO -->
+          <div style="text-align: center; margin-bottom: 20px;">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse: collapse; border: 0;">
+              <tr>
+                <td style="padding: 0; text-align: center;">
+                  <div style="font-size: 24px; font-weight: bold; letter-spacing: 1px; color: #8B5CF6;">
+                    <span style="background: linear-gradient(90deg, #EC4899 0%, #8B5CF6 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; display: inline-block;">${appName}</span>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </div>
+          
           <!-- START CENTERED WHITE CONTAINER -->
-          <table role="presentation" class="main" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; background: #ffffff; border-radius: 3px; width: 100%;" width="100%">
+          <table role="presentation" class="main" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; background: #ffffff; border-radius: 12px; width: 100%; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);" width="100%">
+            
+            <!-- HERO SECTION WITH LOCK ICON -->
+            <tr>
+              <td style="padding: 0;">
+                <div style="background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%); border-radius: 12px 12px 0 0; padding: 40px 20px; text-align: center;">
+                  <!-- Lock Icon -->
+                  <div style="margin: 0 auto 15px; width: 60px; height: 60px; background: rgba(255, 255, 255, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; line-height: 60px; font-size: 30px;">🔒</div>
+                  <h1 style="color: white; font-size: 28px; font-weight: bold; margin: 0; margin-bottom: 10px; text-shadow: 0 1px 3px rgba(0,0,0,0.1);">Password Reset</h1>
+                  <p style="color: white; margin: 0; font-size: 18px; opacity: 0.9;">Secure your account with a new password</p>
+                </div>
+              </td>
+            </tr>
+            
             <!-- START MAIN CONTENT AREA -->
             <tr>
-              <td class="wrapper" style="font-family: sans-serif; font-size: 14px; vertical-align: top; box-sizing: border-box; padding: 20px;" valign="top">
+              <td class="wrapper" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 16px; vertical-align: top; box-sizing: border-box; padding: 30px;" valign="top">
                 <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;" width="100%">
                   <tr>
-                    <td style="font-family: sans-serif; font-size: 14px; vertical-align: top;" valign="top">
-                      <div style="text-align: center; margin-bottom: 30px;">
-                        <h1 style="color: #9333EA; font-size: 28px; font-weight: bold; margin: 0; margin-bottom: 15px;">Reset Your Password</h1>
-                        <div style="background: linear-gradient(90deg, #EC4899 0%, #8B5CF6 100%); height: 2px; width: 100px; margin: 0 auto;"></div>
+                    <td style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 16px; vertical-align: top;" valign="top">
+                      <p style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 20px; color: #4B5563;">Hi ${firstName},</p>
+                      <p style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 20px; color: #4B5563;">We received a request to reset your password for your ${appName} account.</p>
+                      
+                      <!-- SECURITY NOTICE BOX -->
+                      <div style="margin: 0 0 25px; padding: 20px; background-color: #F9FAFB; border-left: 4px solid #8B5CF6; border-radius: 6px;">
+                        <p style="margin: 0; font-size: 16px; color: #4B5563;">
+                          <span style="display: block; font-weight: 600; margin-bottom: 5px; color: #374151;">Security Notice</span>
+                          This password reset link will expire in <span style="font-weight: 600; color: #8B5CF6;">${expiryHours} hour${expiryHours > 1 ? 's' : ''}</span> for your security.
+                        </p>
                       </div>
-                      <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">Hi ${firstName},</p>
-                      <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">We received a request to reset your password for your ${appName} account.</p>
-                      <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 25px;">Click the button below to reset your password. This link will expire in ${expiryHours} hour${
-		expiryHours > 1 ? 's' : ''
-	} for your security.</p>
+                      
+                      <p style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 25px; color: #4B5563;">Click the button below to create a new password and secure your account:</p>
+                      
+                      <!-- BUTTON -->
                       <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; box-sizing: border-box; width: 100%;" width="100%">
                         <tbody>
                           <tr>
-                            <td align="center" style="font-family: sans-serif; font-size: 14px; vertical-align: top; padding-bottom: 15px;" valign="top">
+                            <td align="center" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 16px; vertical-align: top; padding-bottom: 25px;" valign="top">
                               <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: auto;">
                                 <tbody>
                                   <tr>
-                                    <td style="font-family: sans-serif; font-size: 14px; vertical-align: top; border-radius: 5px; text-align: center; background: linear-gradient(90deg, #EC4899 0%, #8B5CF6 100%);" valign="top" align="center" bgcolor="#EC4899">
-                                      <a href="${resetUrl}" target="_blank" style="display: inline-block; color: #fff; background: linear-gradient(90deg, #EC4899 0%, #8B5CF6 100%); border: solid 1px #8B5CF6; border-radius: 5px; box-sizing: border-box; cursor: pointer; text-decoration: none; font-size: 16px; font-weight: bold; margin: 0; padding: 12px 32px;">Reset Password</a>
+                                    <td style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 16px; vertical-align: top; border-radius: 8px; text-align: center; background: linear-gradient(90deg, #EC4899 0%, #8B5CF6 100%);" valign="top" align="center">
+                                      <a href="${resetUrl}" target="_blank" style="display: inline-block; color: #fff; background: transparent; border: solid 1px transparent; border-radius: 8px; box-sizing: border-box; cursor: pointer; text-decoration: none; font-size: 16px; font-weight: bold; margin: 0; padding: 14px 40px;">Reset Password</a>
                                     </td>
                                   </tr>
                                 </tbody>
@@ -139,8 +171,16 @@ export const passwordResetEmailTemplate = ({
                           </tr>
                         </tbody>
                       </table>
-                      <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">If you did not request a password reset, you can safely ignore this email. Your password will remain unchanged.</p>
-                      <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0;">Thank you,<br>The ${appName} Team</p>
+                      
+                      <!-- SAFETY NOTE -->
+                      <div style="margin: 0 0 25px; padding: 15px; background-color: #FFEDD5; border-left: 4px solid #F97316; border-radius: 6px;">
+                        <p style="margin: 0; font-size: 14px; color: #9A3412;">
+                          <strong>Didn't request this change?</strong><br>
+                          If you didn't request a password reset, you can safely ignore this email. Your password will remain unchanged.
+                        </p>
+                      </div>
+                      
+                      <p style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 16px; font-weight: normal; margin: 0; color: #4B5563;">Thank you,<br>The ${appName} Team</p>
                     </td>
                   </tr>
                 </table>
@@ -149,12 +189,18 @@ export const passwordResetEmailTemplate = ({
           <!-- END MAIN CONTENT AREA -->
           </table>
           <!-- END CENTERED WHITE CONTAINER -->
+          
           <!-- START FOOTER -->
-          <div class="footer" style="clear: both; margin-top: 10px; text-align: center; width: 100%;">
+          <div class="footer" style="clear: both; margin-top: 20px; text-align: center; width: 100%;">
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;" width="100%">
               <tr>
-                <td class="content-block" style="font-family: sans-serif; vertical-align: top; padding-bottom: 10px; padding-top: 10px; color: #999999; font-size: 12px; text-align: center;" valign="top" align="center">
-                  <span class="apple-link" style="color: #999999; font-size: 12px; text-align: center;">${appName}<br>Need help? Contact support.</span>
+                <td class="content-block" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; vertical-align: top; padding-bottom: 10px; padding-top: 10px; color: #9CA3AF; font-size: 13px; text-align: center;" valign="top" align="center">
+                  <span class="apple-link" style="color: #9CA3AF; font-size: 13px; text-align: center;">${appName}<br>Need help? Contact support.</span>
+                </td>
+              </tr>
+              <tr>
+                <td class="content-block" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; vertical-align: top; padding-bottom: 10px; padding-top: 0; color: #9CA3AF; font-size: 13px; text-align: center;" valign="top" align="center">
+                  <span style="color: #9CA3AF; font-size: 13px; text-align: center;">© 2023 ${appName}. All rights reserved.</span>
                 </td>
               </tr>
             </table>
@@ -162,7 +208,7 @@ export const passwordResetEmailTemplate = ({
           <!-- END FOOTER -->
         </div>
       </td>
-      <td style="font-family: sans-serif; font-size: 14px; vertical-align: top;" valign="top">&nbsp;</td>
+      <td style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 16px; vertical-align: top;" valign="top">&nbsp;</td>
     </tr>
   </table>
 </body>
