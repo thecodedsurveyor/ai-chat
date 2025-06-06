@@ -14,6 +14,7 @@ import {
 	ArrowLeft,
 	Check,
 	X,
+	RefreshCw,
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useToast } from '../contexts/ToastContext';
@@ -31,6 +32,57 @@ interface PasswordValidation {
 	hasNumber: boolean;
 	hasSpecialChar: boolean;
 }
+
+// Helper function to check if all password requirements are met
+const allRequirementsMet = (
+	validation: PasswordValidation
+): boolean => {
+	return (
+		validation.minLength &&
+		validation.hasUppercase &&
+		validation.hasLowercase &&
+		validation.hasNumber &&
+		validation.hasSpecialChar
+	);
+};
+
+// Helper function to generate a strong password
+const generateStrongPassword = (): string => {
+	const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+	const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+	const numbers = '0123456789';
+	const symbols = '!@#$%^&*(),.?":{}|<>';
+
+	// Ensure at least one character from each category
+	let password = '';
+	password += lowercase.charAt(
+		Math.floor(Math.random() * lowercase.length)
+	);
+	password += uppercase.charAt(
+		Math.floor(Math.random() * uppercase.length)
+	);
+	password += numbers.charAt(
+		Math.floor(Math.random() * numbers.length)
+	);
+	password += symbols.charAt(
+		Math.floor(Math.random() * symbols.length)
+	);
+
+	// Fill the rest with random characters from all categories
+	const allChars =
+		lowercase + uppercase + numbers + symbols;
+	for (let i = 0; i < 8; i++) {
+		password += allChars.charAt(
+			Math.floor(Math.random() * allChars.length)
+		);
+	}
+
+	// Shuffle the password
+	return password
+		.split('')
+		.sort(() => Math.random() - 0.5)
+		.join('');
+};
 
 const AuthPage = () => {
 	const { isDark } = useTheme();
@@ -69,11 +121,11 @@ const AuthPage = () => {
 	const getAuthTitle = () => {
 		switch (authMode) {
 			case 'register':
-				return 'Create Your AI Chat Account';
+				return 'Create your account | NeuronFlow';
 			case 'forgot-password':
-				return 'Reset Your Password – AI Chat';
+				return 'Reset Your Password | NeuronFlow';
 			default:
-				return 'Sign in or Create an Account';
+				return 'Sign in or Create an Account | NeuronFlow';
 		}
 	};
 
@@ -107,7 +159,22 @@ const AuthPage = () => {
 		if (name === 'password') {
 			const validation = validatePassword(value);
 			setPasswordValidation(validation);
-			setShowPasswordRequirements(true);
+
+			// Show requirements unless all are met
+			setShowPasswordRequirements(
+				!allRequirementsMet(validation)
+			);
+
+			// When in register mode, auto-fill confirm password field if all requirements are met
+			if (
+				authMode === 'register' &&
+				allRequirementsMet(validation)
+			) {
+				setFormData((prev) => ({
+					...prev,
+					confirmPassword: value,
+				}));
+			}
 		}
 	};
 
@@ -168,9 +235,9 @@ const AuthPage = () => {
 				if (result.success) {
 					showSuccess(
 						'Registration Successful!',
-						'Welcome to AI Chat'
+						'Welcome to NeuronFlow'
 					);
-					navigate('/ai-chat');
+					navigate('/chat');
 				} else {
 					showError(
 						'Registration Failed',
@@ -190,7 +257,7 @@ const AuthPage = () => {
 						'Login Successful!',
 						'Welcome back'
 					);
-					navigate('/ai-chat');
+					navigate('/chat');
 				} else {
 					showError(
 						'Login Failed',
@@ -820,10 +887,59 @@ const AuthPage = () => {
 																	isDark
 																		? 'bg-white/10 border-white/20 text-white placeholder-gray-400'
 																		: 'bg-white/80 border-gray-300 text-gray-800 placeholder-gray-500'
-																} focus:outline-none focus:ring-2 focus:ring-chat-pink/50 transition-all`}
+																} ${
+																	authMode ===
+																		'register' &&
+																	allRequirementsMet(
+																		passwordValidation
+																	)
+																		? 'ring-2 ring-green-500 border-green-500'
+																		: 'focus:outline-none focus:ring-2 focus:ring-chat-pink/50'
+																} transition-all`}
 																placeholder='••••••••'
 																required
+																autoComplete={
+																	authMode ===
+																	'login'
+																		? 'current-password'
+																		: 'new-password'
+																}
 															/>
+															{authMode ===
+																'register' && (
+																<button
+																	type='button'
+																	onClick={() => {
+																		const strongPassword =
+																			generateStrongPassword();
+																		setFormData(
+																			(
+																				prev
+																			) => ({
+																				...prev,
+																				password:
+																					strongPassword,
+																				confirmPassword:
+																					strongPassword,
+																			})
+																		);
+																		const validation =
+																			validatePassword(
+																				strongPassword
+																			);
+																		setPasswordValidation(
+																			validation
+																		);
+																		setShowPasswordRequirements(
+																			false
+																		);
+																	}}
+																	className='absolute right-10 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-chat-pink'
+																	title='Generate strong password'
+																>
+																	<RefreshCw className='w-4 h-4' />
+																</button>
+															)}
 															<button
 																type='button'
 																onClick={() =>
@@ -1013,9 +1129,16 @@ const AuthPage = () => {
 																	isDark
 																		? 'bg-white/10 border-white/20 text-white placeholder-gray-400'
 																		: 'bg-white/80 border-gray-300 text-gray-800 placeholder-gray-500'
-																} focus:outline-none focus:ring-2 focus:ring-chat-pink/50 transition-all`}
+																} ${
+																	formData.confirmPassword &&
+																	formData.password ===
+																		formData.confirmPassword
+																		? 'ring-2 ring-green-500 border-green-500'
+																		: 'focus:outline-none focus:ring-2 focus:ring-chat-pink/50'
+																} transition-all`}
 																placeholder='••••••••'
 																required
+																autoComplete='new-password'
 															/>
 															<button
 																type='button'
