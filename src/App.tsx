@@ -17,6 +17,7 @@ import AnalyticsPage from './pages/AnalyticsPage';
 import AuthPage from './pages/AuthPage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import {
 	Contact,
 	Terms,
@@ -99,6 +100,14 @@ const App = () => {
 									path='/settings'
 									element={
 										<SettingsPage />
+									}
+								/>
+
+								{/* Reset password route */}
+								<Route
+									path='/reset-password'
+									element={
+										<ResetPasswordPage />
 									}
 								/>
 
