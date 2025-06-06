@@ -44,6 +44,10 @@ const ResetPasswordPage: React.FC = () => {
 	const [isTokenValid, setIsTokenValid] = useState<
 		boolean | null
 	>(null);
+	const [canResend, setCanResend] = useState(false);
+	const [resendLoading, setResendLoading] =
+		useState(false);
+	const [resendTimer, setResendTimer] = useState(60);
 
 	// Get token and email from URL parameters
 	const token = searchParams.get('token');
@@ -57,6 +61,24 @@ const ResetPasswordPage: React.FC = () => {
 			setIsTokenValid(true);
 		}
 	}, [token, email]);
+
+	// Start timer for resend button
+	useEffect(() => {
+		if (!email || !token) return;
+		setCanResend(false);
+		setResendTimer(60);
+		const interval = setInterval(() => {
+			setResendTimer((prev) => {
+				if (prev <= 1) {
+					clearInterval(interval);
+					setCanResend(true);
+					return 0;
+				}
+				return prev - 1;
+			});
+		}, 1000);
+		return () => clearInterval(interval);
+	}, [email, token]);
 
 	const handleInputChange = (
 		e: React.ChangeEvent<HTMLInputElement>
@@ -143,6 +165,45 @@ const ResetPasswordPage: React.FC = () => {
 			);
 		} finally {
 			setIsLoading(false);
+		}
+	};
+
+	const handleResend = async () => {
+		if (!email) return;
+		setResendLoading(true);
+		try {
+			const result =
+				await authService.requestPasswordReset(
+					email
+				);
+			if (result.success) {
+				showSuccess(
+					'Reset Email Sent',
+					'If an account with that email exists, we sent a password reset link.'
+				);
+				setCanResend(false);
+				setResendTimer(60);
+				// Restart timer
+				const interval = setInterval(() => {
+					setResendTimer((prev) => {
+						if (prev <= 1) {
+							clearInterval(interval);
+							setCanResend(true);
+							return 0;
+						}
+						return prev - 1;
+					});
+				}, 1000);
+			} else {
+				showError('Resend Failed', result.message);
+			}
+		} catch (error) {
+			showError(
+				'Error',
+				'An unexpected error occurred'
+			);
+		} finally {
+			setResendLoading(false);
 		}
 	};
 
@@ -560,6 +621,39 @@ const ResetPasswordPage: React.FC = () => {
 								</button>
 							</div>
 						</form>
+
+						{/* Below the form, before <Footer /> */}
+						<div className='flex flex-col items-center mt-6'>
+							{!canResend ? (
+								<p
+									className={`text-xs ${
+										isDark
+											? 'text-gray-400'
+											: 'text-gray-600'
+									}`}
+								>
+									Didn't receive the
+									email? You can resend in{' '}
+									{resendTimer}s
+								</p>
+							) : (
+								<button
+									onClick={handleResend}
+									disabled={resendLoading}
+									className={cn(
+										'mt-2 py-2 px-6 rounded-xl font-medium transition-all',
+										'bg-gradient-to-r from-chat-pink to-chat-purple text-white',
+										resendLoading
+											? 'opacity-50 cursor-not-allowed'
+											: 'hover:shadow-lg active:scale-95'
+									)}
+								>
+									{resendLoading
+										? 'Resending...'
+										: 'Resend Email'}
+								</button>
+							)}
+						</div>
 					</div>
 				</motion.div>
 			</div>

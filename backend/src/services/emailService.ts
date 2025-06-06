@@ -1,77 +1,198 @@
-/**
- * Mock Email Service
- * This service logs email actions instead of sending actual emails
- * Resend functionality has been removed
- */
+// services/emailService.ts
+import * as dotenv from 'dotenv';
+dotenv.config();
+
+import sgMail from '@sendgrid/mail';
+import { Resend } from 'resend';
+
+// Import your HTML templates
+import { welcomeEmailTemplate } from '../templates/welcomeEmail';
+import { passwordResetEmailTemplate } from '../templates/passwordResetEmail';
+import { passwordChangedEmailTemplate } from '../templates/passwordChangedEmail';
+
+enum EmailProvider {
+	SENDGRID = 'sendgrid',
+	RESEND = 'resend',
+	MOCK = 'mock',
+}
 
 class EmailService {
+	private provider: EmailProvider;
+	private sendgrid: typeof sgMail | null = null;
+	private resend: Resend | null = null;
+	private fromEmail: string;
+	private fromName: string;
+	private isInitialized = false;
+
 	constructor() {
-		console.log(
-			'📧 Email Service initialized in mock mode (Resend functionality removed)'
-		);
+		// 1) Decide provider from EMAIL_PROVIDER in .env
+		const providerEnv = (
+			process.env.EMAIL_PROVIDER || 'mock'
+		).toLowerCase();
+
+		if (
+			providerEnv === EmailProvider.SENDGRID &&
+			process.env.SENDGRID_API_KEY
+		) {
+			this.provider = EmailProvider.SENDGRID;
+			sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+			this.sendgrid = sgMail;
+			console.log(
+				'📧 Email Service initialized with SendGrid'
+			);
+		} else if (
+			providerEnv === EmailProvider.RESEND &&
+			process.env.RESEND_API_KEY
+		) {
+			this.provider = EmailProvider.RESEND;
+			this.resend = new Resend(
+				process.env.RESEND_API_KEY
+			);
+			console.log(
+				'📧 Email Service initialized with Resend'
+			);
+		} else {
+			this.provider = EmailProvider.MOCK;
+			console.log(
+				'📧 Email Service initialized in mock mode (no valid API key found)'
+			);
+		}
+
+		// 2) Read the "from" address and friendly name from .env
+		this.fromEmail =
+			process.env.EMAIL_FROM_ADDRESS ||
+			'noreply@aichat.app';
+		this.fromName =
+			process.env.EMAIL_FROM_NAME || 'AI Chat';
+
+		this.isInitialized = true;
 	}
 
 	/**
-	 * Mock: Send welcome email after user registration
+	 * Send a welcome email after user registration
 	 */
 	async sendWelcomeEmail(
 		email: string,
 		firstName: string,
 		lastName: string
 	): Promise<boolean> {
-		console.log(
-			'📧 [MOCK] Welcome email would be sent to:',
-			{
-				to: email,
-				firstName,
-				lastName,
-				subject: 'Welcome to AI Chat! 🚀',
-			}
-		);
-		return true; // Always return success for mock
+		const subject = 'Welcome to AI Chat! 🚀';
+		const htmlContent = welcomeEmailTemplate({
+			firstName,
+			lastName,
+			appName: 'AI Chat',
+			loginUrl: `${process.env.FRONTEND_URL || 'http://localhost:5174'}/auth`,
+		});
+
+		return this.sendEmail(email, subject, htmlContent);
 	}
 
 	/**
-	 * Mock: Send password reset email
+	 * Send password reset email
 	 */
 	async sendPasswordResetEmail(
 		email: string,
 		firstName: string,
 		resetToken: string
 	): Promise<boolean> {
-		const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5174'}/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`;
+		const subject = 'Reset Your Password - AI Chat';
+		const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5174'}/reset-password?token=${resetToken}&email=${encodeURIComponent(
+			email
+		)}`;
 
-		console.log(
-			'📧 [MOCK] Password reset email would be sent to:',
-			{
-				to: email,
-				firstName,
-				subject: 'Reset Your Password - AI Chat',
-				resetUrl,
-			}
-		);
-		return true; // Always return success for mock
+		const htmlContent = passwordResetEmailTemplate({
+			firstName,
+			resetUrl,
+			appName: 'AI Chat',
+			expiryHours: 1,
+		});
+
+		return this.sendEmail(email, subject, htmlContent);
 	}
 
 	/**
-	 * Mock: Send password change confirmation email
+	 * Send password change confirmation email
 	 */
 	async sendPasswordChangeConfirmation(
 		email: string,
 		firstName: string
 	): Promise<boolean> {
-		console.log(
-			'📧 [MOCK] Password change confirmation email would be sent to:',
-			{
-				to: email,
-				firstName,
-				subject:
-					'Password Changed Successfully - AI Chat',
+		const subject =
+			'Password Changed Successfully - AI Chat';
+		const htmlContent = passwordChangedEmailTemplate({
+			firstName,
+			appName: 'AI Chat',
+			supportEmail:
+				process.env.SUPPORT_EMAIL ||
+				'support@aichat.app',
+			loginUrl: `${process.env.FRONTEND_URL || 'http://localhost:5174'}/auth`,
+		});
+
+		return this.sendEmail(email, subject, htmlContent);
+	}
+
+	/**
+	 * Generic email‐sending method that routes to the appropriate provider
+	 */
+	private async sendEmail(
+		to: string,
+		subject: string,
+		html: string
+	): Promise<boolean> {
+		if (!this.isInitialized) {
+			console.error('Email service not initialized');
+			return false;
+		}
+
+		// Format the "from" as "Name <address>"
+		const formattedFrom = `${this.fromName} <${this.fromEmail}>`;
+
+		try {
+			switch (this.provider) {
+				case EmailProvider.SENDGRID:
+					if (this.sendgrid) {
+						await this.sendgrid.send({
+							to: [to], // always pass as an array
+							from: formattedFrom,
+							subject,
+							html,
+						});
+					}
+					break;
+
+				case EmailProvider.RESEND:
+					if (this.resend) {
+						await this.resend.emails.send({
+							from: this.fromEmail,
+							to: [to],
+							subject,
+							html,
+						});
+					}
+					break;
+
+				case EmailProvider.MOCK:
+					// In mock mode, just log what would have been sent
+					console.log(
+						'📧 [MOCK] Email would be sent:',
+						{
+							to,
+							from: formattedFrom,
+							subject,
+							htmlSnippet:
+								html.substring(0, 100) +
+								'…',
+						}
+					);
+					break;
 			}
-		);
-		return true; // Always return success for mock
+
+			return true;
+		} catch (error) {
+			console.error('Failed to send email:', error);
+			return false;
+		}
 	}
 }
 
-// Export singleton instance
 export default new EmailService();

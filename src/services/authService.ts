@@ -1,4 +1,6 @@
-const API_BASE_URL = 'http://localhost:3001/api';
+const API_BASE_URL =
+	import.meta.env.VITE_API_BASE_URL ||
+	'http://localhost:3003/api';
 
 export interface User {
 	id: string;
@@ -325,6 +327,64 @@ class AuthService {
 		return result.success
 			? result.data?.user || null
 			: null;
+	}
+
+	/**
+	 * Reset password using token
+	 */
+	async resetPasswordWithToken(
+		token: string,
+		email: string,
+		newPassword: string
+	): Promise<AuthResponse> {
+		try {
+			const response = await fetch(
+				`${API_BASE_URL}/auth/reset-password`,
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						token,
+						email,
+						newPassword,
+					}),
+				}
+			);
+			return await response.json();
+		} catch {
+			return {
+				success: false,
+				message: 'Network error. Please try again.',
+			};
+		}
+	}
+
+	/**
+	 * Request password reset (send reset email)
+	 */
+	async requestPasswordReset(
+		email: string
+	): Promise<AuthResponse> {
+		try {
+			const response = await fetch(
+				`${API_BASE_URL}/auth/request-password-reset`,
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({ email }),
+				}
+			);
+			return await response.json();
+		} catch {
+			return {
+				success: false,
+				message: 'Network error. Please try again.',
+			};
+		}
 	}
 }
 

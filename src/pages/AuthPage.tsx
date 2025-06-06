@@ -34,7 +34,7 @@ interface PasswordValidation {
 
 const AuthPage = () => {
 	const { isDark } = useTheme();
-	const { showSuccess, showError, showInfo } = useToast();
+	const { showSuccess, showError } = useToast();
 	const navigate = useNavigate();
 	const [authMode, setAuthMode] =
 		useState<AuthMode>('login');
@@ -200,11 +200,46 @@ const AuthPage = () => {
 					);
 				}
 			} else if (authMode === 'forgot-password') {
-				// For now, just show a message that this feature is coming soon
-				showInfo(
-					'Feature Coming Soon',
-					'Password reset functionality will be available soon'
-				);
+				// Validate email
+				if (!formData.email.trim()) {
+					showError(
+						'Invalid Input',
+						'Please enter your email address'
+					);
+					return;
+				}
+
+				try {
+					const result =
+						await authService.requestPasswordReset(
+							formData.email
+						);
+
+					if (result.success) {
+						showSuccess(
+							'Reset Email Sent',
+							'If an account with that email exists, we sent a password reset link. Please check your inbox.'
+						);
+						// Switch back to login mode after successful request
+						setTimeout(() => {
+							switchAuthMode('login');
+						}, 3000);
+					} else {
+						showError(
+							'Request Failed',
+							result.message
+						);
+					}
+				} catch (error) {
+					console.error(
+						'Password reset request error:',
+						error
+					);
+					showError(
+						'Error',
+						'An unexpected error occurred'
+					);
+				}
 			}
 		} catch (error) {
 			console.error('Auth error:', error);
