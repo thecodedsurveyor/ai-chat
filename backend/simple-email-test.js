@@ -27,7 +27,7 @@ async function simpleEmailTest() {
 			from: 'Acme <onboarding@resend.dev>', // Use verified Resend domain
 			to: [testEmail],
 			subject: 'Hello World!',
-			html: '<h1>Hello from AI Chat!</h1><p>This is a test email.</p>',
+			html: '<h1>Hello from NeuronFlow!</h1><p>This is a test email.</p>',
 		});
 
 		if (error) {

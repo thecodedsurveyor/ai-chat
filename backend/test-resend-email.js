@@ -22,9 +22,10 @@ async function testResendEmail() {
 	const testEmail = process.argv[2] || 'test@example.com';
 	const fromEmail =
 		process.env.EMAIL_FROM_ADDRESS ||
-		'noreply@ai-chat.app';
+		'noreply@neuronflow.com';
 	const fromName =
-		process.env.EMAIL_FROM_NAME || 'AI Chat Platform';
+		process.env.EMAIL_FROM_NAME ||
+		'NeuronFlow Platform';
 
 	console.log('📧 Email Configuration:');
 	console.log(`   From: ${fromName} <${fromEmail}>`);
@@ -41,7 +42,7 @@ async function testResendEmail() {
 		const { data, error } = await resend.emails.send({
 			from: `${fromName} <${fromEmail}>`,
 			to: [testEmail],
-			subject: 'AI Chat - Email Service Test 🧪',
+			subject: 'NeuronFlow - Email Service Test 🧪',
 			html: `
 				<!DOCTYPE html>
 				<html>
@@ -70,13 +71,13 @@ async function testResendEmail() {
 							<strong>Test Details:</strong><br>
 							Sent at: ${new Date().toISOString()}<br>
 							Service: Resend Email API<br>
-							Platform: AI Chat Backend
+							Platform: NeuronFlow Backend
 						</p>
 					</div>
 					
 					<div style="text-align: center; margin-top: 20px;">
 						<p style="color: #a0aec0; font-size: 12px;">
-							This is an automated test email from your AI Chat platform.
+							This is an automated test email from your NeuronFlow platform.
 						</p>
 					</div>
 				</body>
@@ -106,7 +107,7 @@ async function testResendEmail() {
 			await resend.emails.send({
 				from: `${fromName} <${fromEmail}>`,
 				to: [testEmail],
-				subject: 'Password Reset Test - AI Chat',
+				subject: 'Password Reset Test - NeuronFlow',
 				html: `
 				<!DOCTYPE html>
 				<html>
@@ -128,7 +129,7 @@ async function testResendEmail() {
 					</div>
 					
 					<p style="color: #2d3748; font-size: 16px;">Hello,</p>
-					<p style="color: #4a5568;">We received a request to reset your password for your AI Chat account. This is a test of the password reset email template.</p>
+					<p style="color: #4a5568;">We received a request to reset your password for your NeuronFlow account. This is a test of the password reset email template.</p>
 					
 					<div style="text-align: center; margin: 30px 0;">
 						<a href="${resetUrl}" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">

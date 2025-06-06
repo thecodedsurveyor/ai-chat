@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 
 console.log(
-	'🚀 AI Chat Platform - Production Keys Generator\n'
+	'🚀 NeuronFlow Platform - Production Keys Generator\n'
 );
 
 // Generate secure production keys
@@ -24,7 +24,7 @@ NODE_ENV=development
 PORT=3001
 
 # Database Configuration
-DATABASE_URL=mongodb+srv://demo-user:demo123pass@cluster0.mongodb.net/ai-chatbot?retryWrites=true&w=majority
+DATABASE_URL=mongodb+srv://demo-user:demo123pass@cluster0.mongodb.net/neuronflow?retryWrites=true&w=majority
 
 # JWT Configuration - Production-ready secrets
 JWT_SECRET=${keys.JWT_SECRET}
@@ -49,7 +49,7 @@ BCRYPT_SALT_ROUNDS=12
 # Email Configuration - Resend Service
 RESEND_API_KEY=YOUR_RESEND_API_KEY_HERE
 EMAIL_FROM_ADDRESS=noreply@yourdomain.com
-EMAIL_FROM_NAME=AI Chat Platform
+EMAIL_FROM_NAME=NeuronFlow Platform
 
 # Application URLs
 APP_URL=http://localhost:5176

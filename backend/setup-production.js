@@ -35,7 +35,7 @@ function askQuestion(question) {
 
 async function setupProduction() {
 	console.log(
-		'🚀 Setting up Production Environment for AI Chat\n'
+		'🚀 Setting up Production Environment for NeuronFlow\n'
 	);
 
 	// Generate secure keys
@@ -50,12 +50,12 @@ async function setupProduction() {
 	);
 	const emailFrom =
 		(await askQuestion(
-			'Enter your from email domain (e.g., noreply@yourdomain.com) [default: noreply@ai-chat.app]: '
-		)) || 'noreply@ai-chat.app';
+			'Enter your from email domain (e.g., noreply@yourdomain.com) [default: noreply@neuronflow.com]: '
+		)) || 'noreply@neuronflow.com';
 	const emailFromName =
 		(await askQuestion(
-			'Enter your from name [default: AI Chat Platform]: '
-		)) || 'AI Chat Platform';
+			'Enter your from name [default: NeuronFlow Platform]: '
+		)) || 'NeuronFlow Platform';
 
 	// Get MongoDB URL
 	console.log('\n💾 Database Configuration');
@@ -63,7 +63,7 @@ async function setupProduction() {
 		(await askQuestion(
 			'Enter your MongoDB connection URL [default: existing Atlas URL]: '
 		)) ||
-		'mongodb+srv://demo-user:demo123pass@cluster0.mongodb.net/ai-chatbot?retryWrites=true&w=majority';
+		'mongodb+srv://demo-user:demo123pass@cluster0.mongodb.net/neuronflow?retryWrites=true&w=majority';
 
 	// Get frontend URL
 	console.log('\n🌐 Frontend Configuration');
@@ -175,13 +175,13 @@ async function testEmail() {
 		const resend = new Resend(process.env.RESEND_API_KEY);
 		
 		const { data, error } = await resend.emails.send({
-			from: process.env.EMAIL_FROM_ADDRESS || 'noreply@ai-chat.app',
+			from: process.env.EMAIL_FROM_ADDRESS || 'noreply@neuronflow.com',
 			to: ['${testEmail}'],
-			subject: 'AI Chat - Email Test 🧪',
+			subject: 'NeuronFlow - Email Test 🧪',
 			html: \`
 				<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
 					<h2 style="color: #667eea;">🧪 Email Test Successful!</h2>
-					<p>This is a test email from your AI Chat platform.</p>
+					<p>This is a test email from your NeuronFlow platform.</p>
 					<p>Email service is working correctly with Resend! ✅</p>
 					<p style="color: #666; font-size: 14px;">Sent at: \${new Date().toISOString()}</p>
 				</div>

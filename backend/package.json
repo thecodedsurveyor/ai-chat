@@ -1,7 +1,7 @@
 {
-	"name": "ai-chatbot-backend",
+	"name": "neuronflow-backend",
 	"version": "1.0.0",
-	"description": "Backend API for AI Chatbot with authentication and chat management",
+	"description": "Backend API for NeuronFlow with authentication and chat management",
 	"main": "dist/server.js",
 	"scripts": {
 		"build": "tsc",

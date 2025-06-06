@@ -23,7 +23,7 @@ function logTest(name, passed, details = '') {
 
 async function testAPI() {
 	console.log(
-		'🧪 AI Chat Backend - Comprehensive API Testing\n'
+		'🧪 NeuronFlow Backend - Comprehensive API Testing\n'
 	);
 	console.log('🌐 Base URL:', BASE_URL);
 	console.log('📧 Test Email:', TEST_EMAIL);

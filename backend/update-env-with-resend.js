@@ -30,12 +30,12 @@ async function updateEnvWithResend() {
 	);
 	const emailFrom =
 		(await askQuestion(
-			'From Email (default: noreply@ai-chat.app): '
-		)) || 'noreply@ai-chat.app';
+			'From Email (default: noreply@neuronflow.com): '
+		)) || 'noreply@neuronflow.com';
 	const emailFromName =
 		(await askQuestion(
-			'From Name (default: AI Chat Platform): '
-		)) || 'AI Chat Platform';
+			'From Name (default: NeuronFlow Platform): '
+		)) || 'NeuronFlow Platform';
 
 	// Update or add Resend configuration
 	const resendConfig = `

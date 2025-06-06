@@ -22,7 +22,7 @@ function logTest(name, passed, details = '') {
 }
 
 async function testAPI() {
-	console.log('🧪 AI Chat Backend - API Testing\n');
+	console.log('🧪 NeuronFlow Backend - API Testing\n');
 	console.log('🌐 Base URL:', BASE_URL);
 	console.log('📧 Test Email:', TEST_EMAIL);
 	console.log('━'.repeat(60));
@@ -259,7 +259,7 @@ async function testAPI() {
 	return testResults;
 }
 
-console.log('🚀 Testing AI Chat API...');
+console.log('🚀 Testing NeuronFlow API...');
 testAPI()
 	.then(() => {
 		console.log('\n🔔 Testing complete!');
