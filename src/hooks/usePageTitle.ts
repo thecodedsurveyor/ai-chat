@@ -20,69 +20,60 @@ const defaultConfig: TitleConfig = {
 
 // Simple title mappings for different pages
 const pageTitles: Record<string, string> = {
-	'/': 'Home',
-	'/ai-chat': 'Chat',
-	'/auth': 'Login | Signup',
-	'/login': 'Login',
-	'/signup': 'Signup',
-	'/about': 'About',
-	'/contact': 'Contact',
-	'/terms': 'Terms of Service',
-	'/privacy': 'Privacy Policy',
-	'/cookies': 'Cookie Policy',
-	'/gdpr': 'GDPR Compliance',
-	'/pricing': 'Pricing',
-	'/api': 'API Documentation',
-	'/documentation': 'Documentation',
-	'/docs': 'Documentation',
-	'/blog': 'Blog',
-	'/careers': 'Careers',
-	'/press': 'Press & Media',
-	'/help': 'Help Center',
-	'/support': 'Support',
-	'/status': 'System Status',
-	'/community': 'Community',
-	'/analytics': 'Analytics',
-	'/dashboard': 'Dashboard',
-	'/profile': 'Profile',
-	'/settings': 'Settings',
-	'/features': 'Features',
-	'/forgot-password': 'Reset Password',
-	'/reset-password': 'Reset Password',
-	'/verify-email': 'Verify Email',
-	'/change-password': 'Change Password',
-	'/deactivate-account': 'Deactivate Account',
+	'/': 'Your Conversations',
+	'/ai-chat': 'AI Chat Assistant',
+	'/auth': 'Sign in or Create an Account',
+	'/login': 'Sign in to AI Chat',
+	'/signup': 'Create Your AI Chat Account',
+	'/about': 'About AI Chat – Our Mission & Team',
+	'/contact': 'Contact Support – AI Chat',
+	'/terms': 'Terms of Service – AI Chat',
+	'/privacy': 'Privacy Policy – AI Chat',
+	'/cookies': 'Cookie Policy – AI Chat',
+	'/gdpr': 'GDPR Compliance – AI Chat',
+	'/pricing': 'Plans & Pricing – AI Chat',
+	'/api': 'API Documentation – AI Chat',
+	'/documentation': 'Platform Documentation – AI Chat',
+	'/docs': 'Platform Documentation – AI Chat',
+	'/blog': 'AI Chat Blog & Updates',
+	'/careers': 'Careers at AI Chat',
+	'/press': 'Press & Media – AI Chat',
+	'/help': 'Help Center – AI Chat',
+	'/support': 'Support – AI Chat',
+	'/status': 'System Status – AI Chat',
+	'/community': 'Community – AI Chat',
+	'/analytics': 'Analytics Dashboard – AI Chat',
+	'/dashboard': 'User Dashboard – AI Chat',
+	'/profile': 'Your Profile – AI Chat',
+	'/settings': 'Settings & Preferences – AI Chat',
+	'/features': 'Features Overview – AI Chat',
+	'/forgot-password': 'Reset Your Password – AI Chat',
+	'/reset-password': 'Reset Your Password – AI Chat',
+	'/verify-email': 'Verify Your Email – AI Chat',
+	'/change-password': 'Change Your Password – AI Chat',
+	'/deactivate-account': 'Deactivate Account – AI Chat',
 };
 
 // Get simple title based on pathname
 const getSimpleTitle = (pathname: string): string => {
-	// Check exact match first
 	if (pageTitles[pathname]) {
 		return pageTitles[pathname];
 	}
-
-	// Check for dynamic routes
 	if (pathname.startsWith('/ai-chat')) {
-		return 'Chat';
+		return 'AI Chat Assistant';
 	}
-
 	if (pathname.startsWith('/settings')) {
-		return 'Settings';
+		return 'Settings & Preferences – AI Chat';
 	}
-
 	if (pathname.startsWith('/profile')) {
-		return 'Profile';
+		return 'Your Profile – AI Chat';
 	}
-
 	if (pathname.startsWith('/analytics')) {
-		return 'Analytics';
+		return 'Analytics Dashboard – AI Chat';
 	}
-
 	if (pathname.startsWith('/conversation/')) {
-		return 'Conversation';
+		return 'Conversation – AI Chat';
 	}
-
-	// Default fallback
 	return 'AI Chat';
 };
 

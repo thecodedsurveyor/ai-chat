@@ -69,11 +69,11 @@ const AuthPage = () => {
 	const getAuthTitle = () => {
 		switch (authMode) {
 			case 'register':
-				return 'Signup';
+				return 'Create Your AI Chat Account';
 			case 'forgot-password':
-				return 'Reset Password';
+				return 'Reset Your Password – AI Chat';
 			default:
-				return 'Login | Signup';
+				return 'Sign in or Create an Account';
 		}
 	};
 
