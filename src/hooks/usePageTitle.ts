@@ -12,7 +12,7 @@ interface TitleConfig {
 }
 
 const defaultConfig: TitleConfig = {
-	base: 'AI Chat',
+	base: 'NeuronFlow',
 	separator: ' | ',
 	suffix: 'Intelligent Conversations Redefined',
 	dynamic: false, // Disabled dynamic features for simple titles
@@ -21,37 +21,38 @@ const defaultConfig: TitleConfig = {
 // Simple title mappings for different pages
 const pageTitles: Record<string, string> = {
 	'/': 'Your Conversations',
-	'/ai-chat': 'AI Chat Assistant',
+	'/ai-chat': 'NeuronFlow Assistant',
 	'/auth': 'Sign in or Create an Account',
-	'/login': 'Sign in to AI Chat',
-	'/signup': 'Create Your AI Chat Account',
-	'/about': 'About AI Chat – Our Mission & Team',
-	'/contact': 'Contact Support – AI Chat',
-	'/terms': 'Terms of Service – AI Chat',
-	'/privacy': 'Privacy Policy – AI Chat',
-	'/cookies': 'Cookie Policy – AI Chat',
-	'/gdpr': 'GDPR Compliance – AI Chat',
-	'/pricing': 'Plans & Pricing – AI Chat',
-	'/api': 'API Documentation – AI Chat',
-	'/documentation': 'Platform Documentation – AI Chat',
-	'/docs': 'Platform Documentation – AI Chat',
-	'/blog': 'AI Chat Blog & Updates',
-	'/careers': 'Careers at AI Chat',
-	'/press': 'Press & Media – AI Chat',
-	'/help': 'Help Center – AI Chat',
-	'/support': 'Support – AI Chat',
-	'/status': 'System Status – AI Chat',
-	'/community': 'Community – AI Chat',
-	'/analytics': 'Analytics Dashboard – AI Chat',
-	'/dashboard': 'User Dashboard – AI Chat',
-	'/profile': 'Your Profile – AI Chat',
-	'/settings': 'Settings & Preferences – AI Chat',
-	'/features': 'Features Overview – AI Chat',
-	'/forgot-password': 'Reset Your Password – AI Chat',
-	'/reset-password': 'Reset Your Password – AI Chat',
-	'/verify-email': 'Verify Your Email – AI Chat',
-	'/change-password': 'Change Your Password – AI Chat',
-	'/deactivate-account': 'Deactivate Account – AI Chat',
+	'/login': 'Sign in to NeuronFlow',
+	'/signup': 'Create Your NeuronFlow Account',
+	'/about': 'About NeuronFlow – Our Mission & Team',
+	'/contact': 'Contact Support – NeuronFlow',
+	'/terms': 'Terms of Service – NeuronFlow',
+	'/privacy': 'Privacy Policy – NeuronFlow',
+	'/cookies': 'Cookie Policy – NeuronFlow',
+	'/gdpr': 'GDPR Compliance – NeuronFlow',
+	'/pricing': 'Plans & Pricing – NeuronFlow',
+	'/api': 'API Documentation – NeuronFlow',
+	'/documentation': 'Platform Documentation – NeuronFlow',
+	'/docs': 'Platform Documentation – NeuronFlow',
+	'/blog': 'NeuronFlow Blog & Updates',
+	'/careers': 'Careers at NeuronFlow',
+	'/press': 'Press & Media – NeuronFlow',
+	'/help': 'Help Center – NeuronFlow',
+	'/support': 'Support – NeuronFlow',
+	'/status': 'System Status – NeuronFlow',
+	'/community': 'Community – NeuronFlow',
+	'/analytics': 'Analytics Dashboard – NeuronFlow',
+	'/dashboard': 'User Dashboard – NeuronFlow',
+	'/profile': 'Your Profile – NeuronFlow',
+	'/settings': 'Settings & Preferences – NeuronFlow',
+	'/features': 'Features Overview – NeuronFlow',
+	'/forgot-password': 'Reset Your Password – NeuronFlow',
+	'/reset-password': 'Reset Your Password – NeuronFlow',
+	'/verify-email': 'Verify Your Email – NeuronFlow',
+	'/change-password': 'Change Your Password – NeuronFlow',
+	'/deactivate-account':
+		'Deactivate Account – NeuronFlow',
 };
 
 // Get simple title based on pathname
@@ -60,21 +61,21 @@ const getSimpleTitle = (pathname: string): string => {
 		return pageTitles[pathname];
 	}
 	if (pathname.startsWith('/ai-chat')) {
-		return 'AI Chat Assistant';
+		return 'NeuronFlow Assistant';
 	}
 	if (pathname.startsWith('/settings')) {
-		return 'Settings & Preferences – AI Chat';
+		return 'Settings & Preferences – NeuronFlow';
 	}
 	if (pathname.startsWith('/profile')) {
-		return 'Your Profile – AI Chat';
+		return 'Your Profile – NeuronFlow';
 	}
 	if (pathname.startsWith('/analytics')) {
-		return 'Analytics Dashboard – AI Chat';
+		return 'Analytics Dashboard – NeuronFlow';
 	}
 	if (pathname.startsWith('/conversation/')) {
-		return 'Conversation – AI Chat';
+		return 'Conversation – NeuronFlow';
 	}
-	return 'AI Chat';
+	return 'NeuronFlow';
 };
 
 export const usePageTitle = (
@@ -112,9 +113,11 @@ export const usePageTitle = (
 				'/ai-chat':
 					'Engage in intelligent conversations with our advanced AI assistant. Get help, answers, and creative solutions.',
 				'/auth':
-					'Login to your account or create a new one to start using AI Chat.',
-				'/login': 'Login to your AI Chat account.',
-				'/signup': 'Create a new AI Chat account.',
+					'Login to your account or create a new one to start using NeuronFlow.',
+				'/login':
+					'Login to your NeuronFlow account.',
+				'/signup':
+					'Create a new NeuronFlow account.',
 				'/about':
 					'Learn about our mission to revolutionize AI conversations and make intelligent interactions accessible to everyone.',
 				'/contact':
@@ -123,7 +126,7 @@ export const usePageTitle = (
 					'Choose the perfect plan for your AI conversation needs. From free to enterprise solutions.',
 				'/api': 'Integrate powerful AI conversations into your applications with our robust, developer-friendly API.',
 				'/documentation':
-					'Complete guides, tutorials, and API references to help you master our AI chat platform.',
+					'Complete guides, tutorials, and API references to help you master our NeuronFlow platform.',
 				'/blog':
 					'Stay updated with the latest AI insights, tutorials, and platform updates from our expert team.',
 				'/careers':
@@ -135,9 +138,9 @@ export const usePageTitle = (
 				'/profile':
 					'View and edit your profile information.',
 				'/features':
-					'Explore all the powerful features available in AI Chat.',
+					'Explore all the powerful features available in NeuronFlow.',
 				'/help':
-					'Find answers to common questions and get help with AI Chat.',
+					'Find answers to common questions and get help with NeuronFlow.',
 				'/privacy':
 					'Read our privacy policy to understand how we protect your data.',
 				'/terms':
@@ -146,7 +149,7 @@ export const usePageTitle = (
 
 			const description =
 				descriptions[location.pathname] ||
-				'AI Chat - Intelligent conversations redefined with advanced AI technology and personalized experiences.';
+				'NeuronFlow - Intelligent conversations redefined with advanced AI technology and personalized experiences.';
 
 			metaDescription.setAttribute(
 				'content',

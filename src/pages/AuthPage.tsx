@@ -417,7 +417,7 @@ const AuthPage = () => {
 								>
 									Welcome to{' '}
 									<span className='bg-gradient-to-r from-chat-pink to-chat-purple bg-clip-text text-transparent'>
-										AI Chat
+										NeuronFlow
 									</span>
 								</h1>
 								<p

@@ -103,7 +103,7 @@ const Navigation = () => {
 										: 'text-chat-light-text'
 								}`}
 							>
-								AI Chat
+								NeuronFlow
 							</span>
 						</Link>
 

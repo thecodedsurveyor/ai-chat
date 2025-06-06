@@ -86,7 +86,7 @@ const Footer = () => {
 										: 'text-chat-light-text'
 								}`}
 							>
-								AI Chat
+								NeuronFlow
 							</span>
 						</Link>
 						<p
@@ -114,7 +114,7 @@ const Footer = () => {
 							>
 								<Mail className='w-4 h-4' />
 								<span>
-									hello@aichat.com
+									hello@neuronflow.com
 								</span>
 							</div>
 							<div
@@ -336,7 +336,7 @@ const Footer = () => {
 									: 'text-chat-light-accent'
 							}`}
 						>
-							© {currentYear} AI Chat. All
+							© {currentYear} NeuronFlow. All
 							rights reserved. Built with ❤️
 							for the future.
 						</p>
