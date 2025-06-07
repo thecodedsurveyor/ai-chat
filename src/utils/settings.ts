@@ -84,7 +84,7 @@ export const defaultSettings: AppSettings = {
 		reducedMotion: false,
 		screenReaderSupport: false,
 		keyboardNavigation: true,
-		focusIndicators: true,
+		focusIndicators: false,
 		largeClickTargets: false,
 	},
 	voiceNavigation: {
