@@ -7,11 +7,11 @@ NODE_ENV=development
 PORT=3003
 
 # Database Configuration - MongoDB Atlas (Working Connection!)
-DATABASE_URL=mongodb+srv://demo-user:demo123pass@cluster0.mongodb.net/ai-chatbot?retryWrites=true&w=majority
+DATABASE_URL=mongodb+srv://demo-user:demo123pass@cluster0.mongodb.net/chatbot?retryWrites=true&w=majority
 
 # JWT Configuration - Strong secrets for security
-JWT_SECRET=ai-chatbot-super-secret-jwt-key-2024-development-67890abcdef
-JWT_REFRESH_SECRET=ai-chatbot-refresh-secret-key-2024-development-12345uvwxyz
+JWT_SECRET=chatbot-super-secret-jwt-key-2024-development-67890abcdef
+JWT_REFRESH_SECRET=chatbot-refresh-secret-key-2024-development-12345uvwxyz
 JWT_EXPIRE=15m
 JWT_REFRESH_EXPIRE=7d
 

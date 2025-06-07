@@ -340,7 +340,7 @@ const ProfilePage: React.FC = () => {
 			<div className='relative'>
 				<div className='absolute top-6 left-6 z-10'>
 					<button
-						onClick={() => navigate('/ai-chat')}
+						onClick={() => navigate(-1)}
 						className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
 							isDark
 								? 'bg-white/10 hover:bg-white/20 text-white'
@@ -352,7 +352,7 @@ const ProfilePage: React.FC = () => {
 						}`}
 					>
 						<ArrowLeft className='w-4 h-4' />
-						<span>Back to Chat</span>
+						<span>Back</span>
 					</button>
 				</div>
 			</div>

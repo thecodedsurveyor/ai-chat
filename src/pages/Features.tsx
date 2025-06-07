@@ -30,9 +30,11 @@ import {
 	TbMessageCircle,
 	TbMessageCircleCheck,
 } from 'react-icons/tb';
+import { useNavigate } from 'react-router-dom';
 
 const Features = () => {
 	const { isDark } = useTheme();
+	const navigate = useNavigate();
 	const [activeCategory, setActiveCategory] =
 		useState('core');
 
@@ -683,8 +685,7 @@ const Features = () => {
 								whileHover={{ scale: 1.05 }}
 								whileTap={{ scale: 0.95 }}
 								onClick={() =>
-									(window.location.href =
-										'/ai-chat')
+									navigate('/chat')
 								}
 							>
 								Start Chatting Now
@@ -698,8 +699,7 @@ const Features = () => {
 								whileHover={{ scale: 1.05 }}
 								whileTap={{ scale: 0.95 }}
 								onClick={() =>
-									(window.location.href =
-										'/about')
+									navigate('/about')
 								}
 							>
 								Learn More

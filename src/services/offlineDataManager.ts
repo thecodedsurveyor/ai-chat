@@ -32,7 +32,7 @@ export interface OfflineUserProfile {
 }
 
 class OfflineDataManager {
-	private dbName = 'ai-chatbot-offline';
+	private dbName = 'chatbot-offline';
 	private dbVersion = 1;
 	private db: IDBDatabase | null = null;
 

@@ -7,14 +7,14 @@ PORT=3001
 
 # Database Configuration - Replace with your MongoDB connection string
 # For local MongoDB:
-DATABASE_URL=mongodb://localhost:27017/ai-chatbot-dev
+DATABASE_URL=mongodb://localhost:27017/chatbot-dev
 
 # For MongoDB Atlas (recommended):
-# DATABASE_URL=mongodb+srv://username:password@cluster.mongodb.net/ai-chatbot?retryWrites=true&w=majority
+# DATABASE_URL=mongodb+srv://username:password@cluster.mongodb.net/chatbot?retryWrites=true&w=majority
 
 # JWT Configuration
-JWT_SECRET=ai-chatbot-super-secret-jwt-key-2024-development
-JWT_REFRESH_SECRET=ai-chatbot-refresh-secret-key-2024-development
+JWT_SECRET=chatbot-super-secret-jwt-key-2024-development
+JWT_REFRESH_SECRET=chatbot-refresh-secret-key-2024-development
 JWT_EXPIRE=15m
 JWT_REFRESH_EXPIRE=7d
 

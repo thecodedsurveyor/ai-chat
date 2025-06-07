@@ -403,7 +403,7 @@ const AnalyticsPage: React.FC<AnalyticsPageProps> = ({
 				insights here.
 			</p>
 			<motion.button
-				onClick={() => navigate('/ai-chat')}
+				onClick={() => navigate(-1)}
 				className='bg-gradient-to-r from-chat-pink to-chat-purple text-white font-semibold py-3 px-8 rounded-xl hover:shadow-lg hover:shadow-chat-pink/30 transition-all duration-300'
 				whileHover={{ scale: 1.05 }}
 				whileTap={{ scale: 0.95 }}
@@ -438,7 +438,7 @@ const AnalyticsPage: React.FC<AnalyticsPageProps> = ({
 							<div className='flex items-center space-x-4'>
 								<button
 									onClick={() =>
-										navigate('/ai-chat')
+										navigate(-1)
 									}
 									className={cn(
 										'p-2 rounded-lg transition-colors',
@@ -547,9 +547,7 @@ const AnalyticsPage: React.FC<AnalyticsPageProps> = ({
 					<div className='flex items-center justify-between'>
 						<div className='flex items-center space-x-4'>
 							<button
-								onClick={() =>
-									navigate('/ai-chat')
-								}
+								onClick={() => navigate(-1)}
 								className={cn(
 									'p-2 rounded-lg transition-colors',
 									isDark

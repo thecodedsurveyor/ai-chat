@@ -48,7 +48,7 @@ if ('serviceWorker' in navigator) {
 			if ('localStorage' in window) {
 				// Don't clear all localStorage, just problematic keys
 				const keysToRemove = [
-					'ai-chatbot-cache',
+					'chatbot-cache',
 					'sw-cache',
 				];
 				keysToRemove.forEach((key) => {

@@ -117,7 +117,7 @@ export const defaultSettings: AppSettings = {
 };
 
 // Settings Storage Key
-const SETTINGS_STORAGE_KEY = 'ai-chatbot-settings';
+const SETTINGS_STORAGE_KEY = 'chatbot-settings';
 
 // Settings Manager Class
 export class SettingsManager {

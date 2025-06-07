@@ -32,7 +32,7 @@ const config: EnvironmentConfig = {
 	// Database Configuration
 	DATABASE_URL:
 		process.env.DATABASE_URL ||
-		'mongodb://localhost:27017/ai-chatbot',
+		'mongodb://localhost:27017/chatbot',
 
 	// JWT Configuration
 	JWT_SECRET:

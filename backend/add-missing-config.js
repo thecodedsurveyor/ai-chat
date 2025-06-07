@@ -19,7 +19,7 @@ EMAIL_FROM_NAME=Ai Chat
 # =============================================================================
 # 🗄️ DATABASE CONFIGURATION
 # =============================================================================
-DATABASE_URL=mongodb+srv://codedsurveyor:5563622222@cluster0.iunbydq.mongodb.net/ai-chat?retryWrites=true&w=majority
+DATABASE_URL=mongodb+srv://codedsurveyor:5563622222@cluster0.iunbydq.mongodb.net/chatbot?retryWrites=true&w=majority
 
 # =============================================================================
 # 🔐 ADDITIONAL SECURITY KEYS

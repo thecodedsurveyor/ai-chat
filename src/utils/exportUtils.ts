@@ -29,7 +29,7 @@ export class ExportManager {
 		switch (options.format) {
 			case 'json':
 				content = this.exportToJSON(exportData);
-				filename = `ai-chat-export-${this.getDateString()}.json`;
+				filename = `chatbot-export-${this.getDateString()}.json`;
 				mimeType = 'application/json';
 				break;
 			case 'txt':
@@ -37,7 +37,7 @@ export class ExportManager {
 					exportData,
 					options
 				);
-				filename = `ai-chat-export-${this.getDateString()}.txt`;
+				filename = `chatbot-export-${this.getDateString()}.txt`;
 				mimeType = 'text/plain';
 				break;
 			case 'csv':
@@ -45,7 +45,7 @@ export class ExportManager {
 					exportData,
 					options
 				);
-				filename = `ai-chat-export-${this.getDateString()}.csv`;
+				filename = `chatbot-export-${this.getDateString()}.csv`;
 				mimeType = 'text/csv';
 				break;
 			case 'markdown':
@@ -53,7 +53,7 @@ export class ExportManager {
 					exportData,
 					options
 				);
-				filename = `ai-chat-export-${this.getDateString()}.md`;
+				filename = `chatbot-export-${this.getDateString()}.md`;
 				mimeType = 'text/markdown';
 				break;
 			default:

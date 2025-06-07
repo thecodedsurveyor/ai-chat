@@ -46,7 +46,7 @@ const Navigation = () => {
 	};
 
 	const handleTryAI = () => {
-		navigate('/ai-chat');
+		navigate('/chat');
 	};
 
 	// Handle Features link click - navigate to features page

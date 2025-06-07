@@ -1,8 +1,8 @@
 // AI Chatbot PWA Service Worker
 // Handles offline caching and background sync
 
-const CACHE_NAME = 'ai-chatbot-v1';
-const STATIC_CACHE_NAME = 'ai-chatbot-static-v1';
+const CACHE_NAME = 'chatbot-v1';
+const STATIC_CACHE_NAME = 'chatbot-static-v1';
 
 // Static assets to cache for offline use
 const STATIC_ASSETS = [

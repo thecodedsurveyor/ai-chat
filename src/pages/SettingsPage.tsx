@@ -40,7 +40,7 @@ const SettingsPage: React.FC = () => {
 	};
 
 	const handleBackToChat = () => {
-		navigate('/ai-chat');
+		navigate(-1);
 	};
 
 	return (

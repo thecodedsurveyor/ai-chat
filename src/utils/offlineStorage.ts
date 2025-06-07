@@ -14,7 +14,7 @@ export interface SyncData {
 }
 
 export class OfflineStorageManager {
-	private static readonly DB_NAME = 'ai-chatbot-db';
+	private static readonly DB_NAME = 'chatbot-db';
 	private static readonly DB_VERSION = 1;
 	private static readonly CHATS_STORE = 'conversations';
 	private static readonly SYNC_STORE = 'sync_data';

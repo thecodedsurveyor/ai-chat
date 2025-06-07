@@ -33,7 +33,7 @@ const LandingPage = () => {
 	const [faqSearch, setFaqSearch] = useState('');
 
 	const handleTryAI = () => {
-		navigate('/ai-chat');
+		navigate('/chat');
 	};
 
 	const handleLearnMore = () => {

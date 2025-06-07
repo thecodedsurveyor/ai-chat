@@ -21,7 +21,7 @@ const defaultConfig: TitleConfig = {
 // Simple title mappings for different pages
 const pageTitles: Record<string, string> = {
 	'/': 'Your Conversations',
-	'/ai-chat': 'NeuronFlow Assistant',
+	'/chat': 'NeuronFlow Assistant',
 	'/auth': 'Sign in or Create an Account',
 	'/login': 'Sign in to NeuronFlow',
 	'/signup': 'Create Your NeuronFlow Account',
@@ -60,7 +60,7 @@ const getSimpleTitle = (pathname: string): string => {
 	if (pageTitles[pathname]) {
 		return pageTitles[pathname];
 	}
-	if (pathname.startsWith('/ai-chat')) {
+	if (pathname.startsWith('/chat')) {
 		return 'NeuronFlow Assistant';
 	}
 	if (pathname.startsWith('/settings')) {
@@ -110,7 +110,7 @@ export const usePageTitle = (
 		if (metaDescription) {
 			const descriptions: Record<string, string> = {
 				'/': 'Experience the future of AI conversations with intelligent responses, smart memory, and personalized interactions.',
-				'/ai-chat':
+				'/chat':
 					'Engage in intelligent conversations with our advanced AI assistant. Get help, answers, and creative solutions.',
 				'/auth':
 					'Login to your account or create a new one to start using NeuronFlow.',
