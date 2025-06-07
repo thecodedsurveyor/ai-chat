@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useUser } from '@clerk/clerk-react';
 import { authService } from '../../services/authService';
 import { useToast } from '../../contexts/ToastContext';
 
@@ -22,10 +21,6 @@ function AuthGuard({
 }: AuthGuardProps) {
 	const navigate = useNavigate();
 	const location = useLocation();
-	const {
-		isSignedIn: isClerkSignedIn,
-		isLoaded: isClerkLoaded,
-	} = useUser();
 	const { showError } = useToast();
 
 	// Use refs to prevent state updates during render
@@ -33,8 +28,7 @@ function AuthGuard({
 	const lastPathRef = useRef(location.pathname);
 
 	// Get authentication status from our own auth service
-	const isAuthServiceSignedIn =
-		authService.isAuthenticated();
+	const isAuthenticated = authService.isAuthenticated();
 
 	useEffect(() => {
 		// Reset redirect status when path changes
@@ -43,18 +37,11 @@ function AuthGuard({
 			lastPathRef.current = location.pathname;
 		}
 
-		// Skip if Clerk is not loaded yet
-		if (!isClerkLoaded) return;
-
 		// Skip if we've already redirected for this route
 		if (hasRedirectedRef.current) return;
 
 		// Handle redirection logic
-		if (
-			requireAuth &&
-			!isAuthServiceSignedIn &&
-			!isClerkSignedIn
-		) {
+		if (requireAuth && !isAuthenticated) {
 			// Don't show error on initial page load for auth pages
 			if (location.pathname !== '/auth') {
 				showError(
@@ -65,17 +52,12 @@ function AuthGuard({
 
 			hasRedirectedRef.current = true;
 			navigate(redirectTo, { replace: true });
-		} else if (
-			!requireAuth &&
-			(isAuthServiceSignedIn || isClerkSignedIn)
-		) {
+		} else if (!requireAuth && isAuthenticated) {
 			hasRedirectedRef.current = true;
 			navigate('/chat', { replace: true });
 		}
 	}, [
-		isClerkLoaded,
-		isClerkSignedIn,
-		isAuthServiceSignedIn,
+		isAuthenticated,
 		requireAuth,
 		navigate,
 		redirectTo,
@@ -84,22 +66,11 @@ function AuthGuard({
 	]);
 
 	// Decide what to render
-	if (!isClerkLoaded) {
+	if (requireAuth && !isAuthenticated) {
 		return null;
 	}
 
-	if (
-		requireAuth &&
-		!isAuthServiceSignedIn &&
-		!isClerkSignedIn
-	) {
-		return null;
-	}
-
-	if (
-		!requireAuth &&
-		(isAuthServiceSignedIn || isClerkSignedIn)
-	) {
+	if (!requireAuth && isAuthenticated) {
 		return null;
 	}
 
