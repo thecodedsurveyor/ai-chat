@@ -169,7 +169,7 @@ const App = () => {
 								/>
 								{/* Dedicated AI Chat route */}
 								<Route
-									path='/ai-chat'
+									path='/chat'
 									element={
 										<ChatProvider>
 											<ChatBotApp />
