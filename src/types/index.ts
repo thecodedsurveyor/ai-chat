@@ -478,7 +478,6 @@ export type AppSettings = {
 export type SettingsCategory =
 	| 'appearance'
 	| 'accessibility'
-	| 'voice'
 	| 'voiceSynthesis'
 	| 'privacy'
 	| 'advanced';

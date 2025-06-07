@@ -5,7 +5,6 @@ import {
 	Sun,
 	Moon,
 	Volume2,
-	VolumeX,
 	RotateCcw,
 	AlertCircle,
 } from 'lucide-react';
@@ -24,7 +23,6 @@ import { settingsManager } from '../../utils/settings';
 import {
 	MdPalette,
 	MdAccessibility,
-	MdMic,
 	MdSecurity,
 	MdSettings,
 } from 'react-icons/md';
@@ -96,12 +94,6 @@ const SettingsPage: React.FC<SettingsPageProps> = ({
 			icon: MdAccessibility,
 			description:
 				'Accessibility features and options',
-		},
-		{
-			id: 'voice' as SettingsCategory,
-			name: 'Voice Navigation',
-			icon: MdMic,
-			description: 'Voice commands and navigation',
 		},
 		{
 			id: 'voiceSynthesis' as SettingsCategory,
@@ -270,17 +262,6 @@ const SettingsPage: React.FC<SettingsPageProps> = ({
 								{activeCategory ===
 									'accessibility' && (
 									<AccessibilitySettings
-										settings={
-											localSettings
-										}
-										onUpdate={
-											updateLocalSettings
-										}
-									/>
-								)}
-								{activeCategory ===
-									'voice' && (
-									<VoiceNavigationSettings
 										settings={
 											localSettings
 										}
@@ -751,253 +732,6 @@ const AccessibilitySettings: React.FC<{
 					</div>
 				))}
 			</div>
-		</div>
-	);
-};
-
-// Voice Navigation Settings Component
-const VoiceNavigationSettings: React.FC<{
-	settings: AppSettings;
-	onUpdate: (updates: Partial<AppSettings>) => void;
-}> = ({ settings, onUpdate }) => {
-	const toggleVoiceNavigation = () => {
-		onUpdate({
-			voiceNavigation: {
-				...settings.voiceNavigation,
-				enabled: !settings.voiceNavigation.enabled,
-			},
-		});
-	};
-
-	const updateVoiceSettings = (
-		updates: Partial<typeof settings.voiceNavigation>
-	) => {
-		onUpdate({
-			voiceNavigation: {
-				...settings.voiceNavigation,
-				...updates,
-			},
-		});
-	};
-
-	return (
-		<div className='space-y-8'>
-			<div>
-				<h3 className='text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2'>
-					Voice Navigation
-				</h3>
-				<p className='text-gray-600 dark:text-gray-400'>
-					Control the app using voice commands
-				</p>
-			</div>
-
-			{/* Enable Voice Navigation */}
-			<div className='flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg'>
-				<div className='flex items-center space-x-3'>
-					<div className='p-2 bg-blue-100 dark:bg-blue-900 rounded-lg'>
-						{settings.voiceNavigation
-							.enabled ? (
-							<Volume2 className='w-5 h-5 text-blue-600 dark:text-blue-400' />
-						) : (
-							<VolumeX className='w-5 h-5 text-gray-400' />
-						)}
-					</div>
-					<div>
-						<h4 className='text-sm font-medium text-gray-900 dark:text-gray-100'>
-							Enable Voice Navigation
-						</h4>
-						<p className='text-sm text-gray-600 dark:text-gray-400'>
-							Navigate and control the app
-							with voice commands
-						</p>
-					</div>
-				</div>
-				<button
-					onClick={toggleVoiceNavigation}
-					className={cn(
-						'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
-						settings.voiceNavigation.enabled
-							? 'bg-blue-600'
-							: 'bg-gray-300 dark:bg-gray-600'
-					)}
-				>
-					<span
-						className={cn(
-							'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
-							settings.voiceNavigation.enabled
-								? 'translate-x-6'
-								: 'translate-x-1'
-						)}
-					/>
-				</button>
-			</div>
-
-			{settings.voiceNavigation.enabled && (
-				<div className='space-y-6'>
-					{/* Wake Word */}
-					<div className='space-y-2'>
-						<label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
-							Wake Word
-						</label>
-						<input
-							type='text'
-							value={
-								settings.voiceNavigation
-									.wakeWord
-							}
-							onChange={(e) =>
-								updateVoiceSettings({
-									wakeWord:
-										e.target.value,
-								})
-							}
-							className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
-							placeholder='e.g., hey assistant'
-						/>
-					</div>
-
-					{/* Sensitivity */}
-					<div className='space-y-2'>
-						<label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
-							Sensitivity:{' '}
-							{Math.round(
-								settings.voiceNavigation
-									.sensitivity * 100
-							)}
-							%
-						</label>
-						<input
-							type='range'
-							min='0'
-							max='1'
-							step='0.1'
-							value={
-								settings.voiceNavigation
-									.sensitivity
-							}
-							onChange={(e) =>
-								updateVoiceSettings({
-									sensitivity: parseFloat(
-										e.target.value
-									),
-								})
-							}
-							className='w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer'
-						/>
-					</div>
-
-					{/* Confirm Actions */}
-					<div className='flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg'>
-						<div>
-							<h4 className='text-sm font-medium text-gray-900 dark:text-gray-100'>
-								Confirm Actions
-							</h4>
-							<p className='text-sm text-gray-600 dark:text-gray-400'>
-								Require confirmation for
-								destructive actions
-							</p>
-						</div>
-						<button
-							onClick={() =>
-								updateVoiceSettings({
-									confirmActions:
-										!settings
-											.voiceNavigation
-											.confirmActions,
-								})
-							}
-							className={cn(
-								'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
-								settings.voiceNavigation
-									.confirmActions
-									? 'bg-blue-600'
-									: 'bg-gray-300 dark:bg-gray-600'
-							)}
-						>
-							<span
-								className={cn(
-									'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
-									settings.voiceNavigation
-										.confirmActions
-										? 'translate-x-6'
-										: 'translate-x-1'
-								)}
-							/>
-						</button>
-					</div>
-
-					{/* Voice Commands */}
-					<div className='space-y-4'>
-						<h4 className='text-lg font-medium text-gray-900 dark:text-gray-100'>
-							Voice Commands
-						</h4>
-						<div className='space-y-2 max-h-64 overflow-y-auto'>
-							{settings.voiceNavigation.commands.map(
-								(command) => (
-									<div
-										key={command.id}
-										className='flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg'
-									>
-										<div>
-											<div className='text-sm font-medium text-gray-900 dark:text-gray-100'>
-												"
-												{
-													command.phrase
-												}
-												"
-											</div>
-											<div className='text-xs text-gray-600 dark:text-gray-400'>
-												{
-													command.description
-												}
-											</div>
-										</div>
-										<button
-											onClick={() => {
-												const updatedCommands =
-													settings.voiceNavigation.commands.map(
-														(
-															cmd
-														) =>
-															cmd.id ===
-															command.id
-																? {
-																		...cmd,
-																		enabled:
-																			!cmd.enabled,
-																  }
-																: cmd
-													);
-												updateVoiceSettings(
-													{
-														commands:
-															updatedCommands,
-													}
-												);
-											}}
-											className={cn(
-												'relative inline-flex h-5 w-9 items-center rounded-full transition-colors',
-												command.enabled
-													? 'bg-blue-600'
-													: 'bg-gray-300 dark:bg-gray-600'
-											)}
-										>
-											<span
-												className={cn(
-													'inline-block h-3 w-3 transform rounded-full bg-white transition-transform',
-													command.enabled
-														? 'translate-x-5'
-														: 'translate-x-1'
-												)}
-											/>
-										</button>
-									</div>
-								)
-							)}
-						</div>
-					</div>
-				</div>
-			)}
 		</div>
 	);
 };

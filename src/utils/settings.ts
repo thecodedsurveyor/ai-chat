@@ -15,7 +15,7 @@ export const defaultVoiceCommands: VoiceNavigationCommand[] =
 			phrase: 'new chat',
 			action: 'CREATE_CHAT',
 			description: 'Create a new chat conversation',
-			enabled: true,
+			enabled: false,
 		},
 		{
 			id: 'open-settings',
