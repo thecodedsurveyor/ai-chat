@@ -1,7 +1,7 @@
 // API base URL for backend
 export const API_BASE_URL =
 	import.meta.env.VITE_API_BASE_URL ||
-	'http://localhost:3003/api';
+	'http://localhost:3001/api';
 
 // Chat model settings
 export const CHAT_MODELS = {

@@ -101,7 +101,7 @@ async function testResendEmail() {
 		);
 
 		const resetToken = 'test-token-123456789';
-		const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5176'}/reset-password?token=${resetToken}&email=${encodeURIComponent(testEmail)}`;
+		const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${resetToken}&email=${encodeURIComponent(testEmail)}`;
 
 		const { data: resetData, error: resetError } =
 			await resend.emails.send({

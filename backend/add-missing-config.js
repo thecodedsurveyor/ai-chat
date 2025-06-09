@@ -30,8 +30,8 @@ SESSION_SECRET=4d38b8e1bc1df9e95ad82c128283189220ee17e011507161070d06fe96bce25e5
 # =============================================================================
 # 🌐 APPLICATION URLS
 # =============================================================================
-APP_URL=http://localhost:5174
-RESET_PASSWORD_URL=http://localhost:5174/reset-password
+APP_URL=http://localhost:5173
+RESET_PASSWORD_URL=http://localhost:5173/reset-password
 `;
 
 // Append missing configuration

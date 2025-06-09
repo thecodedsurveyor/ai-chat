@@ -46,12 +46,12 @@ const config: EnvironmentConfig = {
 		process.env.JWT_REFRESH_EXPIRE || '7d',
 
 	// Server Configuration
-	PORT: parseInt(process.env.PORT || '3003', 10),
+	PORT: parseInt(process.env.PORT || '3001', 10),
 	NODE_ENV: process.env.NODE_ENV || 'development',
 
 	// CORS Configuration
 	FRONTEND_URL:
-		process.env.FRONTEND_URL || 'http://localhost:5174',
+		process.env.FRONTEND_URL || 'http://localhost:5173',
 
 	// Rate Limiting
 	RATE_LIMIT_WINDOW_MS: parseInt(

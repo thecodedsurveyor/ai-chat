@@ -308,9 +308,20 @@ export const useChatStore = create<ChatState>()(
 									  }\n\n${
 											error.message.includes(
 												'API key'
+											) ||
+											error.message.includes(
+												'auth credentials'
 											)
-												? '**Setup Required**: Please create a `.env` file in your project root with:\n```\nVITE_OPENROUTER_API_KEY=your_api_key_here\n```\n\nGet your API key from: https://openrouter.ai/keys'
-												: 'Please check your internet connection and try again.'
+												? '**🔧 Setup Required**: \n\n1. Create a `.env` file in your project root\n2. Add your OpenRouter API key:\n```\nVITE_OPENROUTER_API_KEY=your_actual_api_key_here\n```\n3. Get your API key from: https://openrouter.ai/keys\n4. Restart your development server\n\n📖 **Need help?** Check the `ENV_SETUP.md` file for detailed instructions.'
+												: error.message.includes(
+														'Rate limit'
+												  )
+												? '**⏰ Rate Limited**: Please wait a moment before sending another message.'
+												: error.message.includes(
+														'server error'
+												  )
+												? '**🛠️ Server Error**: OpenRouter is experiencing issues. Please try again in a few moments.'
+												: '**🌐 Connection Error**: Please check your internet connection and try again.'
 									  }`
 									: '❌ An unexpected error occurred. Please try again.',
 							timestamp:

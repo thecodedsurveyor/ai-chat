@@ -208,12 +208,22 @@ export async function callOpenRouter(
 		'https://openrouter.ai/api/v1/chat/completions';
 	const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
 
-	if (
-		!API_KEY ||
-		API_KEY === 'your_openrouter_api_key_here'
-	) {
+	// More comprehensive API key validation
+	if (!API_KEY) {
 		throw new Error(
-			'OpenRouter API key is not configured. Please set VITE_OPENROUTER_API_KEY in your .env file.'
+			'OpenRouter API key is missing. Please set VITE_OPENROUTER_API_KEY in your .env file. Make sure to restart your development server after adding the API key.'
+		);
+	}
+
+	if (API_KEY === 'your_openrouter_api_key_here') {
+		throw new Error(
+			'OpenRouter API key is not configured. Please replace "your_openrouter_api_key_here" with your actual OpenRouter API key in your .env file. Get your API key from: https://openrouter.ai/keys'
+		);
+	}
+
+	if (API_KEY.length < 10) {
+		throw new Error(
+			'OpenRouter API key appears to be invalid (too short). Please check your API key in the .env file. Get your API key from: https://openrouter.ai/keys'
 		);
 	}
 
@@ -265,6 +275,21 @@ export async function callOpenRouter(
 				}
 			}
 
+			// Add more specific error guidance based on status codes
+			if (response.status === 401) {
+				errorMessage +=
+					'\n\n🔑 Authentication failed. Please check:\n1. Your OpenRouter API key is correct\n2. The API key is properly set in your .env file\n3. You have restarted your development server\n4. Get a new API key from: https://openrouter.ai/keys';
+			} else if (response.status === 403) {
+				errorMessage +=
+					'\n\n🚫 Access forbidden. Your API key may not have permission to use this model.';
+			} else if (response.status === 429) {
+				errorMessage +=
+					'\n\n⏰ Rate limit exceeded. Please wait a moment before trying again.';
+			} else if (response.status >= 500) {
+				errorMessage +=
+					'\n\n🛠️ OpenRouter server error. Please try again in a few moments.';
+			}
+
 			throw new Error(errorMessage);
 		}
 
@@ -282,6 +307,7 @@ export async function callOpenRouter(
 
 		const content =
 			data.choices[0].message.content.trim();
+
 		return content;
 	} catch (error) {
 		if (error instanceof Error) {

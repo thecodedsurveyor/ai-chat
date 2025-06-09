@@ -29,21 +29,13 @@ const ONLINE_ONLY_PATTERNS = [
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
-	console.log('🔧 Service Worker: Installing...');
-
 	event.waitUntil(
 		caches
 			.open(STATIC_CACHE_NAME)
 			.then((cache) => {
-				console.log(
-					'📦 Service Worker: Caching static assets'
-				);
 				return cache.addAll(STATIC_ASSETS);
 			})
 			.then(() => {
-				console.log(
-					'✅ Service Worker: Installation complete'
-				);
 				return self.skipWaiting();
 			})
 	);
@@ -51,8 +43,6 @@ self.addEventListener('install', (event) => {
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-	console.log('🚀 Service Worker: Activating...');
-
 	event.waitUntil(
 		caches
 			.keys()
@@ -63,19 +53,12 @@ self.addEventListener('activate', (event) => {
 							cacheName !== CACHE_NAME &&
 							cacheName !== STATIC_CACHE_NAME
 						) {
-							console.log(
-								'🗑️ Service Worker: Deleting old cache:',
-								cacheName
-							);
 							return caches.delete(cacheName);
 						}
 					})
 				);
 			})
 			.then(() => {
-				console.log(
-					'✅ Service Worker: Activation complete'
-				);
 				return self.clients.claim();
 			})
 	);
@@ -105,11 +88,6 @@ self.addEventListener('fetch', (event) => {
 
 // Background sync for offline data
 self.addEventListener('sync', (event) => {
-	console.log(
-		'🔄 Service Worker: Background sync triggered:',
-		event.tag
-	);
-
 	if (event.tag === 'offline-data-sync') {
 		event.waitUntil(syncOfflineData());
 	}
@@ -175,7 +153,6 @@ async function handleStaticAsset(request) {
 
 		return networkResponse;
 	} catch (error) {
-		console.log('❌ Static asset fetch failed:', error);
 		return new Response(
 			'Offline - Asset not available',
 			{ status: 503 }
@@ -195,11 +172,6 @@ async function handleAPIRequest(request) {
 
 		return networkResponse;
 	} catch (error) {
-		console.log(
-			'🔄 API request failed, trying cache:',
-			request.url
-		);
-
 		const cache = await caches.open(CACHE_NAME);
 		const cachedResponse = await cache.match(request);
 
@@ -301,8 +273,6 @@ async function handleDefaultRequest(request) {
 // Sync offline data when connection is restored
 async function syncOfflineData() {
 	try {
-		console.log('🔄 Syncing offline data...');
-
 		// Send message to main app to trigger sync
 		const clients = await self.clients.matchAll();
 		clients.forEach((client) => {
@@ -310,14 +280,5 @@ async function syncOfflineData() {
 				type: 'SYNC_OFFLINE_DATA',
 			});
 		});
-
-		console.log('✅ Offline data sync initiated');
-	} catch (error) {
-		console.error(
-			'❌ Offline data sync failed:',
-			error
-		);
-	}
+	} catch (error) {}
 }
-
-console.log('Service Worker: Loaded and ready');
