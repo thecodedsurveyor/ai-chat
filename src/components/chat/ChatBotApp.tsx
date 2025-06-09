@@ -4,22 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { useAutoScroll } from '../../hooks/useAutoScroll';
 import ToastContainer from '../ui/ToastContainer';
 
-// Phase 1: UI Store import
-import { useUIStore } from '../../stores/uiStore';
 // Phase 3: Chat Store import
-import {
-	useChatStore,
-	useMessages,
-	useActiveChat,
-} from '../../stores/chatStore';
+import { useMessages } from '../../stores/chatStore';
 import PWAPrompt from '../ui/PWAPrompt';
-import {
-	VoiceNavigationManager,
-	VOICE_ACTIONS,
-} from '../../utils/voiceNavigation';
-
-// Settings imports
-import { settingsManager } from '../../utils/settings';
 
 // Authentication imports
 import { authService } from '../../services/authService';
@@ -36,15 +23,6 @@ const ChatBotApp = () => {
 
 	// Phase 3: Chat state from store
 	const messages = useMessages();
-	const activeChat = useActiveChat();
-	const { createNewChat, updateChat } = useChatStore();
-
-	// Phase 1: UI state from Zustand store
-	const {
-		toggleChatList,
-		toggleSettings,
-		toggleAdvancedSearch,
-	} = useUIStore();
 
 	const { scrollRef, containerRef } = useAutoScroll([
 		messages,
@@ -61,70 +39,6 @@ const ChatBotApp = () => {
 			return;
 		}
 	}, [navigate]);
-
-	// Initialize settings managers
-	useEffect(() => {
-		const appSettings = settingsManager.getSettings();
-
-		// Initialize voice navigation
-		if (
-			appSettings.voiceNavigation.enabled &&
-			VoiceNavigationManager.isSupported()
-		) {
-			const vm = VoiceNavigationManager.getInstance(
-				appSettings.voiceNavigation
-			);
-
-			// Subscribe to voice commands
-			const unsubscribe = vm.subscribe(
-				(_command, action) => {
-					switch (action) {
-						case VOICE_ACTIONS.CREATE_CHAT:
-							createNewChat();
-							break;
-						case VOICE_ACTIONS.OPEN_SETTINGS:
-							toggleSettings();
-							break;
-						case VOICE_ACTIONS.OPEN_SEARCH:
-							toggleAdvancedSearch();
-							break;
-						case VOICE_ACTIONS.OPEN_ANALYTICS:
-							navigate('/analytics');
-							break;
-						case VOICE_ACTIONS.TOGGLE_SIDEBAR:
-							toggleChatList();
-							break;
-						case VOICE_ACTIONS.CLEAR_CHAT:
-							if (activeChat) {
-								// Clear current chat messages
-								updateChat(activeChat, {
-									messages: [],
-								});
-							}
-							break;
-						case VOICE_ACTIONS.GO_HOME:
-							navigate('/');
-							break;
-					}
-				}
-			);
-
-			vm.start();
-
-			return () => {
-				unsubscribe();
-				vm.stop();
-			};
-		}
-	}, [
-		createNewChat,
-		toggleSettings,
-		toggleAdvancedSearch,
-		toggleChatList,
-		activeChat,
-		updateChat,
-		navigate,
-	]);
 
 	const handleGoBack = () => {
 		navigate('/');

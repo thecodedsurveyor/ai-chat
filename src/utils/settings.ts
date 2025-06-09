@@ -1,65 +1,10 @@
 import type {
 	AppSettings,
-	VoiceNavigationCommand,
 	ThemeMode,
 	FontFamily,
 	FontSize,
 	LayoutMode,
 } from '../types';
-
-// Default Voice Navigation Commands
-export const defaultVoiceCommands: VoiceNavigationCommand[] =
-	[
-		{
-			id: 'new-chat',
-			phrase: 'new chat',
-			action: 'CREATE_CHAT',
-			description: 'Create a new chat conversation',
-			enabled: false,
-		},
-		{
-			id: 'open-settings',
-			phrase: 'open settings',
-			action: 'OPEN_SETTINGS',
-			description: 'Open the settings page',
-			enabled: true,
-		},
-		{
-			id: 'search-chats',
-			phrase: 'search chats',
-			action: 'OPEN_SEARCH',
-			description: 'Open chat search',
-			enabled: true,
-		},
-		{
-			id: 'show-analytics',
-			phrase: 'show analytics',
-			action: 'OPEN_ANALYTICS',
-			description: 'Open analytics dashboard',
-			enabled: true,
-		},
-		{
-			id: 'toggle-sidebar',
-			phrase: 'toggle sidebar',
-			action: 'TOGGLE_SIDEBAR',
-			description: 'Show or hide the chat list',
-			enabled: true,
-		},
-		{
-			id: 'clear-chat',
-			phrase: 'clear chat',
-			action: 'CLEAR_CHAT',
-			description: 'Clear current conversation',
-			enabled: true,
-		},
-		{
-			id: 'go-home',
-			phrase: 'go home',
-			action: 'GO_HOME',
-			description: 'Navigate to home page',
-			enabled: true,
-		},
-	];
 
 // Default Settings
 export const defaultSettings: AppSettings = {
@@ -87,14 +32,7 @@ export const defaultSettings: AppSettings = {
 		focusIndicators: false,
 		largeClickTargets: false,
 	},
-	voiceNavigation: {
-		enabled: false,
-		language: 'en-US',
-		sensitivity: 0.7,
-		commands: defaultVoiceCommands,
-		wakeWord: 'hey assistant',
-		confirmActions: true,
-	},
+
 	voiceSynthesis: {
 		rate: 1,
 		pitch: 1,

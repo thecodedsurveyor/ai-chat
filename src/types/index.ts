@@ -113,13 +113,6 @@ export type VoiceSettings = {
 	noiseSuppressionEnabled: boolean;
 };
 
-export type VoiceCommand = {
-	pattern: string | RegExp;
-	action: string;
-	description: string;
-	category: 'navigation' | 'chat' | 'search' | 'control';
-};
-
 export type AudioRecording = {
 	id: string;
 	blob: Blob;
@@ -425,23 +418,6 @@ export type AccessibilitySettings = {
 	largeClickTargets: boolean;
 };
 
-export type VoiceNavigationSettings = {
-	enabled: boolean;
-	language: string;
-	sensitivity: number; // 0-1
-	commands: VoiceNavigationCommand[];
-	wakeWord: string;
-	confirmActions: boolean;
-};
-
-export type VoiceNavigationCommand = {
-	id: string;
-	phrase: string;
-	action: string;
-	description: string;
-	enabled: boolean;
-};
-
 export type AppSettings = {
 	theme: {
 		mode: ThemeMode;
@@ -460,7 +436,6 @@ export type AppSettings = {
 		borderRadius: number;
 	};
 	accessibility: AccessibilitySettings;
-	voiceNavigation: VoiceNavigationSettings;
 	voiceSynthesis: VoiceSettings;
 	animations: {
 		enabled: boolean;
