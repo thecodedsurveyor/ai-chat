@@ -8,9 +8,11 @@ import {
 	Users,
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 const Terms = () => {
 	const { isDark } = useTheme();
+	usePageTitle('Terms of Service – NeuronFlow');
 	const lastUpdated = 'January 15, 2024';
 
 	const sections = [
@@ -18,7 +20,7 @@ const Terms = () => {
 			icon: <FileText className='w-6 h-6' />,
 			title: 'Acceptance of Terms',
 			content: [
-				'By accessing and using our AI Chat service, you accept and agree to be bound by the terms and provision of this agreement.',
+				'By accessing and using our NeuronFlow service, you accept and agree to be bound by the terms and provision of this agreement.',
 				'If you do not agree to abide by the above, please do not use this service.',
 				'We reserve the right to change these terms at any time by posting changes online.',
 			],
@@ -27,7 +29,7 @@ const Terms = () => {
 			icon: <Users className='w-6 h-6' />,
 			title: 'Use License',
 			content: [
-				'Permission is granted to temporarily use our AI Chat service for personal, non-commercial transitory viewing only.',
+				'Permission is granted to temporarily use our NeuronFlow service for personal, non-commercial transitory viewing only.',
 				'This is the grant of a license, not a transfer of title, and under this license you may not:',
 				'• Modify or copy the materials',
 				'• Use the materials for any commercial purpose or for any public display',
@@ -49,7 +51,7 @@ const Terms = () => {
 			icon: <AlertCircle className='w-6 h-6' />,
 			title: 'Disclaimer',
 			content: [
-				'The materials on AI Chat are provided on an "as is" basis. AI Chat makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including without limitation, implied warranties or conditions of merchantability.',
+				'The materials on NeuronFlow are provided on an "as is" basis. NeuronFlow makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including without limitation, implied warranties or conditions of merchantability.',
 			],
 		},
 		{
@@ -148,7 +150,7 @@ const Terms = () => {
 						>
 							Please read these terms of
 							service carefully before using
-							our AI chatbot platform.
+							our NeuronFlow platform.
 						</p>
 
 						{/* Last Updated */}
@@ -200,7 +202,7 @@ const Terms = () => {
 											: 'text-gray-600'
 									}`}
 								>
-									By using our AI Chat
+									By using our NeuronFlow
 									service, you acknowledge
 									that you have read,
 									understood, and agree to
@@ -319,7 +321,7 @@ const Terms = () => {
 											: 'text-gray-600'
 									}`}
 								>
-									AI Chat reserves the
+									NeuronFlow reserves the
 									right to modify or
 									discontinue the service
 									at any time without
@@ -378,11 +380,12 @@ const Terms = () => {
 											: 'text-gray-600'
 									}`}
 								>
-									In no event shall AI
-									Chat be liable for any
-									indirect, incidental,
-									special, consequential,
-									or punitive damages,
+									In no event shall
+									NeuronFlow be liable for
+									any indirect,
+									incidental, special,
+									consequential, or
+									punitive damages,
 									including without
 									limitation, loss of
 									profits, data, use,

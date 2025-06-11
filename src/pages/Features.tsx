@@ -503,9 +503,10 @@ const Features = () => {
 							}`}
 						>
 							Discover the powerful features
-							that make our AI chatbot the
-							most advanced and user-friendly
-							conversational AI platform.
+							that make our NeuronFlow
+							platform the most advanced and
+							user-friendly conversational AI
+							platform.
 						</p>
 					</motion.div>
 				</div>
@@ -676,7 +677,7 @@ const Features = () => {
 						>
 							Start your intelligent
 							conversation journey today with
-							our feature-rich AI chatbot
+							our feature-rich NeuronFlow
 							platform.
 						</p>
 						<div className='flex flex-col sm:flex-row gap-4 justify-center'>

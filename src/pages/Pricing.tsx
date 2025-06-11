@@ -560,8 +560,8 @@ const Pricing = () => {
 							}`}
 						>
 							Join thousands of users already
-							using AI Chat to enhance their
-							productivity
+							using NeuronFlow to enhance
+							their productivity
 						</p>
 						<div className='flex flex-col sm:flex-row gap-4 justify-center'>
 							<motion.button

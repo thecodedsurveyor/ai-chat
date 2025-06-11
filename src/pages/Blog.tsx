@@ -66,11 +66,11 @@ const Blog = () => {
 		},
 		{
 			id: 2,
-			title: 'Building Your First AI Chatbot: A Complete Guide',
+			title: 'Building Your First NeuronFlow App: A Complete Guide',
 			excerpt:
-				'Step-by-step tutorial on creating intelligent chatbots using our API. Perfect for developers getting started with AI.',
+				'Step-by-step tutorial on creating intelligent conversational AI using our platform. Perfect for developers getting started with AI.',
 			content:
-				"Creating an AI chatbot has never been easier. In this comprehensive guide, we'll walk you through...",
+				"Creating an AI-powered conversation app has never been easier. In this comprehensive guide, we'll walk you through...",
 			author: 'Mike Rodriguez',
 			authorRole: 'Senior Developer',
 			publishDate: '2024-01-12',
@@ -144,7 +144,7 @@ const Blog = () => {
 			id: 6,
 			title: 'Case Study: How TechCorp Increased Productivity by 40%',
 			excerpt:
-				'Discover how TechCorp leveraged our AI chat platform to streamline operations and boost team productivity.',
+				'Discover how TechCorp leveraged our NeuronFlow platform to streamline operations and boost team productivity.',
 			content:
 				'TechCorp, a leading software development company, was facing challenges with internal communication...',
 			author: 'Alex Thompson',
@@ -212,7 +212,7 @@ const Blog = () => {
 									: 'text-chat-light-text'
 							}`}
 						>
-							AI Chat{' '}
+							NeuronFlow{' '}
 							<span className='bg-gradient-to-r from-chat-pink to-chat-purple bg-clip-text text-transparent'>
 								Blog
 							</span>

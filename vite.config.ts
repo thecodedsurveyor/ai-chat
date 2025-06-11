@@ -14,10 +14,10 @@ export default defineConfig({
 				'apple-touch-icon.png',
 			],
 			manifest: {
-				name: 'AI Chatbot',
-				short_name: 'AIChatbot',
+				name: 'NeuronFlow',
+				short_name: 'NeuronFlow',
 				description:
-					'AI-powered chatbot with voice, offline mode, and more',
+					'AI-powered conversational platform with voice, offline mode, and more',
 				theme_color: '#5E35B1',
 				icons: [
 					{

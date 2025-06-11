@@ -32,7 +32,7 @@ export const authenticateToken = (
 		const decoded = JWTUtils.verifyAccessToken(token);
 		req.user = decoded;
 		next();
-	} catch (error) {
+	} catch {
 		res.status(HttpStatusCode.FORBIDDEN).json({
 			success: false,
 			message: 'Invalid or expired token',
@@ -60,7 +60,7 @@ export const optionalAuth = (
 			req.user = decoded;
 		}
 		next();
-	} catch (error) {
+	} catch {
 		// Continue without authentication if token is invalid
 		next();
 	}

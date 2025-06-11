@@ -9,6 +9,7 @@ import {
 	Calendar,
 	Mail,
 } from 'lucide-react';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 const Privacy = () => {
 	const { isDark } = useTheme();
@@ -20,7 +21,7 @@ const Privacy = () => {
 			title: 'Information We Collect',
 			content: [
 				'Personal Information: When you use our service, we may collect personal information such as your name, email address, and usage preferences.',
-				'Usage Data: We automatically collect information about how you use our AI Chat service, including conversation topics, frequency of use, and feature preferences.',
+				'Usage Data: We automatically collect information about how you use our NeuronFlow service, including conversation topics, frequency of use, and feature preferences.',
 				'Technical Data: We collect technical information including IP address, browser type, device information, and operating system for service optimization.',
 				'Cookies: We use cookies and similar technologies to enhance your experience and remember your preferences.',
 			],
@@ -29,7 +30,7 @@ const Privacy = () => {
 			icon: <Database className='w-6 h-6' />,
 			title: 'How We Use Your Information',
 			content: [
-				'Service Provision: To provide, maintain, and improve our AI Chat service and respond to your inquiries.',
+				'Service Provision: To provide, maintain, and improve our NeuronFlow service and respond to your inquiries.',
 				'Personalization: To personalize your experience and provide content and features that match your interests.',
 				'Communication: To send you important updates about our service, security alerts, and support messages.',
 				'Analytics: To understand how our service is used and to improve functionality and user experience.',
@@ -71,7 +72,7 @@ const Privacy = () => {
 		{
 			title: 'Third-Party Services',
 			content: [
-				'AI Providers: We use third-party AI services to power our chatbot. These providers have their own privacy policies.',
+				'AI Providers: We use third-party AI services to power our conversational platform. These providers have their own privacy policies.',
 				'Analytics: We may use third-party analytics services to understand usage patterns and improve our service.',
 				'Security Services: We work with security providers to protect against fraud and abuse.',
 				'Data Processing Agreements: All third-party providers are bound by data processing agreements that protect your privacy.',
@@ -114,6 +115,8 @@ const Privacy = () => {
 			],
 		},
 	];
+
+	usePageTitle('Privacy Policy – NeuronFlow');
 
 	return (
 		<div

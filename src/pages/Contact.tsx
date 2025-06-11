@@ -76,8 +76,8 @@ const Contact = () => {
 
 	const faqs = [
 		{
-			question: 'How does the AI chatbot work?',
-			answer: 'Our AI chatbot uses advanced natural language processing to understand and respond to your queries in real-time.',
+			question: 'How does NeuronFlow work?',
+			answer: 'Our NeuronFlow platform uses advanced natural language processing to understand and respond to your queries in real-time.',
 		},
 		{
 			question: 'Is my data secure?',
@@ -128,10 +128,11 @@ const Contact = () => {
 									: 'text-chat-light-muted'
 							}`}
 						>
-							Have questions about our AI
-							chatbot? We'd love to hear from
-							you. Send us a message and we'll
-							respond as soon as possible.
+							Have questions about our
+							NeuronFlow platform? We'd love
+							to hear from you. Send us a
+							message and we'll respond as
+							soon as possible.
 						</p>
 					</motion.div>
 				</div>

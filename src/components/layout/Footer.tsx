@@ -98,9 +98,9 @@ const Footer = () => {
 						>
 							Experience the future of
 							conversation with our advanced
-							AI chatbot. Intelligent, fast,
-							and designed for the modern
-							world.
+							NeuronFlow platform.
+							Intelligent, fast, and designed
+							for the modern world.
 						</p>
 
 						{/* Contact Info */}
@@ -295,7 +295,7 @@ const Footer = () => {
 							}`}
 						>
 							Get the latest news and updates
-							about our AI chatbot features.
+							about our NeuronFlow features.
 						</p>
 						<form className='flex flex-col sm:flex-row gap-4'>
 							<input

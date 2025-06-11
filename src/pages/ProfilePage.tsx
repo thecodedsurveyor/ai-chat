@@ -48,7 +48,7 @@ const ProfilePage: React.FC = () => {
 	const user = authService.getUser();
 
 	// Set page title
-	usePageTitle('Your Profile – AI Chat');
+	usePageTitle('Your Profile – NeuronFlow');
 
 	const [isEditing, setIsEditing] = useState(false);
 	const [formData, setFormData] = useState({

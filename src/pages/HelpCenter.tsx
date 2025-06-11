@@ -50,7 +50,8 @@ const HelpCenter = () => {
 		{
 			id: 1,
 			category: 'getting-started',
-			question: 'How do I get started with AI Chat?',
+			question:
+				'How do I get started with NeuronFlow?',
 			answer: 'Getting started is easy! Simply sign up for a free account, verify your email, and you can start chatting with AI immediately. No setup required.',
 			tags: ['signup', 'account', 'beginner'],
 		},

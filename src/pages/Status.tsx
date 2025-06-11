@@ -30,7 +30,7 @@ const Status = () => {
 
 	const services = [
 		{
-			name: 'AI Chat API',
+			name: 'NeuronFlow API',
 			status: 'operational',
 			uptime: '99.98%',
 			responseTime: '145ms',
@@ -92,7 +92,7 @@ const Status = () => {
 			severity: 'minor',
 			startTime: '2024-01-15T14:30:00Z',
 			description:
-				'We are investigating reports of increased response times for the AI Chat API.',
+				'We are investigating reports of increased response times for the NeuronFlow API.',
 			updates: [
 				{
 					time: '2024-01-15T14:45:00Z',

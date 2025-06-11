@@ -124,7 +124,7 @@ const PWAPrompt: React.FC = () => {
 							</div>
 							<div className='flex-1 min-w-0'>
 								<h3 className='font-semibold text-sm mb-1'>
-									Install AI Chat App
+									Install NeuronFlow App
 								</h3>
 								<p className='text-xs opacity-75 mb-3'>
 									Install this app for

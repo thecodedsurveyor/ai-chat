@@ -316,7 +316,7 @@ const LandingPage = () => {
 						}}
 					>
 						<span className='block'>
-							AI Chat
+							NeuronFlow
 						</span>
 						Revolution
 					</motion.h1>
@@ -355,7 +355,7 @@ const LandingPage = () => {
 						>
 							<div className='absolute inset-0 bg-gradient-to-r from-chat-purple to-chat-pink opacity-0 group-hover:opacity-100 transition-opacity duration-300' />
 							<span className='relative'>
-								Try AI Chat Now
+								Try NeuronFlow Now
 							</span>
 							<ArrowRight className='w-5 h-5 group-hover:translate-x-1 transition-transform relative' />
 						</motion.button>

@@ -64,7 +64,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 								: 'text-chat-light-text'
 						)}
 					>
-						AI Chat
+						NeuronFlow
 					</h1>
 				</button>
 			</div>

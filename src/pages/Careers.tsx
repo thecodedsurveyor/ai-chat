@@ -39,7 +39,7 @@ const Careers = () => {
 			type: 'Full-time',
 			experience: '3+ years',
 			description:
-				'Design intuitive user experiences for our AI chat platform.',
+				'Design intuitive user experiences for our NeuronFlow platform.',
 			requirements: [
 				'UI/UX design',
 				'Figma/Sketch',

@@ -14,7 +14,7 @@ const SettingsPage: React.FC = () => {
 	const navigate = useNavigate();
 
 	// Set page title
-	usePageTitle('Settings & Preferences – AI Chat');
+	usePageTitle('Settings & Preferences – NeuronFlow');
 
 	const [settings, setSettings] = useState<AppSettings>(
 		settingsManager.getSettings()

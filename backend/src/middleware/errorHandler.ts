@@ -1,93 +1,40 @@
 import { Request, Response, NextFunction } from 'express';
-import {
-	AppError,
-	ApiResponse,
-	HttpStatusCode,
-} from '../types';
-import config from '../config/environment';
+import { ApiResponse, HttpStatusCode } from '../types';
 
 /**
  * Global error handling middleware
  */
 export const errorHandler = (
-	err: Error | AppError,
+	err: Error,
 	req: Request,
-	res: Response<ApiResponse>,
-	next: NextFunction
+	res: Response,
+	_next: NextFunction
 ): void => {
-	let error = { ...err } as AppError;
-	error.message = err.message;
+	console.error('Error:', err);
 
-	// Log error for debugging
-	console.error('Error:', {
-		message: err.message,
-		stack: err.stack,
-		url: req.url,
-		method: req.method,
-		timestamp: new Date().toISOString(),
-	});
+	// Default error response
+	let status = 500;
+	let message = 'Internal Server Error';
 
-	// Mongoose bad ObjectId
-	if (err.name === 'CastError') {
-		const message = 'Invalid resource ID';
-		error = new AppError(
-			message,
-			HttpStatusCode.BAD_REQUEST
-		);
-	}
-
-	// Mongoose duplicate key
-	if (
-		err.name === 'MongoError' &&
-		(err as any).code === 11000
-	) {
-		const message = 'Duplicate field value entered';
-		error = new AppError(
-			message,
-			HttpStatusCode.CONFLICT
-		);
-	}
-
-	// Mongoose validation error
+	// Handle specific error types
 	if (err.name === 'ValidationError') {
-		const message = 'Validation failed';
-		error = new AppError(
-			message,
-			HttpStatusCode.BAD_REQUEST
-		);
+		status = 400;
+		message = err.message;
+	} else if (err.name === 'UnauthorizedError') {
+		status = 401;
+		message = 'Unauthorized';
+	} else if (err.name === 'CastError') {
+		status = 400;
+		message = 'Invalid ID format';
 	}
 
-	// JWT errors
-	if (err.name === 'JsonWebTokenError') {
-		const message = 'Invalid token';
-		error = new AppError(
-			message,
-			HttpStatusCode.UNAUTHORIZED
-		);
-	}
-
-	if (err.name === 'TokenExpiredError') {
-		const message = 'Token expired';
-		error = new AppError(
-			message,
-			HttpStatusCode.UNAUTHORIZED
-		);
-	}
-
-	// Default to 500 server error
-	const statusCode =
-		error.statusCode ||
-		HttpStatusCode.INTERNAL_SERVER_ERROR;
-	const message =
-		error.message || 'Internal server error';
-
-	res.status(statusCode).json({
+	// Send error response
+	res.status(status).json({
 		success: false,
 		message,
-		error:
-			config.NODE_ENV === 'development'
-				? err.stack
-				: undefined,
+		...(process.env.NODE_ENV === 'development' && {
+			stack: err.stack,
+		}),
 	});
 };
 
@@ -108,7 +55,13 @@ export const notFound = (
 /**
  * Async error wrapper to catch async errors
  */
-export const asyncHandler = (fn: Function) => {
+export const asyncHandler = (
+	fn: (
+		req: Request,
+		res: Response,
+		next: NextFunction
+	) => Promise<void>
+) => {
 	return (
 		req: Request,
 		res: Response,

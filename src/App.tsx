@@ -167,7 +167,7 @@ const App = () => {
 										</PageWrapper>
 									}
 								/>
-								{/* Dedicated AI Chat route */}
+								{/* Dedicated NeuronFlow Chat route */}
 								<Route
 									path='/chat'
 									element={

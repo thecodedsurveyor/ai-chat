@@ -1,8 +1,8 @@
-# AI Chatbot - Project Summary
+# NeuronFlow - Project Summary
 
-## 🌟 Project Overview
+## 🧠 Advanced AI Conversational Platform
 
-The AI Chatbot is an advanced conversational AI platform built with React, TypeScript, and PWA technologies. It features multiple AI personalities, offline functionality, and a beautiful mobile-first interface.
+The NeuronFlow is an advanced conversational AI platform built with React, TypeScript, and PWA technologies. It features multiple AI personalities, offline functionality, and a beautiful mobile-first interface.
 
 ## 🚀 Key Features
 

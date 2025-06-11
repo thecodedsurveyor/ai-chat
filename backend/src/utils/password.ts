@@ -13,7 +13,7 @@ export class PasswordUtils {
 				config.BCRYPT_SALT_ROUNDS
 			);
 			return await bcrypt.hash(password, salt);
-		} catch (error) {
+		} catch {
 			throw new Error('Failed to hash password');
 		}
 	}
@@ -27,7 +27,7 @@ export class PasswordUtils {
 	): Promise<boolean> {
 		try {
 			return await bcrypt.compare(password, hash);
-		} catch (error) {
+		} catch {
 			throw new Error('Failed to compare password');
 		}
 	}
@@ -66,7 +66,7 @@ export class PasswordUtils {
 		}
 
 		if (
-			!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(
+			!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(
 				password
 			)
 		) {

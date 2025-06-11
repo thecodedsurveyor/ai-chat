@@ -9,9 +9,11 @@ import {
 	Globe,
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 const About = () => {
 	const { isDark } = useTheme();
+	usePageTitle('About Us – NeuronFlow');
 
 	const values = [
 		{
@@ -72,7 +74,7 @@ const About = () => {
 						>
 							About{' '}
 							<span className='bg-gradient-to-r from-chat-pink to-chat-purple bg-clip-text text-transparent'>
-								AI Chat
+								NeuronFlow
 							</span>
 						</h1>
 						<p
@@ -82,12 +84,15 @@ const About = () => {
 									: 'text-chat-light-accent'
 							}`}
 						>
-							We're on a mission to
-							revolutionize how humans
-							interact with AI, making
-							intelligent conversations
-							accessible, intuitive, and
-							meaningful for everyone.
+							At NeuronFlow, we believe that
+							artificial intelligence should
+							enhance human communication, not
+							replace it. Our mission is to
+							create AI-powered tools that
+							understand context, emotion, and
+							intent, making every
+							conversation more productive and
+							meaningful.
 						</p>
 					</motion.div>
 				</div>
@@ -121,8 +126,8 @@ const About = () => {
 										: 'text-chat-light-muted'
 								}`}
 							>
-								At AI Chat, we believe that
-								artificial intelligence
+								At NeuronFlow, we believe
+								that artificial intelligence
 								should enhance human
 								communication, not replace
 								it. Our mission is to create

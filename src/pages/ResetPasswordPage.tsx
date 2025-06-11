@@ -157,8 +157,7 @@ const ResetPasswordPage: React.FC = () => {
 			} else {
 				showError('Reset Failed', result.message);
 			}
-		} catch (error) {
-			console.error('Reset password error:', error);
+		} catch {
 			showError(
 				'Error',
 				'An unexpected error occurred'
@@ -197,7 +196,7 @@ const ResetPasswordPage: React.FC = () => {
 			} else {
 				showError('Resend Failed', result.message);
 			}
-		} catch (error) {
+		} catch {
 			showError(
 				'Error',
 				'An unexpected error occurred'

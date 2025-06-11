@@ -29,7 +29,7 @@ export class ExportManager {
 		switch (options.format) {
 			case 'json':
 				content = this.exportToJSON(exportData);
-				filename = `chatbot-export-${this.getDateString()}.json`;
+				filename = `neuronflow-export-${this.getDateString()}.json`;
 				mimeType = 'application/json';
 				break;
 			case 'txt':
@@ -37,7 +37,7 @@ export class ExportManager {
 					exportData,
 					options
 				);
-				filename = `chatbot-export-${this.getDateString()}.txt`;
+				filename = `neuronflow-export-${this.getDateString()}.txt`;
 				mimeType = 'text/plain';
 				break;
 			case 'csv':
@@ -45,7 +45,7 @@ export class ExportManager {
 					exportData,
 					options
 				);
-				filename = `chatbot-export-${this.getDateString()}.csv`;
+				filename = `neuronflow-export-${this.getDateString()}.csv`;
 				mimeType = 'text/csv';
 				break;
 			case 'markdown':
@@ -53,7 +53,7 @@ export class ExportManager {
 					exportData,
 					options
 				);
-				filename = `chatbot-export-${this.getDateString()}.md`;
+				filename = `neuronflow-export-${this.getDateString()}.md`;
 				mimeType = 'text/markdown';
 				break;
 			default:
@@ -144,7 +144,7 @@ export class ExportManager {
 		exportData: ExportData,
 		options: ExportOptions
 	): string {
-		let content = `AI Chat Export - ${new Date().toLocaleDateString()}\n`;
+		let content = `NeuronFlow Export - ${new Date().toLocaleDateString()}\n`;
 		content += `Total Chats: ${exportData.totalChats}\n`;
 		content += `Total Messages: ${exportData.totalMessages}\n`;
 		content += '='.repeat(50) + '\n\n';
@@ -251,7 +251,7 @@ export class ExportManager {
 		exportData: ExportData,
 		options: ExportOptions
 	): string {
-		let content = `# AI Chat Export\n\n`;
+		let content = `# NeuronFlow Export\n\n`;
 		content += `**Export Date:** ${new Date().toLocaleDateString()}\n`;
 		content += `**Total Chats:** ${exportData.totalChats}\n`;
 		content += `**Total Messages:** ${exportData.totalMessages}\n\n`;

@@ -78,7 +78,7 @@ const SmartAutoComplete: React.FC<
 			// Close suggestions if input is too long
 			onClose();
 		}
-	}, [inputValue, isVisible, onClose]); // Remove setSuggestions from dependencies
+	}, [inputValue, isVisible, onClose, setSuggestions]);
 
 	// Ensure cleanup when component unmounts or becomes invisible
 	useEffect(() => {

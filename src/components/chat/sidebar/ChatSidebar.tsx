@@ -115,7 +115,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
 								: 'text-chat-light-accent'
 						}`}
 					>
-						AI Chat
+						NeuronFlow
 					</h2>
 				</div>
 
