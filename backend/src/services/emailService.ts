@@ -61,9 +61,9 @@ class EmailService {
 		// 2) Read the "from" address and friendly name from .env
 		this.fromEmail =
 			process.env.EMAIL_FROM_ADDRESS ||
-			'noreply@aichat.app';
+			'noreply@neuronflow.app';
 		this.fromName =
-			process.env.EMAIL_FROM_NAME || 'AI Chat';
+			process.env.EMAIL_FROM_NAME || 'NeuronFlow';
 
 		this.isInitialized = true;
 	}
@@ -76,11 +76,11 @@ class EmailService {
 		firstName: string,
 		lastName: string
 	): Promise<boolean> {
-		const subject = 'Welcome to AI Chat! 🚀';
+		const subject = 'Welcome to NeuronFlow! 🚀';
 		const htmlContent = welcomeEmailTemplate({
 			firstName,
 			lastName,
-			appName: 'AI Chat',
+			appName: 'NeuronFlow',
 			loginUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/auth`,
 		});
 
@@ -95,7 +95,7 @@ class EmailService {
 		firstName: string,
 		resetToken: string
 	): Promise<boolean> {
-		const subject = 'Reset Your Password - AI Chat';
+		const subject = 'Reset Your Password - NeuronFlow';
 		const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${resetToken}&email=${encodeURIComponent(
 			email
 		)}`;
@@ -103,7 +103,7 @@ class EmailService {
 		const htmlContent = passwordResetEmailTemplate({
 			firstName,
 			resetUrl,
-			appName: 'AI Chat',
+			appName: 'NeuronFlow',
 			expiryHours: 1,
 		});
 
@@ -118,13 +118,13 @@ class EmailService {
 		firstName: string
 	): Promise<boolean> {
 		const subject =
-			'Password Changed Successfully - AI Chat';
+			'Password Changed Successfully - NeuronFlow';
 		const htmlContent = passwordChangedEmailTemplate({
 			firstName,
-			appName: 'AI Chat',
+			appName: 'NeuronFlow',
 			supportEmail:
 				process.env.SUPPORT_EMAIL ||
-				'support@aichat.app',
+				'support@neuronflow.app',
 			loginUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/auth`,
 		});
 

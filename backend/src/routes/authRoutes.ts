@@ -3,6 +3,7 @@ import {
 	register,
 	login,
 	logout,
+	refreshToken,
 	getProfile,
 	updateProfile,
 	changePassword,
@@ -41,6 +42,9 @@ router.post(
 	resetPassword
 );
 
+// Token refresh route
+router.post('/refresh-token', refreshToken);
+
 // Protected routes
 router.post('/logout', authenticateToken, logout);
 
@@ -59,6 +63,10 @@ router.put(
 	changePassword
 );
 
-router.delete('/delete-account', authenticateToken, deleteAccount);
+router.delete(
+	'/delete-account',
+	authenticateToken,
+	deleteAccount
+);
 
 export default router;

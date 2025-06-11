@@ -65,7 +65,7 @@ const config: EnvironmentConfig = {
 
 	// Security
 	BCRYPT_SALT_ROUNDS: parseInt(
-		process.env.BCRYPT_SALT_ROUNDS || '12',
+		process.env.BCRYPT_SALT_ROUNDS || '10',
 		10
 	),
 };

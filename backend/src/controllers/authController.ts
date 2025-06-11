@@ -22,9 +22,10 @@ export const register = async (
 		const { email, password, firstName, lastName } =
 			req.body;
 
-		// Check if user already exists
+		// Check if user already exists - select only email for faster query
 		const existingUser = await prisma.user.findUnique({
 			where: { email },
+			select: { email: true },
 		});
 
 		if (existingUser) {
@@ -48,46 +49,50 @@ export const register = async (
 				firstName,
 				lastName,
 			},
+			select: {
+				id: true,
+				email: true,
+				firstName: true,
+				lastName: true,
+				createdAt: true,
+				updatedAt: true,
+			},
 		});
 
-		// Generate JWT token
-		const token = JWTUtils.generateAccessToken({
+		// Generate JWT tokens
+		const accessToken = JWTUtils.generateAccessToken({
 			userId: user.id,
 			email: user.email,
 		});
 
-		// Create session
-		await prisma.session.create({
-			data: {
-				userId: user.id,
-				token,
-				expiresAt: new Date(
-					Date.now() + 7 * 24 * 60 * 60 * 1000
-				), // 7 days
-			},
+		const refreshToken = JWTUtils.generateRefreshToken({
+			userId: user.id,
+			email: user.email,
 		});
 
-		// Send welcome email (async, don't wait for it)
-		emailService
-			.sendWelcomeEmail(email, firstName, lastName)
-			.catch((error) =>
-				console.error(
-					'Welcome email failed:',
-					error
+		// Send welcome email asynchronously (fire and forget)
+		setImmediate(() => {
+			emailService
+				.sendWelcomeEmail(
+					email,
+					firstName,
+					lastName
 				)
-			);
-
-		// Remove password from response
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const { password: _, ...userWithoutPassword } =
-			user;
+				.catch((error) =>
+					console.error(
+						'Welcome email failed:',
+						error
+					)
+				);
+		});
 
 		res.status(201).json({
 			success: true,
 			message: 'User registered successfully',
 			data: {
-				user: userWithoutPassword,
-				token,
+				user,
+				accessToken,
+				refreshToken,
 			},
 		});
 	} catch (error) {
@@ -106,9 +111,18 @@ export const login = async (
 	try {
 		const { email, password } = req.body;
 
-		// Find user by email
+		// Find user by email with selective fields for faster query
 		const user = await prisma.user.findUnique({
 			where: { email },
+			select: {
+				id: true,
+				email: true,
+				password: true,
+				firstName: true,
+				lastName: true,
+				createdAt: true,
+				updatedAt: true,
+			},
 		});
 
 		if (!user) {
@@ -133,21 +147,15 @@ export const login = async (
 			return;
 		}
 
-		// Generate JWT token
-		const token = JWTUtils.generateAccessToken({
+		// Generate JWT tokens
+		const accessToken = JWTUtils.generateAccessToken({
 			userId: user.id,
 			email: user.email,
 		});
 
-		// Create session
-		await prisma.session.create({
-			data: {
-				userId: user.id,
-				token,
-				expiresAt: new Date(
-					Date.now() + 7 * 24 * 60 * 60 * 1000
-				), // 7 days
-			},
+		const refreshToken = JWTUtils.generateRefreshToken({
+			userId: user.id,
+			email: user.email,
 		});
 
 		// Remove password from response
@@ -160,7 +168,8 @@ export const login = async (
 			message: 'Login successful',
 			data: {
 				user: userWithoutPassword,
-				token,
+				accessToken,
+				refreshToken,
 			},
 		});
 	} catch (error) {
@@ -177,17 +186,9 @@ export const logout = async (
 	res: Response
 ): Promise<void> => {
 	try {
-		const token = req.headers.authorization?.replace(
-			'Bearer ',
-			''
-		);
-
-		if (token) {
-			// Delete session
-			await prisma.session.deleteMany({
-				where: { token },
-			});
-		}
+		// With stateless JWT, logout is handled client-side
+		// We just return success immediately
+		// Client should remove tokens from storage
 
 		res.json({
 			success: true,
@@ -198,6 +199,57 @@ export const logout = async (
 		res.status(500).json({
 			success: false,
 			message: 'Internal server error',
+		});
+	}
+};
+
+export const refreshToken = async (
+	req: Request,
+	res: Response
+): Promise<void> => {
+	try {
+		const { refreshToken } = req.body;
+
+		if (!refreshToken) {
+			res.status(401).json({
+				success: false,
+				message: 'Refresh token is required',
+			});
+			return;
+		}
+
+		// Verify refresh token
+		const decoded =
+			JWTUtils.verifyRefreshToken(refreshToken);
+
+		// Generate new access token
+		const newAccessToken = JWTUtils.generateAccessToken(
+			{
+				userId: decoded.userId,
+				email: decoded.email,
+			}
+		);
+
+		// Optionally generate new refresh token for rotation
+		const newRefreshToken =
+			JWTUtils.generateRefreshToken({
+				userId: decoded.userId,
+				email: decoded.email,
+			});
+
+		res.json({
+			success: true,
+			message: 'Token refreshed successfully',
+			data: {
+				accessToken: newAccessToken,
+				refreshToken: newRefreshToken,
+			},
+		});
+	} catch (error) {
+		console.error('Token refresh error:', error);
+		res.status(401).json({
+			success: false,
+			message: 'Invalid refresh token',
 		});
 	}
 };
