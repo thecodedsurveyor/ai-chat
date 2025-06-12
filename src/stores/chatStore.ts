@@ -5,6 +5,7 @@ import type {
 	Chat,
 	SearchFilters,
 	SearchResult,
+	AIPersona,
 } from '../types';
 import {
 	callOpenRouter,
@@ -12,6 +13,7 @@ import {
 	type OpenRouterConfig,
 	buildConversationHistory,
 } from '../utils/openRouter';
+import { generatePersonaGreeting } from '../utils/aiPersonas';
 
 interface ChatState {
 	// Chat data state
@@ -21,6 +23,7 @@ interface ChatState {
 	isTyping: boolean;
 	searchResults: SearchResult[];
 	isSearching: boolean;
+	activePersona: AIPersona | null;
 
 	// Add model configuration
 	modelConfig: OpenRouterConfig;
@@ -34,6 +37,7 @@ interface ChatState {
 	setChats: (chats: Chat[]) => void;
 	addChat: (chat: Chat) => void;
 	setActiveChat: (chatId: string | null) => void;
+	setActivePersona: (persona: AIPersona | null) => void;
 	deleteChat: (chatId: string) => void;
 	updateChat: (
 		chatId: string,
@@ -66,6 +70,7 @@ export const useChatStore = create<ChatState>()(
 				isTyping: false,
 				searchResults: [],
 				isSearching: false,
+				activePersona: null,
 				modelConfig: DEFAULT_CONFIG,
 
 				// Model configuration action
@@ -105,6 +110,90 @@ export const useChatStore = create<ChatState>()(
 						});
 					} else {
 						set({ messages: [] });
+					}
+				},
+				setActivePersona: (persona) => {
+					const state = get();
+					set({ activePersona: persona });
+
+					if (persona && state.activeChat) {
+						// Create persona greeting as AI response
+						const greetingMessage: Message = {
+							id: Date.now().toString(),
+							type: 'response',
+							text: generatePersonaGreeting(
+								persona
+							),
+							timestamp:
+								new Date().toLocaleTimeString(
+									[],
+									{
+										hour: '2-digit',
+										minute: '2-digit',
+									}
+								),
+							status: 'delivered',
+						};
+
+						// Add greeting message
+						const updatedMessages = [
+							...state.messages,
+							greetingMessage,
+						];
+						set({ messages: updatedMessages });
+
+						// Update chat with new message
+						get().updateChat(state.activeChat, {
+							messages: updatedMessages,
+							persona: persona,
+						});
+					} else if (
+						persona &&
+						!state.activeChat
+					) {
+						// Create new chat if none exists
+						get().createNewChat();
+
+						// Add greeting after chat creation
+						setTimeout(() => {
+							const greetingMessage: Message =
+								{
+									id: Date.now().toString(),
+									type: 'response',
+									text: generatePersonaGreeting(
+										persona
+									),
+									timestamp:
+										new Date().toLocaleTimeString(
+											[],
+											{
+												hour: '2-digit',
+												minute: '2-digit',
+											}
+										),
+									status: 'delivered',
+								};
+
+							const currentState = get();
+							const updatedMessages = [
+								...currentState.messages,
+								greetingMessage,
+							];
+							set({
+								messages: updatedMessages,
+							});
+
+							if (currentState.activeChat) {
+								get().updateChat(
+									currentState.activeChat,
+									{
+										messages:
+											updatedMessages,
+										persona: persona,
+									}
+								);
+							}
+						}, 100);
 					}
 				},
 				deleteChat: (chatId) =>
@@ -229,11 +318,12 @@ export const useChatStore = create<ChatState>()(
 									state.activeChat
 							);
 
-						// Build conversation history with proper context management
+						// Build conversation history with persona support
 						const conversationHistory =
 							buildConversationHistory(
 								currentChat,
-								text
+								text,
+								state.activePersona
 							);
 
 						// Call OpenRouter API with current model config and conversation history
@@ -479,13 +569,15 @@ export const useChatStore = create<ChatState>()(
 	)
 );
 
-// Performance selectors
+// Selector hooks for easier usage
 export const useMessages = () =>
 	useChatStore((state) => state.messages);
 export const useChats = () =>
 	useChatStore((state) => state.chats);
 export const useActiveChat = () =>
 	useChatStore((state) => state.activeChat);
+export const useActivePersona = () =>
+	useChatStore((state) => state.activePersona);
 export const useIsTyping = () =>
 	useChatStore((state) => state.isTyping);
 export const useSearchResults = () =>

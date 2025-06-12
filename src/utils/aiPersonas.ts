@@ -228,4 +228,167 @@ export class PersonaManager {
 
 		return false;
 	}
+
+	static clearPasswordCache(): void {
+		passwordCache.clear();
+	}
+}
+
+// Random human names for persona greetings
+const PERSONA_NAMES = {
+	male: [
+		'Alex',
+		'Ben',
+		'Chris',
+		'David',
+		'Eric',
+		'Frank',
+		'George',
+		'Henry',
+		'Ian',
+		'Jack',
+		'Kevin',
+		'Lucas',
+		'Mark',
+		'Nathan',
+		'Oliver',
+		'Paul',
+		'Quinn',
+		'Ryan',
+		'Sam',
+		'Tom',
+		'Victor',
+		'Will',
+		'Xavier',
+		'Zach',
+	],
+	female: [
+		'Alice',
+		'Beth',
+		'Claire',
+		'Diana',
+		'Emma',
+		'Fiona',
+		'Grace',
+		'Hannah',
+		'Iris',
+		'Julia',
+		'Kate',
+		'Lily',
+		'Maya',
+		'Nina',
+		'Olivia',
+		'Penny',
+		'Quinn',
+		'Ruby',
+		'Sophie',
+		'Tara',
+		'Uma',
+		'Vera',
+		'Wendy',
+		'Zoe',
+	],
+	neutral: [
+		'Avery',
+		'Blake',
+		'Casey',
+		'Drew',
+		'Emery',
+		'Finley',
+		'Gray',
+		'Hayden',
+		'Jordan',
+		'Kendall',
+		'Logan',
+		'Morgan',
+		'Parker',
+		'Reese',
+		'Sage',
+		'Taylor',
+		'Val',
+		'Wren',
+		'Xen',
+		'Yael',
+	],
+};
+
+export function generatePersonaGreeting(
+	persona: AIPersona
+): string {
+	// Get all names from all categories
+	const allNames = [
+		...PERSONA_NAMES.male,
+		...PERSONA_NAMES.female,
+		...PERSONA_NAMES.neutral,
+	];
+
+	// Pick a random name
+	const randomName =
+		allNames[
+			Math.floor(Math.random() * allNames.length)
+		];
+
+	// Generate appropriate greeting based on persona
+	const greetingTemplates: Record<string, string[]> = {
+		teacher: [
+			`Hi! I'm ${randomName}, and I'll be your teacher today. I'm here to help you learn and understand new concepts. What would you like to explore?`,
+			`Hello there! My name is ${randomName}, and I'm excited to be your learning guide today. What subject can I help you with?`,
+			`Welcome! I'm ${randomName}, your dedicated teacher. I believe learning should be fun and engaging. What would you like to discover today?`,
+		],
+		'coding-assistant': [
+			`Hey! I'm ${randomName}, your coding companion. Ready to write some awesome code together? What programming challenge can I help you tackle?`,
+			`Hi there! ${randomName} here, and I'm here to help you code like a pro. What project are we working on today?`,
+			`Hello! I'm ${randomName}, and I love helping developers solve problems. What coding challenge shall we tackle together?`,
+		],
+		'creative-writer': [
+			`Greetings, fellow creator! I'm ${randomName}, and I'm here to spark your imagination. What story shall we bring to life today?`,
+			`Hello! I'm ${randomName}, your creative writing partner. Ready to craft something amazing? What's on your mind?`,
+			`Hi there! ${randomName} here, and I believe everyone has stories worth telling. What shall we create together?`,
+		],
+		'business-analyst': [
+			`Good day! I'm ${randomName}, your business strategy consultant. What business challenge can I help you analyze today?`,
+			`Hello! ${randomName} here, ready to dive into the world of business insights. What opportunity shall we explore?`,
+			`Hi! I'm ${randomName}, and I specialize in turning data into actionable business intelligence. How can I assist you?`,
+		],
+		'research-assistant': [
+			`Hello! I'm ${randomName}, your dedicated research partner. What topic shall we investigate together today?`,
+			`Hi there! ${randomName} here, and I love diving deep into research. What questions are we trying to answer?`,
+			`Greetings! I'm ${randomName}, and thorough research is my specialty. What subject needs our attention?`,
+		],
+		'life-coach': [
+			`Hello! I'm ${randomName}, and I'm here to support your personal growth journey. What goals are we working towards today?`,
+			`Hi there! ${randomName} here, your motivational partner. What positive changes shall we explore together?`,
+			`Welcome! I'm ${randomName}, and I believe everyone has unlimited potential. What dreams shall we turn into reality?`,
+		],
+		comedian: [
+			`Hey there! I'm ${randomName}, and I'm here to add some laughs to your day! What's got you down? Let's turn that frown upside down! 😄`,
+			`Hello! ${randomName} here, professional joke-teller and mood-lifter. Ready for some fun? What can I make you smile about today?`,
+			`Hi! I'm ${randomName}, and life's too short to be serious all the time. What shall we laugh about today? 🎭`,
+		],
+		therapist: [
+			`Hello, I'm ${randomName}, your wellness guide. I'm here to provide a safe, supportive space for you. How are you feeling today?`,
+			`Hi there, I'm ${randomName}. I'm here to listen and support your mental wellness journey. What's on your mind?`,
+			`Welcome! I'm ${randomName}, and I believe in the power of self-care and emotional wellbeing. How can I support you today?`,
+		],
+		chef: [
+			`Bonjour! I'm Chef ${randomName}, and I'm excited to embark on a culinary adventure with you! What delicious creation shall we make today?`,
+			`Hello! I'm ${randomName}, your culinary companion. Ready to create something delicious? What's cooking in your mind?`,
+			`Hey there! Chef ${randomName} at your service! Whether you're a beginner or a seasoned cook, let's make something amazing together!`,
+		],
+		default: [
+			`Hello! I'm ${randomName}, your AI assistant. I'm here to help with whatever you need. How can I assist you today?`,
+			`Hi there! I'm ${randomName}, and I'm excited to help you with any questions or tasks you have. What can I do for you?`,
+			`Welcome! I'm ${randomName}, your helpful AI companion. I'm here to make your day easier. What shall we work on together?`,
+		],
+	};
+
+	const templates =
+		greetingTemplates[persona.id] ||
+		greetingTemplates.default;
+	const randomTemplate =
+		templates[
+			Math.floor(Math.random() * templates.length)
+		];
+
+	return randomTemplate;
 }

@@ -1,4 +1,4 @@
-import type { Chat, Message } from '../types';
+import type { Chat, Message, AIPersona } from '../types';
 
 // Available OpenRouter models - All FREE
 export const OPENROUTER_MODELS = {
@@ -70,7 +70,8 @@ function convertToApiMessage(message: Message): {
  */
 export function buildConversationHistory(
 	currentChat: Chat | undefined,
-	newMessage: string
+	newMessage: string,
+	persona?: AIPersona | null
 ): Array<{
 	role: 'user' | 'assistant' | 'system';
 	content: string;
@@ -80,10 +81,14 @@ export function buildConversationHistory(
 		content: string;
 	}> = [];
 
-	// Add system message for context awareness
+	// Add system message - use persona if available, otherwise default
+	const systemContent =
+		persona?.systemPrompt ||
+		`You are a helpful AI assistant. You have memory of our previous conversation in this chat. Use this context to provide relevant, personalized responses. If the user refers to something from earlier in our conversation, acknowledge and build upon that context.`;
+
 	const systemMessage = {
 		role: 'system' as const,
-		content: `You are a helpful AI assistant. You have memory of our previous conversation in this chat. Use this context to provide relevant, personalized responses. If the user refers to something from earlier in our conversation, acknowledge and build upon that context.`,
+		content: systemContent,
 	};
 	messages.push(systemMessage);
 

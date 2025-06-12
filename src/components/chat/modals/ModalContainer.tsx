@@ -43,8 +43,12 @@ const ModalContainer: React.FC = () => {
 	} = useUIStore();
 
 	// Get chat data from store
-	const { searchChats, setActiveChat, updateChat } =
-		useChatStore();
+	const {
+		searchChats,
+		setActiveChat,
+		updateChat,
+		setActivePersona,
+	} = useChatStore();
 	const chats = useChats();
 	const searchResults = useSearchResults();
 	const isSearching = useIsSearching();
@@ -114,10 +118,11 @@ const ModalContainer: React.FC = () => {
 
 	const handlePersonaSelect = useCallback(
 		(persona: AIPersona) => {
+			setActivePersona(persona);
 			setSelectedPersona(persona);
 			closePersonaSelector();
 		},
-		[closePersonaSelector]
+		[setActivePersona, closePersonaSelector]
 	);
 
 	const handleSettingsChange = useCallback(
