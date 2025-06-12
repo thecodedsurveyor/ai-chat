@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -18,6 +18,7 @@ import {
 	Check,
 	AlertTriangle,
 	Trash2,
+	Camera,
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useToast } from '../contexts/ToastContext';
@@ -45,10 +46,29 @@ const ProfilePage: React.FC = () => {
 	const { isDark } = useTheme();
 	const { showSuccess, showError } = useToast();
 	const navigate = useNavigate();
-	const user = authService.getUser();
+	const [user, setUser] = useState(authService.getUser());
 
 	// Set page title
 	usePageTitle('Your Profile – NeuronFlow');
+
+	// Fetch fresh user data on mount and when user changes
+	React.useEffect(() => {
+		const fetchUserData = async () => {
+			if (authService.isAuthenticated()) {
+				try {
+					const freshUser =
+						await authService.getUserFresh();
+					if (freshUser) {
+						setUser(freshUser);
+					}
+				} catch {
+					// Silent error - will use cached user data
+				}
+			}
+		};
+
+		fetchUserData();
+	}, []);
 
 	const [isEditing, setIsEditing] = useState(false);
 	const [formData, setFormData] = useState({
@@ -91,6 +111,10 @@ const ProfilePage: React.FC = () => {
 	const [deleteConfirmText, setDeleteConfirmText] =
 		useState('');
 
+	// Profile picture upload state
+	const [isUploadingPicture, setIsUploadingPicture] =
+		useState(false);
+
 	// Redirect if not authenticated
 	React.useEffect(() => {
 		if (!user) {
@@ -118,15 +142,21 @@ const ProfilePage: React.FC = () => {
 				// For now, we'll only update firstName and lastName
 			});
 
-			if (result.success) {
+			if (result.success && result.data?.user) {
 				showSuccess(
 					'Profile Updated',
 					'Your profile has been successfully updated'
 				);
 				setIsEditing(false);
 
-				// Refresh the page data to show updated information
-				window.location.reload();
+				// Update the local user state with the updated user data
+				setUser(result.data.user);
+
+				// Force refresh of localStorage to ensure persistence
+				localStorage.setItem(
+					'user',
+					JSON.stringify(result.data.user)
+				);
 			} else {
 				showError(
 					'Update Failed',
@@ -134,8 +164,7 @@ const ProfilePage: React.FC = () => {
 						'Failed to update profile. Please try again.'
 				);
 			}
-		} catch (error) {
-			console.error('Profile update error:', error);
+		} catch {
 			showError(
 				'Update Failed',
 				'Failed to update profile. Please try again.'
@@ -160,6 +189,99 @@ const ProfilePage: React.FC = () => {
 			0
 		)}`.toUpperCase();
 	};
+
+	const handleProfilePictureUpload = useCallback(
+		async (
+			event: React.ChangeEvent<HTMLInputElement>
+		) => {
+			const file = event.target.files?.[0];
+			if (!file) return;
+
+			// Check if user is authenticated
+			if (!authService.isAuthenticated()) {
+				showError(
+					'Authentication Required',
+					'Please log in again to upload a profile picture'
+				);
+				navigate('/auth');
+				return;
+			}
+
+			// Validate file type
+			const allowedTypes = [
+				'image/jpeg',
+				'image/jpg',
+				'image/png',
+				'image/webp',
+			];
+			if (!allowedTypes.includes(file.type)) {
+				showError(
+					'Invalid File Type',
+					'Please select a JPEG, PNG, or WebP image'
+				);
+				return;
+			}
+
+			// Validate file size (5MB)
+			if (file.size > 5 * 1024 * 1024) {
+				showError(
+					'File Too Large',
+					'Please select an image smaller than 5MB'
+				);
+				return;
+			}
+
+			setIsUploadingPicture(true);
+
+			try {
+				const result =
+					await authService.uploadProfilePicture(
+						file
+					);
+
+				if (result.success && result.data?.user) {
+					showSuccess(
+						'Profile Picture Updated',
+						'Your profile picture has been updated successfully'
+					);
+					// Update the local user state with the updated user data
+					setUser(result.data.user);
+
+					// Force refresh of localStorage to ensure persistence
+					localStorage.setItem(
+						'user',
+						JSON.stringify(result.data.user)
+					);
+				} else {
+					// If it's an authentication error, redirect to login
+					if (
+						result.message?.includes('token') ||
+						result.message?.includes('auth')
+					) {
+						showError(
+							'Session Expired',
+							'Please log in again to continue'
+						);
+						navigate('/auth');
+					} else {
+						showError(
+							'Upload Failed',
+							result.message ||
+								'Failed to upload profile picture'
+						);
+					}
+				}
+			} catch {
+				showError(
+					'Upload Failed',
+					'Failed to upload profile picture. Please try again.'
+				);
+			} finally {
+				setIsUploadingPicture(false);
+			}
+		},
+		[navigate, showError, showSuccess]
+	);
 
 	const formatDate = (dateString: string) => {
 		return new Date(dateString).toLocaleDateString(
@@ -263,8 +385,7 @@ const ProfilePage: React.FC = () => {
 					result.message
 				);
 			}
-		} catch (error) {
-			console.error('Change password error:', error);
+		} catch {
 			showError(
 				'Error',
 				'An unexpected error occurred'
@@ -311,8 +432,7 @@ const ProfilePage: React.FC = () => {
 					result.message
 				);
 			}
-		} catch (error) {
-			console.error('Delete account error:', error);
+		} catch {
 			showError(
 				'Error',
 				'An unexpected error occurred'
@@ -374,17 +494,71 @@ const ProfilePage: React.FC = () => {
 					>
 						{/* Profile Header */}
 						<div className='text-center mb-8'>
-							<div
-								className={`w-24 h-24 mx-auto rounded-full flex items-center justify-center text-2xl font-bold mb-4 ${
-									isDark
-										? 'bg-gradient-to-r from-chat-pink to-chat-purple text-white'
-										: 'bg-gradient-to-r from-blue-500 to-purple-500 text-white'
-								}`}
-							>
-								{getInitials(
-									user.firstName,
-									user.lastName
+							<div className='relative inline-block mb-4'>
+								{user.avatar ? (
+									<img
+										src={user.avatar}
+										alt={`${user.firstName} ${user.lastName}`}
+										className='w-24 h-24 rounded-full object-cover border-4 border-white/20'
+										onError={() => {
+											// Fallback to initials if image fails to load
+											setUser(
+												(prev) =>
+													prev
+														? {
+																...prev,
+																avatar: '',
+														  }
+														: null
+											);
+										}}
+									/>
+								) : (
+									<div
+										className={`w-24 h-24 rounded-full flex items-center justify-center text-2xl font-bold ${
+											isDark
+												? 'bg-gradient-to-r from-chat-pink to-chat-purple text-white'
+												: 'bg-gradient-to-r from-blue-500 to-purple-500 text-white'
+										}`}
+									>
+										{getInitials(
+											user.firstName,
+											user.lastName
+										)}
+									</div>
 								)}
+
+								{/* Upload Button */}
+								<label
+									htmlFor='profile-picture-upload'
+									className={`absolute bottom-0 right-0 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-all ${
+										isDark
+											? 'bg-chat-accent hover:bg-chat-accent/80 text-white'
+											: 'bg-blue-500 hover:bg-blue-600 text-white'
+									} ${
+										isUploadingPicture
+											? 'opacity-50 cursor-not-allowed'
+											: ''
+									}`}
+								>
+									{isUploadingPicture ? (
+										<div className='w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin' />
+									) : (
+										<Camera className='w-4 h-4' />
+									)}
+								</label>
+								<input
+									id='profile-picture-upload'
+									type='file'
+									accept='image/*'
+									onChange={
+										handleProfilePictureUpload
+									}
+									className='hidden'
+									disabled={
+										isUploadingPicture
+									}
+								/>
 							</div>
 							<h1
 								className={`text-3xl font-bold mb-2 ${

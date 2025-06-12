@@ -1,10 +1,14 @@
 import React, { useState, useCallback } from 'react';
-import type { ConversationTemplate } from '../../../types';
+import type {
+	ConversationTemplate,
+	AIPersona,
+} from '../../../types';
 
 import AdvancedSearch from '../../search/AdvancedSearch';
 import ChatManager from './ChatManager';
 import ConversationTemplates from '../../forms/ConversationTemplates';
 import FavoritesViewer from './FavoritesViewer';
+import PersonaSelector from './PersonaSelector';
 
 import ChatShareDialog from './ChatShareDialog';
 import SettingsPage from '../../settings/SettingsPage';
@@ -32,6 +36,8 @@ const ModalContainer: React.FC = () => {
 		closeConversationTemplates,
 		showFavoritesViewer,
 		closeFavoritesViewer,
+		showPersonaSelector,
+		closePersonaSelector,
 
 		showChatShareDialog,
 		closeChatShareDialog,
@@ -44,8 +50,12 @@ const ModalContainer: React.FC = () => {
 	} = useUIStore();
 
 	// Get chat data from store
-	const { searchChats, setActiveChat, updateChat } =
-		useChatStore();
+	const {
+		searchChats,
+		setActiveChat,
+		updateChat,
+		setActivePersona,
+	} = useChatStore();
 	const chats = useChats();
 	const searchResults = useSearchResults();
 	const isSearching = useIsSearching();
@@ -147,6 +157,15 @@ const ModalContainer: React.FC = () => {
 		[updateInputValue, closeUnifiedTemplates]
 	);
 
+	// Persona selector handlers
+	const handlePersonaSelect = useCallback(
+		(persona: AIPersona) => {
+			setActivePersona(persona);
+			closePersonaSelector();
+		},
+		[setActivePersona, closePersonaSelector]
+	);
+
 	return (
 		<>
 			{/* Advanced Search Modal */}
@@ -229,6 +248,13 @@ const ModalContainer: React.FC = () => {
 				onSelectTemplate={
 					handleUnifiedTemplateSelect
 				}
+			/>
+
+			{/* Persona Selector Modal */}
+			<PersonaSelector
+				isVisible={showPersonaSelector}
+				onClose={closePersonaSelector}
+				onPersonaSelect={handlePersonaSelect}
 			/>
 		</>
 	);

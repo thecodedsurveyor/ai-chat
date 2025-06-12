@@ -685,3 +685,67 @@ export const resetPassword = async (
 		});
 	}
 };
+
+export const uploadProfilePicture = async (
+	req: AuthenticatedRequest,
+	res: Response
+): Promise<void> => {
+	try {
+		const userId = req.user?.userId;
+
+		if (!userId) {
+			res.status(401).json({
+				success: false,
+				message: 'User not authenticated',
+			});
+			return;
+		}
+
+		if (!req.file) {
+			res.status(400).json({
+				success: false,
+				message: 'No file uploaded',
+			});
+			return;
+		}
+
+		// Generate the avatar URL
+		const avatarUrl = `/uploads/profiles/${req.file.filename}`;
+
+		// Update user's avatar in database
+		const updatedUser = await prisma.user.update({
+			where: { id: userId },
+			data: {
+				avatar: avatarUrl,
+				updatedAt: new Date(),
+			},
+			select: {
+				id: true,
+				email: true,
+				firstName: true,
+				lastName: true,
+				isVerified: true,
+				avatar: true,
+				preferences: true,
+				createdAt: true,
+				updatedAt: true,
+			},
+		});
+
+		res.json({
+			success: true,
+			message:
+				'Profile picture uploaded successfully',
+			data: { user: updatedUser },
+		});
+	} catch (error) {
+		console.error(
+			'Upload profile picture error:',
+			error
+		);
+		res.status(500).json({
+			success: false,
+			message: 'Internal server error',
+		});
+	}
+};

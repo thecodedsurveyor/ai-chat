@@ -39,6 +39,7 @@ import ToastContainer from './components/ui/ToastContainer';
 import ScrollToTop from './components/ui/ScrollToTop';
 import BackToTop from './components/ui/BackToTop';
 import { useChats } from './stores/chatStore';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 const queryClient = new QueryClient();
 
@@ -171,9 +172,11 @@ const App = () => {
 								<Route
 									path='/chat'
 									element={
-										<ChatProvider>
-											<ChatBotApp />
-										</ChatProvider>
+										<ProtectedRoute>
+											<ChatProvider>
+												<ChatBotApp />
+											</ChatProvider>
+										</ProtectedRoute>
 									}
 								/>
 								{/* Analytics route */}

@@ -1,4 +1,13 @@
 import { API_BASE_URL } from '../config';
+import {
+	compressImage,
+	validateImageFile,
+} from '../utils/imageOptimization';
+import {
+	uploadWithProgress,
+	uploadWithRetry,
+} from '../utils/uploadProgress';
+import type { ProgressCallback } from '../utils/uploadProgress';
 
 export interface User {
 	id: string;
@@ -359,6 +368,67 @@ class AuthService {
 						Authorization: `Bearer ${this.token}`,
 					},
 					body: JSON.stringify(data),
+				}
+			);
+
+			const result: ProfileResponse =
+				await response.json();
+
+			// Update localStorage with new data
+			if (result.success && result.data) {
+				localStorage.setItem(
+					'user',
+					JSON.stringify(result.data.user)
+				);
+			}
+
+			return result;
+		} catch {
+			return {
+				success: false,
+				message: 'Network error. Please try again.',
+			};
+		}
+	}
+
+	/**
+	 * Upload profile picture with optimization
+	 */
+	async uploadProfilePicture(
+		file: File,
+		onProgress?: ProgressCallback
+	): Promise<ProfileResponse> {
+		try {
+			// Validate file first
+			const validation = validateImageFile(file);
+			if (!validation.valid) {
+				return {
+					success: false,
+					message:
+						validation.error || 'Invalid file',
+				};
+			}
+
+			// Compress image for faster upload
+			const optimizedFile = await compressImage(file);
+
+			const formData = new FormData();
+			formData.append(
+				'profilePicture',
+				optimizedFile
+			);
+
+			// Upload with progress tracking and retry logic
+			const response = await uploadWithRetry(
+				async () => {
+					return uploadWithProgress(
+						`${API_BASE_URL}/auth/upload-profile-picture`,
+						formData,
+						{
+							Authorization: `Bearer ${this.token}`,
+						},
+						onProgress
+					);
 				}
 			);
 

@@ -88,6 +88,44 @@ const UserProfile: React.FC = () => {
 		)}`.toUpperCase();
 	};
 
+	const renderAvatar = (size: 'small' | 'large') => {
+		const sizeClasses =
+			size === 'small'
+				? 'w-8 h-8 text-sm'
+				: 'w-12 h-12 text-lg';
+
+		if (user.avatar) {
+			return (
+				<img
+					src={user.avatar}
+					alt={`${user.firstName} ${user.lastName}`}
+					className={`${sizeClasses} rounded-full object-cover border-2 border-white/20`}
+					onError={(e) => {
+						console.error(
+							'Avatar failed to load:',
+							e
+						);
+						// Hide the image and let the fallback div show
+						e.currentTarget.style.display =
+							'none';
+					}}
+				/>
+			);
+		}
+
+		return (
+			<div
+				className={`${sizeClasses} rounded-full flex items-center justify-center font-semibold ${
+					isDark
+						? 'bg-gradient-to-r from-chat-pink to-chat-purple text-white'
+						: 'bg-gradient-to-r from-blue-500 to-purple-500 text-white'
+				}`}
+			>
+				{getInitials(user.firstName, user.lastName)}
+			</div>
+		);
+	};
+
 	return (
 		<div className='relative' ref={dropdownRef}>
 			{/* Profile Button */}
@@ -104,18 +142,7 @@ const UserProfile: React.FC = () => {
 				} shadow-lg hover:shadow-xl`}
 			>
 				{/* Avatar */}
-				<div
-					className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
-						isDark
-							? 'bg-gradient-to-r from-chat-pink to-chat-purple text-white'
-							: 'bg-gradient-to-r from-blue-500 to-purple-500 text-white'
-					}`}
-				>
-					{getInitials(
-						user.firstName,
-						user.lastName
-					)}
-				</div>
+				{renderAvatar('small')}
 
 				{/* User Info */}
 				<div className='flex flex-col items-start'>
@@ -176,18 +203,7 @@ const UserProfile: React.FC = () => {
 							}`}
 						>
 							<div className='flex items-center gap-3'>
-								<div
-									className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-semibold ${
-										isDark
-											? 'bg-gradient-to-r from-chat-pink to-chat-purple text-white'
-											: 'bg-gradient-to-r from-blue-500 to-purple-500 text-white'
-									}`}
-								>
-									{getInitials(
-										user.firstName,
-										user.lastName
-									)}
-								</div>
+								{renderAvatar('large')}
 								<div>
 									<div
 										className={`font-semibold ${

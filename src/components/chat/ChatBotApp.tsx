@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { useAutoScroll } from '../../hooks/useAutoScroll';
 import ToastContainer from '../ui/ToastContainer';
+import { useToast } from '../../contexts/ToastContext';
 
 // Phase 3: Chat Store import
 import { useMessages } from '../../stores/chatStore';
@@ -20,6 +21,7 @@ import ChatTitle from './ChatTitle';
 
 const ChatBotApp = () => {
 	const navigate = useNavigate();
+	const { showInfo } = useToast();
 
 	// Phase 3: Chat state from store
 	const messages = useMessages();
@@ -40,7 +42,17 @@ const ChatBotApp = () => {
 		}
 	}, [navigate]);
 
-	const handleGoBack = () => {
+	const handleGoBack = async () => {
+		// Show logout message
+		showInfo(
+			'Logged Out',
+			'You have been logged out. Please log in again to access the chat.'
+		);
+
+		// Logout user
+		await authService.logout();
+
+		// Navigate to home page
 		navigate('/');
 	};
 

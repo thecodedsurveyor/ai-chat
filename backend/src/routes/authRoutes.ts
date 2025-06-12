@@ -11,9 +11,11 @@ import {
 	resetPassword,
 	deleteAccount,
 } from '../controllers/authController';
+import { uploadProfilePicture } from '../controllers/uploadController';
 import { authenticateToken } from '../middleware/auth';
 import { validate } from '../middleware/validation';
 import { ValidationUtils } from '../utils/validation';
+import { uploadProfilePicture as uploadMiddleware } from '../middleware/upload';
 
 const router = Router();
 
@@ -55,6 +57,13 @@ router.put(
 	authenticateToken,
 	validate(ValidationUtils.updateUserSchema),
 	updateProfile
+);
+
+router.post(
+	'/upload-profile-picture',
+	authenticateToken,
+	uploadMiddleware,
+	uploadProfilePicture
 );
 
 router.put(

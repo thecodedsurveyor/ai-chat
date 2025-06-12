@@ -3,6 +3,7 @@ import { useTheme } from '../../../contexts/ThemeContext';
 import type { AIPersona } from '../../../types';
 import { PersonaManager } from '../../../utils/aiPersonas';
 import { cn } from '../../../utils/classNames';
+import { useActivePersona } from '../../../stores/chatStore';
 // React Icons imports
 import {
 	MdClose,
@@ -41,6 +42,11 @@ const PersonaSelector: React.FC<PersonaSelectorProps> = ({
 	const [selectedCategory, setSelectedCategory] =
 		useState<AIPersona['category'] | 'all'>('all');
 	const [searchQuery, setSearchQuery] = useState('');
+	const activePersona = useActivePersona();
+
+	// Use active persona if no selected persona is passed
+	const currentSelectedPersona =
+		selectedPersona || activePersona;
 
 	// Map persona icon strings to React components
 	const getPersonaIcon = (iconName: string) => {
@@ -252,7 +258,7 @@ const PersonaSelector: React.FC<PersonaSelectorProps> = ({
 								}
 								className={cn(
 									'p-3 sm:p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 hover:scale-105',
-									selectedPersona?.id ===
+									currentSelectedPersona?.id ===
 										persona.id
 										? isDark
 											? 'border-chat-accent bg-chat-accent/10'
@@ -330,7 +336,7 @@ const PersonaSelector: React.FC<PersonaSelectorProps> = ({
 									>
 										{persona.category}
 									</span>
-									{selectedPersona?.id ===
+									{currentSelectedPersona?.id ===
 										persona.id && (
 										<MdCheckCircle
 											className={cn(

@@ -1,55 +1,41 @@
-import React, { useEffect, useState } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { authService } from '../../services/authService';
+import { useToast } from '../../contexts/ToastContext';
 
 interface ProtectedRouteProps {
 	children: React.ReactNode;
-	redirectTo?: string;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 	children,
-	redirectTo = '/auth',
 }) => {
-	const [isAuthenticated, setIsAuthenticated] = useState<
-		boolean | null
-	>(null);
-	const location = useLocation();
+	const navigate = useNavigate();
+	const { showError } = useToast();
 
 	useEffect(() => {
-		const checkAuth = () => {
-			const authenticated =
-				authService.isAuthenticated();
-			const user = authService.getUser();
+		const isAuthenticated =
+			authService.isAuthenticated();
+		const user = authService.getUser();
 
-			// User is authenticated if they have both token and user data
-			setIsAuthenticated(authenticated && !!user);
-		};
+		if (!isAuthenticated || !user) {
+			// Show alert that user needs to login
+			showError(
+				'Authentication Required',
+				'You need to log in to access the chat. Please log in to continue.'
+			);
 
-		checkAuth();
-	}, []);
+			// Redirect to auth page
+			navigate('/auth');
+			return;
+		}
+	}, [navigate, showError]);
 
-	// Show loading state while checking authentication
-	if (isAuthenticated === null) {
-		return (
-			<div className='min-h-screen flex items-center justify-center'>
-				<div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
-			</div>
-		);
+	// Only render children if authenticated
+	if (!authService.isAuthenticated()) {
+		return null;
 	}
 
-	// Redirect to auth page if not authenticated
-	if (!isAuthenticated) {
-		return (
-			<Navigate
-				to={redirectTo}
-				state={{ from: location }}
-				replace
-			/>
-		);
-	}
-
-	// Render protected content
 	return <>{children}</>;
 };
 

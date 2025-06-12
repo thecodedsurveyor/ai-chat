@@ -26,6 +26,13 @@ interface EnvironmentConfig {
 
 	// Security
 	BCRYPT_SALT_ROUNDS: number;
+
+	// Cloudinary
+	cloudinary: {
+		cloudName: string;
+		apiKey: string;
+		apiSecret: string;
+	};
 }
 
 const config: EnvironmentConfig = {
@@ -68,6 +75,13 @@ const config: EnvironmentConfig = {
 		process.env.BCRYPT_SALT_ROUNDS || '10',
 		10
 	),
+
+	// Cloudinary Configuration
+	cloudinary: {
+		cloudName: process.env.CLOUDINARY_CLOUD_NAME || '',
+		apiKey: process.env.CLOUDINARY_API_KEY || '',
+		apiSecret: process.env.CLOUDINARY_API_SECRET || '',
+	},
 };
 
 // Validate required environment variables

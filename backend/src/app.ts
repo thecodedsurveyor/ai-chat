@@ -1,7 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import compression from 'compression';
 import rateLimit from 'express-rate-limit';
+import path from 'path';
 import config from './config/environment';
 import authRoutes from './routes/authRoutes';
 import conversationRoutes from './routes/conversationRoutes';
@@ -10,21 +12,63 @@ import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
 
-// Security middleware
-app.use(helmet());
+// Compression middleware (should be early in the stack)
+app.use(
+	compression({
+		filter: (req, res) => {
+			// Don't compress responses with this request header
+			if (req.headers['x-no-compression']) {
+				return false;
+			}
+			// Fallback to standard filter function
+			return compression.filter(req, res);
+		},
+		level: 6, // Good balance between compression and CPU usage
+		threshold: 1024, // Only compress responses larger than 1KB
+	})
+);
 
-// CORS configuration
+// Security middleware with optimized CSP
+app.use(
+	helmet({
+		contentSecurityPolicy: {
+			directives: {
+				defaultSrc: ["'self'"],
+				styleSrc: [
+					"'self'",
+					"'unsafe-inline'",
+					'https:',
+				],
+				scriptSrc: ["'self'"],
+				imgSrc: [
+					"'self'",
+					'data:',
+					'blob:',
+					'https://res.cloudinary.com',
+					'http://localhost:3001',
+				],
+				fontSrc: ["'self'", 'https:', 'data:'],
+				connectSrc: [
+					"'self'",
+					'http://localhost:3001',
+					'http://localhost:5173',
+					'http://localhost:5174',
+					'http://localhost:5175',
+				],
+			},
+		},
+	})
+);
+
+// CORS configuration with optimizations
 app.use(
 	cors({
 		origin: (origin, callback) => {
-			// Allow requests with no origin (like mobile apps or curl requests)
 			if (!origin) return callback(null, true);
 
-			// Parse the frontend URL from config
 			const configUrl = new URL(config.FRONTEND_URL);
 			const allowedOrigins = [
 				config.FRONTEND_URL,
-				// Add variations of localhost with different ports
 				'http://localhost:5173',
 				'http://localhost:5174',
 				'http://localhost:5175',
@@ -32,7 +76,6 @@ app.use(
 				'http://localhost:5177',
 				'http://localhost:5178',
 				'http://localhost:5179',
-				// Use the same host but with different protocol
 				`https://${configUrl.host}`,
 			];
 
@@ -54,27 +97,40 @@ app.use(
 			'OPTIONS',
 		],
 		allowedHeaders: ['Content-Type', 'Authorization'],
+		maxAge: 86400, // Cache preflight for 24 hours
 	})
 );
 
-// Rate limiting
+// Rate limiting with optimization
 const limiter = rateLimit({
 	windowMs: 15 * 60 * 1000, // 15 minutes
-	max: 100, // limit each IP to 100 requests per windowMs
+	max: 100,
 	message: {
 		success: false,
 		message:
 			'Too many requests from this IP, please try again later.',
 	},
+	standardHeaders: true,
+	legacyHeaders: false,
+	skip: (req) => {
+		// Skip rate limiting for health checks
+		return (
+			req.path === '/health' ||
+			req.path === '/api/health'
+		);
+	},
 });
 app.use(limiter);
 
-// Body parsing middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
+// Body parsing middleware with size limits
+app.use(express.json({ limit: '2mb' }));
+app.use(
+	express.urlencoded({ extended: true, limit: '2mb' })
+);
 
-// Health check endpoint
+// Health check endpoints with caching
 app.get('/health', (req, res) => {
+	res.set('Cache-Control', 'public, max-age=60'); // Cache for 1 minute
 	res.json({
 		success: true,
 		message: 'Server is running',
@@ -82,8 +138,8 @@ app.get('/health', (req, res) => {
 	});
 });
 
-// API health check endpoint
 app.get('/api/health', (req, res) => {
+	res.set('Cache-Control', 'public, max-age=60'); // Cache for 1 minute
 	res.json({
 		success: true,
 		message: 'API is running',
@@ -91,6 +147,8 @@ app.get('/api/health', (req, res) => {
 		database: 'connected',
 	});
 });
+
+// Note: Static file serving removed - now using Cloudinary for image storage
 
 // API routes
 app.use('/api/auth', authRoutes);
