@@ -1,14 +1,15 @@
 import React, { useState, useCallback } from 'react';
-import type { AIPersona } from '../../../types';
+import type { ConversationTemplate } from '../../../types';
 
 import AdvancedSearch from '../../search/AdvancedSearch';
 import ChatManager from './ChatManager';
 import ConversationTemplates from '../../forms/ConversationTemplates';
 import FavoritesViewer from './FavoritesViewer';
-import PersonaSelector from './PersonaSelector';
+
 import ChatShareDialog from './ChatShareDialog';
 import SettingsPage from '../../settings/SettingsPage';
 import QuickResponses from '../input/QuickResponses';
+import TemplatesModal from '../input/TemplatesModal';
 
 // Zustand store imports
 import { useUIStore } from '../../../stores/uiStore';
@@ -21,7 +22,6 @@ import {
 } from '../../../stores/chatStore';
 import { useInputStore } from '../../../stores/inputStore';
 import { settingsManager } from '../../../utils/settings';
-import { PersonaManager } from '../../../utils/aiPersonas';
 
 const ModalContainer: React.FC = () => {
 	// Get UI state from store
@@ -32,23 +32,20 @@ const ModalContainer: React.FC = () => {
 		closeConversationTemplates,
 		showFavoritesViewer,
 		closeFavoritesViewer,
-		showPersonaSelector,
-		closePersonaSelector,
+
 		showChatShareDialog,
 		closeChatShareDialog,
 		showSettings,
 		closeSettings,
 		showQuickResponses,
 		closeQuickResponses,
+		showUnifiedTemplates,
+		closeUnifiedTemplates,
 	} = useUIStore();
 
 	// Get chat data from store
-	const {
-		searchChats,
-		setActiveChat,
-		updateChat,
-		setActivePersona,
-	} = useChatStore();
+	const { searchChats, setActiveChat, updateChat } =
+		useChatStore();
 	const chats = useChats();
 	const searchResults = useSearchResults();
 	const isSearching = useIsSearching();
@@ -61,10 +58,6 @@ const ModalContainer: React.FC = () => {
 	const [managingChat, setManagingChat] = useState<
 		string | null
 	>(null);
-	const [selectedPersona, setSelectedPersona] =
-		useState<AIPersona>(() =>
-			PersonaManager.getDefaultPersona()
-		);
 
 	// Get app settings
 	const appSettings = settingsManager.getSettings();
@@ -116,15 +109,6 @@ const ModalContainer: React.FC = () => {
 		[setActiveChat]
 	);
 
-	const handlePersonaSelect = useCallback(
-		(persona: AIPersona) => {
-			setActivePersona(persona);
-			setSelectedPersona(persona);
-			closePersonaSelector();
-		},
-		[setActivePersona, closePersonaSelector]
-	);
-
 	const handleSettingsChange = useCallback(
 		(newSettings: Record<string, unknown>) => {
 			settingsManager.updateSettings(newSettings);
@@ -140,6 +124,27 @@ const ModalContainer: React.FC = () => {
 			closeQuickResponses();
 		},
 		[updateInputValue, closeQuickResponses]
+	);
+
+	// Unified Templates handlers
+	const handleUnifiedQuickResponseSelect = useCallback(
+		(prompt: string) => {
+			updateInputValue({
+				target: { value: prompt },
+			} as React.ChangeEvent<HTMLInputElement>);
+			closeUnifiedTemplates();
+		},
+		[updateInputValue, closeUnifiedTemplates]
+	);
+
+	const handleUnifiedTemplateSelect = useCallback(
+		(template: ConversationTemplate) => {
+			updateInputValue({
+				target: { value: template.prompt },
+			} as React.ChangeEvent<HTMLInputElement>);
+			closeUnifiedTemplates();
+		},
+		[updateInputValue, closeUnifiedTemplates]
 	);
 
 	return (
@@ -186,14 +191,6 @@ const ModalContainer: React.FC = () => {
 				onSelectChat={handleChatSelect}
 			/>
 
-			{/* Persona Selector */}
-			<PersonaSelector
-				selectedPersona={selectedPersona}
-				isVisible={showPersonaSelector}
-				onClose={closePersonaSelector}
-				onPersonaSelect={handlePersonaSelect}
-			/>
-
 			{/* Chat Share Dialog */}
 			{activeChat && (
 				<ChatShareDialog
@@ -220,6 +217,18 @@ const ModalContainer: React.FC = () => {
 				isVisible={showQuickResponses}
 				onClose={closeQuickResponses}
 				onSelectResponse={handleQuickResponseSelect}
+			/>
+
+			{/* Templates Modal */}
+			<TemplatesModal
+				isVisible={showUnifiedTemplates}
+				onClose={closeUnifiedTemplates}
+				onSelectQuickResponse={
+					handleUnifiedQuickResponseSelect
+				}
+				onSelectTemplate={
+					handleUnifiedTemplateSelect
+				}
 			/>
 		</>
 	);

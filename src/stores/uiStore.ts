@@ -13,6 +13,7 @@ interface UIState {
 	showPersonaSelector: boolean;
 	showChatShareDialog: boolean;
 	showAutoSuggestions: boolean;
+	showUnifiedTemplates: boolean;
 
 	// Actions
 	toggleChatList: () => void;
@@ -35,6 +36,8 @@ interface UIState {
 	closeChatShareDialog: () => void;
 	toggleAutoSuggestions: () => void;
 	closeAutoSuggestions: () => void;
+	toggleUnifiedTemplates: () => void;
+	closeUnifiedTemplates: () => void;
 
 	// Utility actions
 	closeAll: () => void;
@@ -54,6 +57,7 @@ export const useUIStore = create<UIState>()(
 			showPersonaSelector: false,
 			showChatShareDialog: false,
 			showAutoSuggestions: false,
+			showUnifiedTemplates: false,
 
 			// Chat list actions
 			toggleChatList: () =>
@@ -147,6 +151,19 @@ export const useUIStore = create<UIState>()(
 			closeAutoSuggestions: () =>
 				set({ showAutoSuggestions: false }),
 
+			// Unified templates actions
+			toggleUnifiedTemplates: () =>
+				set((state) => ({
+					showUnifiedTemplates:
+						!state.showUnifiedTemplates,
+					// Close conflicting modals
+					showQuickResponses: false,
+					showConversationTemplates: false,
+					showPersonaSelector: false,
+				})),
+			closeUnifiedTemplates: () =>
+				set({ showUnifiedTemplates: false }),
+
 			// Close all modals/overlays
 			closeAll: () =>
 				set({
@@ -160,6 +177,7 @@ export const useUIStore = create<UIState>()(
 					showPersonaSelector: false,
 					showChatShareDialog: false,
 					showAutoSuggestions: false,
+					showUnifiedTemplates: false,
 				}),
 		}),
 		{
@@ -189,3 +207,5 @@ export const useChatShareDialogState = () =>
 	useUIStore((state) => state.showChatShareDialog);
 export const useAutoSuggestionsState = () =>
 	useUIStore((state) => state.showAutoSuggestions);
+export const useUnifiedTemplatesState = () =>
+	useUIStore((state) => state.showUnifiedTemplates);

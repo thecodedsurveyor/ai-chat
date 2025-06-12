@@ -6,6 +6,7 @@ import {
 	Settings,
 	LogOut,
 	ChevronDown,
+	BarChart3,
 } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -66,6 +67,11 @@ const UserProfile: React.FC = () => {
 
 	const handleSettings = () => {
 		navigate('/settings');
+		setIsOpen(false);
+	};
+
+	const handleAnalytics = () => {
+		navigate('/analytics');
 		setIsOpen(false);
 	};
 
@@ -230,6 +236,18 @@ const UserProfile: React.FC = () => {
 							>
 								<Settings className='w-5 h-5' />
 								<span>Settings</span>
+							</button>
+
+							<button
+								onClick={handleAnalytics}
+								className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
+									isDark
+										? 'hover:bg-white/5 text-gray-300 hover:text-white'
+										: 'hover:bg-gray-50 text-gray-700 hover:text-gray-900'
+								}`}
+							>
+								<BarChart3 className='w-5 h-5' />
+								<span>Analytics</span>
 							</button>
 
 							<div

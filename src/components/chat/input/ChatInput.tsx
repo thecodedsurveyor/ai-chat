@@ -25,13 +25,13 @@ import {
 } from '../../../stores/chatStore';
 
 import {
-	MdFlashOn,
-	MdCollections,
 	MdEmojiEmotions,
 	MdSend,
 	MdMoreHoriz,
 	MdAutoAwesome,
 	MdOutlineAutoAwesome,
+	MdApps,
+	MdFace,
 } from 'react-icons/md';
 import type { EmojiData } from '../../../types';
 import VoiceControls from '../../voice/VoiceControls';
@@ -65,8 +65,8 @@ const ChatInput: React.FC = () => {
 		toggleEmojiPicker,
 		closeEmojiPicker,
 		showEmojiPicker,
-		toggleQuickResponses,
-		toggleConversationTemplates,
+		toggleUnifiedTemplates,
+		togglePersonaSelector,
 		toggleAutoSuggestions: toggleAutoSuggestionsAction,
 		closeAutoSuggestions,
 		showAutoSuggestions,
@@ -329,18 +329,32 @@ const ChatInput: React.FC = () => {
 			>
 				{/* Mobile: Show only essential buttons */}
 				<div className='md:hidden flex items-center gap-1'>
-					{/* Quick Responses Button - Mobile */}
+					{/* Templates Button - Mobile */}
 					<button
 						type='button'
-						onClick={toggleQuickResponses}
+						onClick={toggleUnifiedTemplates}
 						className={`flex-shrink-0 p-2 text-lg transition-colors ${
 							isDark
-								? 'text-chat-accent hover:text-chat-orange'
-								: 'text-chat-light-accent hover:text-chat-orange'
+								? 'text-chat-accent hover:text-chat-purple'
+								: 'text-chat-light-accent hover:text-chat-purple'
 						}`}
-						title='Quick responses'
+						title='Templates'
 					>
-						<MdFlashOn />
+						<MdApps />
+					</button>
+
+					{/* Persona Selector Button - Mobile */}
+					<button
+						type='button'
+						onClick={togglePersonaSelector}
+						className={`flex-shrink-0 p-2 text-lg transition-colors ${
+							isDark
+								? 'text-chat-accent hover:text-chat-pink'
+								: 'text-chat-light-accent hover:text-chat-pink'
+						}`}
+						title='AI Personas'
+					>
+						<MdFace />
 					</button>
 
 					{/* Voice Controls - Mobile (Compact) */}
@@ -361,34 +375,32 @@ const ChatInput: React.FC = () => {
 
 				{/* Desktop: Show all buttons */}
 				<div className='hidden md:flex items-center gap-4'>
-					{/* Quick Responses Button */}
-					<button
-						type='button'
-						onClick={toggleQuickResponses}
-						className={`flex-shrink-0 p-3 text-2xl transition-colors ${
-							isDark
-								? 'text-chat-accent hover:text-chat-orange'
-								: 'text-chat-light-accent hover:text-chat-orange'
-						}`}
-						title='Quick responses'
-					>
-						<MdFlashOn />
-					</button>
-
 					{/* Templates Button */}
 					<button
 						type='button'
-						onClick={
-							toggleConversationTemplates
-						}
+						onClick={toggleUnifiedTemplates}
 						className={`flex-shrink-0 p-3 text-2xl transition-colors ${
 							isDark
 								? 'text-chat-accent hover:text-chat-purple'
 								: 'text-chat-light-accent hover:text-chat-purple'
 						}`}
-						title='Conversation templates'
+						title='Templates'
 					>
-						<MdCollections />
+						<MdApps />
+					</button>
+
+					{/* Persona Selector Button */}
+					<button
+						type='button'
+						onClick={togglePersonaSelector}
+						className={`flex-shrink-0 p-3 text-2xl transition-colors ${
+							isDark
+								? 'text-chat-accent hover:text-chat-pink'
+								: 'text-chat-light-accent hover:text-chat-pink'
+						}`}
+						title='AI Personas'
+					>
+						<MdFace />
 					</button>
 
 					{/* Emoji Picker Button */}

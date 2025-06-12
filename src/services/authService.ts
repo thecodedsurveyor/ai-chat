@@ -16,7 +16,8 @@ export interface AuthResponse {
 	message: string;
 	data?: {
 		user: User;
-		token: string;
+		accessToken: string;
+		refreshToken: string;
 	};
 }
 
@@ -54,10 +55,13 @@ export interface ProfileResponse {
 
 class AuthService {
 	private token: string | null = null;
+	private refreshToken: string | null = null;
 
 	constructor() {
-		// Load token from localStorage on initialization
+		// Load tokens from localStorage on initialization
 		this.token = localStorage.getItem('authToken');
+		this.refreshToken =
+			localStorage.getItem('refreshToken');
 	}
 
 	async register(
@@ -79,10 +83,16 @@ class AuthService {
 				await response.json();
 
 			if (result.success && result.data) {
-				this.token = result.data.token;
+				this.token = result.data.accessToken;
+				this.refreshToken =
+					result.data.refreshToken;
 				localStorage.setItem(
 					'authToken',
 					this.token
+				);
+				localStorage.setItem(
+					'refreshToken',
+					this.refreshToken
 				);
 				localStorage.setItem(
 					'user',
@@ -116,10 +126,16 @@ class AuthService {
 				await response.json();
 
 			if (result.success && result.data) {
-				this.token = result.data.token;
+				this.token = result.data.accessToken;
+				this.refreshToken =
+					result.data.refreshToken;
 				localStorage.setItem(
 					'authToken',
 					this.token
+				);
+				localStorage.setItem(
+					'refreshToken',
+					this.refreshToken
 				);
 				localStorage.setItem(
 					'user',
@@ -215,7 +231,9 @@ class AuthService {
 			// Logout error
 		} finally {
 			this.token = null;
+			this.refreshToken = null;
 			localStorage.removeItem('authToken');
+			localStorage.removeItem('refreshToken');
 			localStorage.removeItem('user');
 		}
 	}
@@ -238,6 +256,55 @@ class AuthService {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Refresh access token using refresh token
+	 */
+	async refreshAccessToken(): Promise<boolean> {
+		try {
+			if (!this.refreshToken) {
+				return false;
+			}
+
+			const response = await fetch(
+				`${API_BASE_URL}/auth/refresh-token`,
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						refreshToken: this.refreshToken,
+					}),
+				}
+			);
+
+			const result = await response.json();
+
+			if (result.success && result.data) {
+				this.token = result.data.accessToken;
+				this.refreshToken =
+					result.data.refreshToken;
+				if (this.token) {
+					localStorage.setItem(
+						'authToken',
+						this.token
+					);
+				}
+				if (this.refreshToken) {
+					localStorage.setItem(
+						'refreshToken',
+						this.refreshToken
+					);
+				}
+				return true;
+			}
+
+			return false;
+		} catch {
+			return false;
+		}
 	}
 
 	/**

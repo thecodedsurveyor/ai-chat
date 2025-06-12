@@ -1,6 +1,5 @@
 import React from 'react';
 import { Bot } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { cn } from '../../../utils/classNames';
 import { MdEdit, MdClose } from 'react-icons/md';
@@ -27,8 +26,6 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
 		showChatList,
 		closeChatList,
 		toggleAdvancedSearch,
-		togglePersonaSelector,
-		toggleConversationTemplates,
 		toggleFavoritesViewer,
 		toggleChatShareDialog,
 	} = useUIStore();
@@ -82,10 +79,6 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
 		if (activeChat) {
 			toggleChatShareDialog();
 		}
-	};
-	const navigate = useNavigate();
-	const handleNavigateToAnalytics = () => {
-		navigate('/analytics');
 	};
 
 	return (
@@ -150,15 +143,6 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
 			<SidebarActions
 				activeChat={activeChat}
 				onAdvancedSearchOpen={toggleAdvancedSearch}
-				onNavigateToAnalytics={
-					handleNavigateToAnalytics
-				}
-				onTogglePersonaSelector={
-					togglePersonaSelector
-				}
-				onToggleConversationTemplates={
-					toggleConversationTemplates
-				}
 				onToggleFavoritesViewer={
 					toggleFavoritesViewer
 				}
