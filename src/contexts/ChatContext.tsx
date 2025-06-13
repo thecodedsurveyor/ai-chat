@@ -3,22 +3,9 @@ import React, {
 	useContext,
 	useState,
 	useEffect,
-	useCallback,
 } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import type {
-	Message,
-	Chat,
-	MessageAction,
-	SearchFilters,
-	SearchResult,
-} from '../types';
-import { SearchEngine } from '../utils/searchUtils';
-import {
-	callOpenRouter,
-	buildConversationHistory,
-} from '../utils/openRouter';
-import authService from '../services/authService';
+import type { Message, Chat, SearchResult } from '../types';
+import { authService } from '../services/authService';
 
 interface ChatContextType {
 	// Chat management
@@ -226,139 +213,6 @@ export const ChatProvider = ({
 		});
 	}, [chats]);
 
-	// API call mutation
-	const sendMessageMutation = useMutation({
-		mutationFn: async (messageText: string) => {
-			const startTime = Date.now(); // Track start time
-
-			// Get current chat for context-aware messaging
-			const currentChat = chats.find(
-				(chat) => chat.id === activeChat
-			);
-
-			// Build conversation history with proper context management
-			const conversationHistory =
-				buildConversationHistory(
-					currentChat,
-					messageText
-				);
-
-			// Call OpenRouter API with conversation history
-			const content = await callOpenRouter(
-				conversationHistory
-			);
-			const responseTime = Date.now() - startTime;
-
-			return { content, responseTime };
-		},
-		onSuccess: (response) => {
-			// Add AI response with response time and word count
-			const aiMessage: Message = {
-				id: crypto.randomUUID(),
-				type: 'response',
-				text: response.content,
-				timestamp: new Date().toLocaleTimeString(),
-				status: 'delivered',
-				responseTime: response.responseTime,
-				wordCount: response.content
-					.trim()
-					.split(/\s+/)
-					.filter(
-						(word: string) => word.length > 0
-					).length,
-			};
-
-			const updatedMessages = [
-				...messages,
-				aiMessage,
-			];
-			setMessages(updatedMessages);
-			setIsTyping(false);
-
-			// Update the last user message status to delivered and add word count
-			const messagesWithUpdatedStatus =
-				updatedMessages.map((msg, index) =>
-					index === updatedMessages.length - 2 &&
-					msg.type === 'prompt'
-						? {
-								...msg,
-								status: 'delivered' as const,
-								wordCount:
-									msg.wordCount ||
-									msg.text
-										.trim()
-										.split(/\s+/)
-										.filter(
-											(
-												word: string
-											) =>
-												word.length >
-												0
-										).length,
-						  }
-						: msg
-				);
-			setMessages(messagesWithUpdatedStatus);
-
-			// Save to localStorage
-			localStorage.setItem(
-				activeChat,
-				JSON.stringify(messagesWithUpdatedStatus)
-			);
-
-			// Update chat in chats array with analytics data
-			setChats((prev) =>
-				prev.map((chat) =>
-					chat.id === activeChat
-						? {
-								...chat,
-								messages:
-									messagesWithUpdatedStatus,
-								totalMessages:
-									messagesWithUpdatedStatus.length,
-								averageResponseTime:
-									messagesWithUpdatedStatus
-										.filter(
-											(m) =>
-												m.type ===
-													'response' &&
-												m.responseTime
-										)
-										.reduce(
-											(sum, m) =>
-												sum +
-												(m.responseTime ||
-													0),
-											0
-										) /
-										messagesWithUpdatedStatus.filter(
-											(m) =>
-												m.type ===
-													'response' &&
-												m.responseTime
-										).length || 0,
-						  }
-						: chat
-				)
-			);
-		},
-		onError: () => {
-			setIsTyping(false);
-			// Update message status to error
-			setMessages((prev) =>
-				prev.map((msg, index) =>
-					index === prev.length - 1 &&
-					msg.type === 'prompt'
-						? {
-								...msg,
-								status: 'error' as const,
-						  }
-						: msg
-				)
-			);
-		},
-	});
-
 	const addMessage = (message: Message) => {
 		const user = authService.getUser();
 		if (!user) return;
@@ -466,21 +320,24 @@ export const ChatProvider = ({
 					chatMessages.forEach(
 						(message, index) => {
 							if (
-								message.content
+								message.text
 									.toLowerCase()
 									.includes(
 										query.toLowerCase()
 									)
 							) {
 								results.push({
-									chatId: chat.id,
-									messageIndex: index,
+									type: 'message',
+									chat: chat,
 									message,
-									chatTitle:
-										chat.displayId,
-									preview: message.content
-										.substring(0, 100)
-										.trim(),
+									matchedText:
+										message.text
+											.substring(
+												0,
+												100
+											)
+											.trim(),
+									relevanceScore: 1,
 								});
 							}
 						}
