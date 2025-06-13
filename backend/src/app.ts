@@ -3,14 +3,21 @@ import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
-import path from 'path';
+
 import config from './config/environment';
 import authRoutes from './routes/authRoutes';
 import conversationRoutes from './routes/conversationRoutes';
 import messageRoutes from './routes/messageRoutes';
-import { errorHandler } from './middleware/errorHandler';
+import {
+	errorHandler,
+	securityHeaders,
+} from './middleware/errorHandler';
+import { sanitizeInputs } from './middleware/validation';
 
 const app = express();
+
+// Security headers middleware (should be first)
+app.use(securityHeaders);
 
 // Compression middleware (should be early in the stack)
 app.use(
@@ -28,7 +35,7 @@ app.use(
 	})
 );
 
-// Security middleware with optimized CSP
+// Enhanced security middleware with stricter CSP
 app.use(
 	helmet({
 		contentSecurityPolicy: {
@@ -36,7 +43,7 @@ app.use(
 				defaultSrc: ["'self'"],
 				styleSrc: [
 					"'self'",
-					"'unsafe-inline'",
+					"'unsafe-inline'", // Consider removing in production
 					'https:',
 				],
 				scriptSrc: ["'self'"],
@@ -45,22 +52,37 @@ app.use(
 					'data:',
 					'blob:',
 					'https://res.cloudinary.com',
-					'http://localhost:3001',
+					...(config.NODE_ENV === 'development'
+						? ['http://localhost:3001']
+						: []),
 				],
 				fontSrc: ["'self'", 'https:', 'data:'],
 				connectSrc: [
 					"'self'",
-					'http://localhost:3001',
-					'http://localhost:5173',
-					'http://localhost:5174',
-					'http://localhost:5175',
+					...(config.NODE_ENV === 'development'
+						? [
+								'http://localhost:3001',
+								'http://localhost:5173',
+								'http://localhost:5174',
+								'http://localhost:5175',
+							]
+						: []),
 				],
+				objectSrc: ["'none'"],
+				mediaSrc: ["'self'"],
+				frameSrc: ["'none'"],
 			},
+		},
+		crossOriginEmbedderPolicy: false, // Disable if causing issues with external resources
+		hsts: {
+			maxAge: 31536000, // 1 year
+			includeSubDomains: true,
+			preload: true,
 		},
 	})
 );
 
-// CORS configuration with optimizations
+// CORS configuration with enhanced security
 app.use(
 	cors({
 		origin: (origin, callback) => {
@@ -69,13 +91,17 @@ app.use(
 			const configUrl = new URL(config.FRONTEND_URL);
 			const allowedOrigins = [
 				config.FRONTEND_URL,
-				'http://localhost:5173',
-				'http://localhost:5174',
-				'http://localhost:5175',
-				'http://localhost:5176',
-				'http://localhost:5177',
-				'http://localhost:5178',
-				'http://localhost:5179',
+				...(config.NODE_ENV === 'development'
+					? [
+							'http://localhost:5173',
+							'http://localhost:5174',
+							'http://localhost:5175',
+							'http://localhost:5176',
+							'http://localhost:5177',
+							'http://localhost:5178',
+							'http://localhost:5179',
+						]
+					: []),
 				`https://${configUrl.host}`,
 			];
 
@@ -96,37 +122,73 @@ app.use(
 			'DELETE',
 			'OPTIONS',
 		],
-		allowedHeaders: ['Content-Type', 'Authorization'],
+		allowedHeaders: [
+			'Content-Type',
+			'Authorization',
+			'X-Request-ID',
+		],
 		maxAge: 86400, // Cache preflight for 24 hours
 	})
 );
 
-// Rate limiting with optimization
-const limiter = rateLimit({
-	windowMs: 15 * 60 * 1000, // 15 minutes
-	max: 100,
-	message: {
-		success: false,
-		message:
-			'Too many requests from this IP, please try again later.',
-	},
-	standardHeaders: true,
-	legacyHeaders: false,
-	skip: (req) => {
-		// Skip rate limiting for health checks
-		return (
-			req.path === '/health' ||
-			req.path === '/api/health'
-		);
-	},
-});
-app.use(limiter);
+// Enhanced rate limiting with different limits for different endpoints
+const createRateLimiter = (
+	windowMs: number,
+	max: number,
+	message: string
+) => {
+	return rateLimit({
+		windowMs,
+		max,
+		message: {
+			success: false,
+			message,
+			error: 'RATE_LIMIT_EXCEEDED',
+		},
+		standardHeaders: true,
+		legacyHeaders: false,
+		skip: (req) => {
+			// Skip rate limiting for health checks
+			return (
+				req.path === '/health' ||
+				req.path === '/api/health'
+			);
+		},
+	});
+};
+
+// General rate limiter
+const generalLimiter = createRateLimiter(
+	config.RATE_LIMIT_WINDOW_MS,
+	config.RATE_LIMIT_MAX_REQUESTS,
+	'Too many requests from this IP, please try again later.'
+);
+
+// Stricter rate limiter for auth endpoints
+const authLimiter = createRateLimiter(
+	15 * 60 * 1000, // 15 minutes
+	5, // Only 5 attempts per 15 minutes
+	'Too many authentication attempts, please try again later.'
+);
+
+app.use(generalLimiter);
 
 // Body parsing middleware with size limits
-app.use(express.json({ limit: '2mb' }));
+app.use(
+	express.json({
+		limit: '2mb',
+		verify: (req, res, buf) => {
+			// Store raw body for webhook verification if needed
+			(req as any).rawBody = buf;
+		},
+	})
+);
 app.use(
 	express.urlencoded({ extended: true, limit: '2mb' })
 );
+
+// Input sanitization middleware
+app.use(sanitizeInputs);
 
 // Health check endpoints with caching
 app.get('/health', (req, res) => {
@@ -135,6 +197,7 @@ app.get('/health', (req, res) => {
 		success: true,
 		message: 'Server is running',
 		timestamp: new Date().toISOString(),
+		environment: config.NODE_ENV,
 	});
 });
 
@@ -145,13 +208,14 @@ app.get('/api/health', (req, res) => {
 		message: 'API is running',
 		timestamp: new Date().toISOString(),
 		database: 'connected',
+		version: '1.0.0',
 	});
 });
 
 // Note: Static file serving removed - now using Cloudinary for image storage
 
-// API routes
-app.use('/api/auth', authRoutes);
+// API routes with specific rate limiting
+app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/conversations', conversationRoutes);
 app.use('/api/messages', messageRoutes);
 
@@ -159,7 +223,8 @@ app.use('/api/messages', messageRoutes);
 app.use('*', (req, res) => {
 	res.status(404).json({
 		success: false,
-		message: 'Route not found',
+		message: 'Endpoint not found',
+		error: 'NOT_FOUND',
 	});
 });
 

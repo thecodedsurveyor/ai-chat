@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import crypto from 'crypto';
 
 // Load environment variables
 dotenv.config();
@@ -35,19 +36,63 @@ interface EnvironmentConfig {
 	};
 }
 
+/**
+ * Generate a secure random secret if none provided
+ */
+function generateSecureSecret(): string {
+	return crypto.randomBytes(64).toString('hex');
+}
+
+/**
+ * Validate JWT secret strength
+ */
+function validateJWTSecret(secret: string): boolean {
+	return (
+		secret.length >= 32 &&
+		secret !== 'your-super-secret-jwt-key-here' &&
+		secret !== 'your-refresh-secret-key-here'
+	);
+}
+
 const config: EnvironmentConfig = {
 	// Database Configuration
 	DATABASE_URL:
 		process.env.DATABASE_URL ||
 		'mongodb://localhost:27017/chatbot',
 
-	// JWT Configuration
-	JWT_SECRET:
-		process.env.JWT_SECRET ||
-		'your-super-secret-jwt-key-here',
-	JWT_REFRESH_SECRET:
-		process.env.JWT_REFRESH_SECRET ||
-		'your-refresh-secret-key-here',
+	// JWT Configuration - Enhanced Security
+	JWT_SECRET: (() => {
+		const secret = process.env.JWT_SECRET;
+		if (!secret || !validateJWTSecret(secret)) {
+			if (process.env.NODE_ENV === 'production') {
+				throw new Error(
+					'JWT_SECRET must be provided and be at least 32 characters long in production'
+				);
+			}
+			console.warn(
+				'⚠️  Using auto-generated JWT_SECRET for development. Set JWT_SECRET in production!'
+			);
+			return generateSecureSecret();
+		}
+		return secret;
+	})(),
+
+	JWT_REFRESH_SECRET: (() => {
+		const secret = process.env.JWT_REFRESH_SECRET;
+		if (!secret || !validateJWTSecret(secret)) {
+			if (process.env.NODE_ENV === 'production') {
+				throw new Error(
+					'JWT_REFRESH_SECRET must be provided and be at least 32 characters long in production'
+				);
+			}
+			console.warn(
+				'⚠️  Using auto-generated JWT_REFRESH_SECRET for development. Set JWT_REFRESH_SECRET in production!'
+			);
+			return generateSecureSecret();
+		}
+		return secret;
+	})(),
+
 	JWT_EXPIRE: process.env.JWT_EXPIRE || '15m',
 	JWT_REFRESH_EXPIRE:
 		process.env.JWT_REFRESH_EXPIRE || '7d',
@@ -60,7 +105,7 @@ const config: EnvironmentConfig = {
 	FRONTEND_URL:
 		process.env.FRONTEND_URL || 'http://localhost:5173',
 
-	// Rate Limiting
+	// Rate Limiting - More restrictive defaults
 	RATE_LIMIT_WINDOW_MS: parseInt(
 		process.env.RATE_LIMIT_WINDOW_MS || '900000',
 		10
@@ -70,10 +115,10 @@ const config: EnvironmentConfig = {
 		10
 	),
 
-	// Security
-	BCRYPT_SALT_ROUNDS: parseInt(
-		process.env.BCRYPT_SALT_ROUNDS || '10',
-		10
+	// Security - Stronger defaults
+	BCRYPT_SALT_ROUNDS: Math.max(
+		10,
+		parseInt(process.env.BCRYPT_SALT_ROUNDS || '12', 10)
 	),
 
 	// Cloudinary Configuration
@@ -84,19 +129,36 @@ const config: EnvironmentConfig = {
 	},
 };
 
-// Validate required environment variables
-const requiredEnvVars = [
-	'JWT_SECRET',
-	'JWT_REFRESH_SECRET',
-];
+// Enhanced validation for production environment
+if (config.NODE_ENV === 'production') {
+	const requiredEnvVars = [
+		'DATABASE_URL',
+		'JWT_SECRET',
+		'JWT_REFRESH_SECRET',
+		'FRONTEND_URL',
+	];
 
-for (const envVar of requiredEnvVars) {
-	if (
-		!process.env[envVar] &&
-		config.NODE_ENV === 'production'
-	) {
+	const missingVars = requiredEnvVars.filter((envVar) => {
+		const value = process.env[envVar];
+		return !value || value.trim() === '';
+	});
+
+	if (missingVars.length > 0) {
 		throw new Error(
-			`Missing required environment variable: ${envVar}`
+			`Missing required environment variables in production: ${missingVars.join(', ')}`
+		);
+	}
+
+	// Additional production security checks
+	if (config.BCRYPT_SALT_ROUNDS < 10) {
+		throw new Error(
+			'BCRYPT_SALT_ROUNDS must be at least 10 in production'
+		);
+	}
+
+	if (config.RATE_LIMIT_MAX_REQUESTS > 1000) {
+		console.warn(
+			'⚠️  Rate limit is very high for production. Consider lowering RATE_LIMIT_MAX_REQUESTS'
 		);
 	}
 }

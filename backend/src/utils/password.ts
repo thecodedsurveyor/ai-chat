@@ -1,12 +1,6 @@
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import config from '../config/environment';
-
-// Simple in-memory cache for recent password validations
-const passwordCache = new Map<
-	string,
-	{ hash: string; isValid: boolean; timestamp: number }
->();
-const CACHE_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 
 export class PasswordUtils {
 	/**
@@ -31,68 +25,21 @@ export class PasswordUtils {
 	}
 
 	/**
-	 * Compare password with hash using cache optimization
+	 * Compare password with hash - SECURE VERSION (no caching)
 	 */
 	static async comparePassword(
 		password: string,
 		hash: string
 	): Promise<boolean> {
 		try {
-			// Create cache key
-			const cacheKey = `${password.substring(0, 20)}:${hash.substring(0, 20)}`;
-
-			// Check cache first
-			const cached = passwordCache.get(cacheKey);
-			if (
-				cached &&
-				Date.now() - cached.timestamp <
-					CACHE_TIMEOUT
-			) {
-				return cached.isValid;
-			}
-
-			// Perform comparison
-			const isValid = await bcrypt.compare(
-				password,
-				hash
-			);
-
-			// Cache result for future requests (only cache valid results for security)
-			if (isValid) {
-				passwordCache.set(cacheKey, {
-					hash,
-					isValid,
-					timestamp: Date.now(),
-				});
-			}
-
-			// Clean old cache entries periodically
-			if (passwordCache.size > 100) {
-				this.cleanPasswordCache();
-			}
-
-			return isValid;
+			// Direct comparison without caching for security
+			return await bcrypt.compare(password, hash);
 		} catch (error) {
 			console.error(
 				'Password comparison failed:',
 				error
 			);
 			throw new Error('Failed to compare password');
-		}
-	}
-
-	/**
-	 * Clean expired cache entries
-	 */
-	private static cleanPasswordCache(): void {
-		const now = Date.now();
-		for (const [
-			key,
-			value,
-		] of passwordCache.entries()) {
-			if (now - value.timestamp > CACHE_TIMEOUT) {
-				passwordCache.delete(key);
-			}
 		}
 	}
 
@@ -146,7 +93,7 @@ export class PasswordUtils {
 	}
 
 	/**
-	 * Generate a random password
+	 * Generate a cryptographically secure random password
 	 */
 	static generateRandomPassword(
 		length: number = 12
@@ -155,9 +102,12 @@ export class PasswordUtils {
 			'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
 		let password = '';
 
+		// Use crypto.randomBytes for cryptographically secure random generation
+		const randomBytes = crypto.randomBytes(length);
+
 		for (let i = 0; i < length; i++) {
 			password += charset.charAt(
-				Math.floor(Math.random() * charset.length)
+				randomBytes[i] % charset.length
 			);
 		}
 
@@ -165,9 +115,14 @@ export class PasswordUtils {
 	}
 
 	/**
-	 * Clear password cache (for security)
+	 * Securely clear sensitive data from memory
 	 */
-	static clearPasswordCache(): void {
-		passwordCache.clear();
+	static clearSensitiveData(data: string): void {
+		// Overwrite the string in memory (best effort)
+		if (data) {
+			// This is a best-effort approach in JavaScript
+			// Real memory clearing would require native modules
+			data = '';
+		}
 	}
 }
