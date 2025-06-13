@@ -10,6 +10,7 @@ import {
 	requestPasswordReset,
 	resetPassword,
 	deleteAccount,
+	getEmailStatus,
 } from '../controllers/authController';
 import { uploadProfilePicture } from '../controllers/uploadController';
 import { authenticateToken } from '../middleware/auth';
@@ -43,6 +44,9 @@ router.post(
 	validate(ValidationUtils.resetPasswordSchema),
 	resetPassword
 );
+
+// Email service status (for debugging)
+router.get('/email-status', getEmailStatus);
 
 // Token refresh route
 router.post('/refresh-token', refreshToken);

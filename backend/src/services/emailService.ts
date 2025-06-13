@@ -162,12 +162,30 @@ class EmailService {
 
 				case EmailProvider.RESEND:
 					if (this.resend) {
-						await this.resend.emails.send({
-							from: this.fromEmail,
-							to: [to],
-							subject,
-							html,
-						});
+						// Resend requires verified domain for 'from' field
+						// Use simple format: "Name <email@domain.com>"
+						const result =
+							await this.resend.emails.send({
+								from: `${this.fromName} <${this.fromEmail}>`,
+								to: [to],
+								subject,
+								html,
+								replyTo: this.fromEmail,
+							});
+
+						// Log success for debugging
+						console.log(
+							'📧 Resend email sent successfully:',
+							{
+								id: result.data?.id,
+								to,
+								subject:
+									subject.substring(
+										0,
+										50
+									) + '...',
+							}
+						);
 					}
 					break;
 
@@ -189,9 +207,46 @@ class EmailService {
 
 			return true;
 		} catch (error) {
-			console.error('Failed to send email:', error);
+			console.error('Failed to send email:', {
+				provider: this.provider,
+				to,
+				subject: subject.substring(0, 50) + '...',
+				error:
+					error instanceof Error
+						? error.message
+						: error,
+				details:
+					error instanceof Error
+						? error.stack
+						: undefined,
+			});
 			return false;
 		}
+	}
+
+	/**
+	 * Get email service status for debugging
+	 */
+	getStatus(): {
+		provider: string;
+		isInitialized: boolean;
+		fromEmail: string;
+		fromName: string;
+		hasApiKey: boolean;
+	} {
+		return {
+			provider: this.provider,
+			isInitialized: this.isInitialized,
+			fromEmail: this.fromEmail,
+			fromName: this.fromName,
+			hasApiKey:
+				this.provider === EmailProvider.RESEND
+					? !!process.env.RESEND_API_KEY
+					: this.provider ===
+						  EmailProvider.SENDGRID
+						? !!process.env.SENDGRID_API_KEY
+						: false,
+		};
 	}
 }
 

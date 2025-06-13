@@ -588,6 +588,34 @@ export const requestPasswordReset = async (
 /**
  * Reset password using token
  */
+/**
+ * Get email service status (for debugging)
+ */
+export const getEmailStatus = async (
+	req: Request,
+	res: Response
+): Promise<void> => {
+	try {
+		const status = emailService.getStatus();
+		res.json({
+			success: true,
+			data: {
+				...status,
+				// Mask the API key for security
+				hasApiKey: status.hasApiKey
+					? 'Present'
+					: 'Missing',
+			},
+		});
+	} catch (error) {
+		console.error('Get email status error:', error);
+		res.status(500).json({
+			success: false,
+			message: 'Internal server error',
+		});
+	}
+};
+
 export const resetPassword = async (
 	req: Request,
 	res: Response
