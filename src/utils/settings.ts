@@ -51,7 +51,6 @@ export const defaultSettings: AppSettings = {
 		crashReporting: true,
 		dataCollection: false,
 	},
-	autoSuggestions: true, // Enable auto-suggestions by default
 };
 
 // Settings Storage Key

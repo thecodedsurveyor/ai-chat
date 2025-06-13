@@ -1,78 +1,63 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import rehypeHighlight from 'rehype-highlight';
-import rehypeRaw from 'rehype-raw';
 import { useTheme } from '../../../contexts/ThemeContext';
-import 'prismjs/themes/prism-tomorrow.css';
+import EnhancedCodeBlock from './EnhancedCodeBlock';
 
-type MarkdownMessageProps = {
+interface MarkdownMessageProps {
 	content: string;
-	className?: string;
-};
+	isUser: boolean;
+}
 
-const MarkdownMessage = ({
+const MarkdownMessage: React.FC<MarkdownMessageProps> = ({
 	content,
-	className = '',
-}: MarkdownMessageProps) => {
+	isUser,
+}) => {
 	const { isDark } = useTheme();
 
 	return (
-		<div className={`markdown-content ${className}`}>
+		<div
+			className={`markdown-content ${
+				isUser ? 'user-message' : ''
+			}`}
+		>
 			<ReactMarkdown
 				remarkPlugins={[remarkGfm]}
-				rehypePlugins={[rehypeHighlight, rehypeRaw]}
 				components={{
-					// Code blocks
-					code(props: {
-						inline?: boolean;
-						className?: string;
-						children?: React.ReactNode;
-					}) {
-						const {
-							inline,
-							className,
-							children,
-						} = props;
+					code: ({
+						className,
+						children,
+						...props
+					}) => {
 						const match = /language-(\w+)/.exec(
 							className || ''
 						);
-						return !inline && match ? (
-							<div className='relative'>
-								<div
-									className={`absolute top-2 right-2 text-xs px-2 py-1 rounded ${
-										isDark
-											? 'bg-gray-700 text-gray-300'
-											: 'bg-gray-200 text-gray-600'
-									}`}
+						const language = match
+							? match[1]
+							: '';
+
+						// Check if this is a code block (has language) vs inline code
+						if (language && className) {
+							// Use EnhancedCodeBlock for code blocks
+							return (
+								<EnhancedCodeBlock
+									className={className}
+									language={language}
 								>
-									{match[1]}
-								</div>
-								<pre
-									className={`language-${
-										match[1]
-									} rounded-lg p-4 my-3 overflow-x-auto ${
-										isDark
-											? 'bg-gray-800'
-											: 'bg-gray-100'
-									}`}
-								>
-									<code
-										className={
-											className
-										}
-									>
-										{children}
-									</code>
-								</pre>
-							</div>
-						) : (
+									{children}
+								</EnhancedCodeBlock>
+							);
+						}
+
+						// Regular inline code styling
+						return (
 							<code
 								className={`px-1.5 py-0.5 rounded text-sm ${
 									isDark
 										? 'bg-gray-700 text-pink-300'
 										: 'bg-gray-200 text-pink-600'
-								} ${className}`}
+								} ${className || ''}`}
+								{...props}
 							>
 								{children}
 							</code>

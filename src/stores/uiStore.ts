@@ -12,7 +12,6 @@ interface UIState {
 	showFavoritesViewer: boolean;
 	showPersonaSelector: boolean;
 	showChatShareDialog: boolean;
-	showAutoSuggestions: boolean;
 	showUnifiedTemplates: boolean;
 
 	// Actions
@@ -34,8 +33,6 @@ interface UIState {
 	closePersonaSelector: () => void;
 	toggleChatShareDialog: () => void;
 	closeChatShareDialog: () => void;
-	toggleAutoSuggestions: () => void;
-	closeAutoSuggestions: () => void;
 	toggleUnifiedTemplates: () => void;
 	closeUnifiedTemplates: () => void;
 
@@ -56,7 +53,6 @@ export const useUIStore = create<UIState>()(
 			showFavoritesViewer: false,
 			showPersonaSelector: false,
 			showChatShareDialog: false,
-			showAutoSuggestions: false,
 			showUnifiedTemplates: false,
 
 			// Chat list actions
@@ -93,6 +89,7 @@ export const useUIStore = create<UIState>()(
 			toggleSettings: () =>
 				set((state) => ({
 					showSettings: !state.showSettings,
+					showEmojiPicker: false, // Close emoji picker
 				})),
 			closeSettings: () =>
 				set({ showSettings: false }),
@@ -102,6 +99,7 @@ export const useUIStore = create<UIState>()(
 				set((state) => ({
 					showAdvancedSearch:
 						!state.showAdvancedSearch,
+					showEmojiPicker: false, // Close emoji picker
 				})),
 			closeAdvancedSearch: () =>
 				set({ showAdvancedSearch: false }),
@@ -111,6 +109,7 @@ export const useUIStore = create<UIState>()(
 				set((state) => ({
 					showConversationTemplates:
 						!state.showConversationTemplates,
+					showEmojiPicker: false, // Close emoji picker
 				})),
 			closeConversationTemplates: () =>
 				set({ showConversationTemplates: false }),
@@ -120,6 +119,7 @@ export const useUIStore = create<UIState>()(
 				set((state) => ({
 					showFavoritesViewer:
 						!state.showFavoritesViewer,
+					showEmojiPicker: false, // Close emoji picker
 				})),
 			closeFavoritesViewer: () =>
 				set({ showFavoritesViewer: false }),
@@ -129,6 +129,7 @@ export const useUIStore = create<UIState>()(
 				set((state) => ({
 					showPersonaSelector:
 						!state.showPersonaSelector,
+					showEmojiPicker: false, // Close emoji picker
 				})),
 			closePersonaSelector: () =>
 				set({ showPersonaSelector: false }),
@@ -138,18 +139,10 @@ export const useUIStore = create<UIState>()(
 				set((state) => ({
 					showChatShareDialog:
 						!state.showChatShareDialog,
+					showEmojiPicker: false, // Close emoji picker
 				})),
 			closeChatShareDialog: () =>
 				set({ showChatShareDialog: false }),
-
-			// Auto suggestions actions
-			toggleAutoSuggestions: () =>
-				set((state) => ({
-					showAutoSuggestions:
-						!state.showAutoSuggestions,
-				})),
-			closeAutoSuggestions: () =>
-				set({ showAutoSuggestions: false }),
 
 			// Unified templates actions
 			toggleUnifiedTemplates: () =>
@@ -160,6 +153,7 @@ export const useUIStore = create<UIState>()(
 					showQuickResponses: false,
 					showConversationTemplates: false,
 					showPersonaSelector: false,
+					showEmojiPicker: false, // Close emoji picker
 				})),
 			closeUnifiedTemplates: () =>
 				set({ showUnifiedTemplates: false }),
@@ -176,7 +170,6 @@ export const useUIStore = create<UIState>()(
 					showFavoritesViewer: false,
 					showPersonaSelector: false,
 					showChatShareDialog: false,
-					showAutoSuggestions: false,
 					showUnifiedTemplates: false,
 				}),
 		}),
@@ -205,7 +198,5 @@ export const usePersonaSelectorState = () =>
 	useUIStore((state) => state.showPersonaSelector);
 export const useChatShareDialogState = () =>
 	useUIStore((state) => state.showChatShareDialog);
-export const useAutoSuggestionsState = () =>
-	useUIStore((state) => state.showAutoSuggestions);
 export const useUnifiedTemplatesState = () =>
 	useUIStore((state) => state.showUnifiedTemplates);

@@ -24,7 +24,6 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useToast } from '../contexts/ToastContext';
 import { authService } from '../services/authService';
 import { usePageTitle } from '../hooks/usePageTitle';
-import Footer from '../components/layout/Footer';
 
 // Password validation interface (reused from AuthPage)
 interface PasswordValidation {
@@ -52,9 +51,14 @@ const ProfilePage: React.FC = () => {
 	usePageTitle('Your Profile – NeuronFlow');
 
 	// Fetch fresh user data on mount and when user changes
+	const hasFetchedUserData = React.useRef(false);
 	React.useEffect(() => {
 		const fetchUserData = async () => {
-			if (authService.isAuthenticated()) {
+			if (
+				authService.isAuthenticated() &&
+				!hasFetchedUserData.current
+			) {
+				hasFetchedUserData.current = true;
 				try {
 					const freshUser =
 						await authService.getUserFresh();
@@ -68,7 +72,7 @@ const ProfilePage: React.FC = () => {
 		};
 
 		fetchUserData();
-	}, []);
+	}, []); // Only run once on mount
 
 	const [isEditing, setIsEditing] = useState(false);
 	const [formData, setFormData] = useState({
@@ -1442,9 +1446,6 @@ const ProfilePage: React.FC = () => {
 					</div>
 				</motion.div>
 			</div>
-
-			{/* Footer */}
-			<Footer />
 		</div>
 	);
 };

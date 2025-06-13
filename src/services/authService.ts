@@ -321,7 +321,7 @@ class AuthService {
 	 */
 	async getProfile(): Promise<ProfileResponse> {
 		try {
-			const response = await fetch(
+			let response = await fetch(
 				`${API_BASE_URL}/auth/profile`,
 				{
 					method: 'GET',
@@ -331,6 +331,25 @@ class AuthService {
 					},
 				}
 			);
+
+			// If 403, try to refresh token and retry
+			if (response.status === 403) {
+				const refreshed =
+					await this.refreshAccessToken();
+				if (refreshed) {
+					response = await fetch(
+						`${API_BASE_URL}/auth/profile`,
+						{
+							method: 'GET',
+							headers: {
+								'Content-Type':
+									'application/json',
+								Authorization: `Bearer ${this.token}`,
+							},
+						}
+					);
+				}
+			}
 
 			const result: ProfileResponse =
 				await response.json();
@@ -359,7 +378,7 @@ class AuthService {
 		data: UpdateProfileData
 	): Promise<ProfileResponse> {
 		try {
-			const response = await fetch(
+			let response = await fetch(
 				`${API_BASE_URL}/auth/profile`,
 				{
 					method: 'PUT',
@@ -370,6 +389,26 @@ class AuthService {
 					body: JSON.stringify(data),
 				}
 			);
+
+			// If 403, try to refresh token and retry
+			if (response.status === 403) {
+				const refreshed =
+					await this.refreshAccessToken();
+				if (refreshed) {
+					response = await fetch(
+						`${API_BASE_URL}/auth/profile`,
+						{
+							method: 'PUT',
+							headers: {
+								'Content-Type':
+									'application/json',
+								Authorization: `Bearer ${this.token}`,
+							},
+							body: JSON.stringify(data),
+						}
+					);
+				}
+			}
 
 			const result: ProfileResponse =
 				await response.json();
@@ -419,7 +458,7 @@ class AuthService {
 			);
 
 			// Upload with progress tracking and retry logic
-			const response = await uploadWithRetry(
+			let response = await uploadWithRetry(
 				async () => {
 					return uploadWithProgress(
 						`${API_BASE_URL}/auth/upload-profile-picture`,
@@ -431,6 +470,26 @@ class AuthService {
 					);
 				}
 			);
+
+			// If 403, try to refresh token and retry
+			if (response.status === 403) {
+				const refreshed =
+					await this.refreshAccessToken();
+				if (refreshed) {
+					response = await uploadWithRetry(
+						async () => {
+							return uploadWithProgress(
+								`${API_BASE_URL}/auth/upload-profile-picture`,
+								formData,
+								{
+									Authorization: `Bearer ${this.token}`,
+								},
+								onProgress
+							);
+						}
+					);
+				}
+			}
 
 			const result: ProfileResponse =
 				await response.json();

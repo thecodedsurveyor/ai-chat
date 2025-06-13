@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bot } from 'lucide-react';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { cn } from '../../../utils/classNames';
@@ -22,6 +22,23 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 	const { toggleChatList } = useUIStore();
 	const chats = useChats();
 	const activeChat = useActiveChat();
+	const [isMobile, setIsMobile] = useState(false);
+
+	// Check if screen is mobile size
+	useEffect(() => {
+		const checkMobile = () => {
+			setIsMobile(window.innerWidth < 640);
+		};
+
+		checkMobile();
+		window.addEventListener('resize', checkMobile);
+
+		return () =>
+			window.removeEventListener(
+				'resize',
+				checkMobile
+			);
+	}, []);
 
 	const messageCount =
 		chats.find((c) => c.id === activeChat)?.messages
@@ -37,7 +54,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 			)}
 		>
 			{/* Left Section */}
-			<div className='flex items-center gap-2 sm:gap-3 min-w-0 w-1/4'>
+			<div className='flex items-center gap-2 sm:gap-3 min-w-0'>
 				<button
 					onClick={toggleChatList}
 					className={cn(
@@ -56,23 +73,26 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 					<div className='p-1.5 rounded-xl bg-gradient-to-r from-chat-pink to-chat-purple flex-shrink-0'>
 						<Bot className='w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white' />
 					</div>
-					<h1
-						className={cn(
-							'font-exo text-lg sm:text-xl md:text-3xl font-bold truncate',
-							isDark
-								? 'text-white'
-								: 'text-chat-light-text'
-						)}
-					>
-						NeuronFlow
-					</h1>
+					{/* Logo text - only show on larger screens */}
+					{!isMobile && (
+						<h1
+							className={cn(
+								'font-exo text-lg sm:text-xl md:text-3xl font-bold truncate',
+								isDark
+									? 'text-white'
+									: 'text-chat-light-text'
+							)}
+						>
+							NeuronFlow
+						</h1>
+					)}
 				</button>
 			</div>
 
-			{/* Center Section - Message Counter and Model Selector */}
-			<div className='flex-1 flex items-center justify-center gap-2 sm:gap-3'>
+			{/* Center Section - Model Selector (properly centered) */}
+			<div className='flex-1 flex items-center justify-center'>
 				{activeChat && (
-					<>
+					<div className='flex items-center gap-2 sm:gap-3'>
 						{/* Message Counter - Hidden on small screens */}
 						<div
 							className={cn(
@@ -119,12 +139,12 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 
 						{/* Model Selector */}
 						<ModelSelector />
-					</>
+					</div>
 				)}
 			</div>
 
 			{/* Right Section - User Profile */}
-			<div className='flex items-center gap-3 min-w-0 flex-1 justify-end'>
+			<div className='flex items-center justify-end min-w-0'>
 				<UserProfile />
 			</div>
 		</header>

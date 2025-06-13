@@ -1,13 +1,7 @@
-import React, {
-	useCallback,
-	useMemo,
-	useRef,
-	useEffect,
-} from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import Picker from '@emoji-mart/react';
 import data from '@emoji-mart/data';
 import { useTheme } from '../../../contexts/ThemeContext';
-import { useNavigate } from 'react-router-dom';
 
 // Phase 1: UI Store import
 import { useUIStore } from '../../../stores/uiStore';
@@ -15,7 +9,6 @@ import { useUIStore } from '../../../stores/uiStore';
 import {
 	useInputValue,
 	useInputStore,
-	useAutoSuggestions,
 } from '../../../stores/inputStore';
 // Phase 3: Chat Store import
 import {
@@ -27,38 +20,22 @@ import {
 import {
 	MdEmojiEmotions,
 	MdSend,
-	MdMoreHoriz,
-	MdAutoAwesome,
-	MdOutlineAutoAwesome,
 	MdApps,
 	MdFace,
 } from 'react-icons/md';
 import type { EmojiData } from '../../../types';
 import VoiceControls from '../../voice/VoiceControls';
-import SmartAutoComplete from './SmartAutoComplete';
 
 import { settingsManager } from '../../../utils/settings';
-// Using only the context toast system
-import { useToast } from '../../../contexts/ToastContext';
 
 const ChatInput: React.FC = () => {
 	const { isDark } = useTheme();
 	const inputRef = useRef<HTMLInputElement>(null);
-	const navigate = useNavigate();
-
-	// Get toast context
-	const toast = useToast();
 
 	// Phase 2: Input state from store
 	const inputValue = useInputValue();
-	const autoSuggestions = useAutoSuggestions();
-	const {
-		updateInputValue,
-		appendToInput,
-		clearInput,
-		clearSuggestions,
-		setInputValue,
-	} = useInputStore();
+	const { updateInputValue, appendToInput, clearInput } =
+		useInputStore();
 
 	// Get UI state from Zustand store
 	const {
@@ -67,9 +44,6 @@ const ChatInput: React.FC = () => {
 		showEmojiPicker,
 		toggleUnifiedTemplates,
 		togglePersonaSelector,
-		toggleAutoSuggestions: toggleAutoSuggestionsAction,
-		closeAutoSuggestions,
-		showAutoSuggestions,
 	} = useUIStore();
 
 	// Phase 3: Chat state from store
@@ -89,109 +63,6 @@ const ChatInput: React.FC = () => {
 			? aiMessages[aiMessages.length - 1].text
 			: undefined;
 	}, [messages]);
-
-	// Add auto-suggestion functions after lastAIMessage logic
-	// Get auto-suggestions using the SmartAutoComplete component
-	useEffect(() => {
-		// Debounce suggestions to avoid too many API calls
-		const debounceTimer = setTimeout(() => {
-			// Only show suggestions if input is between 10 and 60 characters
-			if (
-				inputValue.trim().length >= 10 &&
-				inputValue.trim().length <= 60 &&
-				appSettings.autoSuggestions !== false
-			) {
-				// Only show suggestions if they're not already showing
-				if (!showAutoSuggestions) {
-					toggleAutoSuggestionsAction();
-				}
-				// Auto suggestions is already implemented in SmartAutoComplete component
-				// We just need to pass the suggestions back to our store
-			} else {
-				if (showAutoSuggestions) {
-					closeAutoSuggestions();
-					clearSuggestions();
-				}
-			}
-		}, 500);
-
-		return () => clearTimeout(debounceTimer);
-	}, [
-		inputValue,
-		showAutoSuggestions,
-		toggleAutoSuggestionsAction,
-		closeAutoSuggestions,
-		clearSuggestions,
-		appSettings,
-		autoSuggestions.length,
-	]);
-
-	// Handle keyboard navigation for suggestions
-	const handleKeyDown = useCallback(
-		(e: React.KeyboardEvent) => {
-			// Only process if we have suggestions and they're visible
-			if (
-				!showAutoSuggestions ||
-				autoSuggestions.length === 0
-			)
-				return;
-
-			switch (e.key) {
-				case 'ArrowDown':
-					e.preventDefault();
-					useInputStore
-						.getState()
-						.selectNextSuggestion();
-					break;
-				case 'ArrowUp':
-					e.preventDefault();
-					useInputStore
-						.getState()
-						.selectPrevSuggestion();
-					break;
-				case 'Tab':
-				case 'Enter': {
-					if (e.key === 'Tab') e.preventDefault();
-					const selectedSuggestion = useInputStore
-						.getState()
-						.getSelectedSuggestion();
-					if (selectedSuggestion) {
-						setInputValue(
-							selectedSuggestion.text
-						);
-						clearSuggestions();
-						closeAutoSuggestions();
-					}
-					break;
-				}
-				case 'Escape':
-					closeAutoSuggestions();
-					clearSuggestions();
-					break;
-			}
-		},
-		[
-			showAutoSuggestions,
-			autoSuggestions.length,
-			setInputValue,
-			clearSuggestions,
-			closeAutoSuggestions,
-		]
-	);
-
-	// Handle suggestion selection
-	const handleSelectSuggestion = useCallback(
-		(suggestion: string) => {
-			setInputValue(suggestion);
-			clearSuggestions();
-			closeAutoSuggestions();
-		},
-		[
-			setInputValue,
-			clearSuggestions,
-			closeAutoSuggestions,
-		]
-	);
 
 	// Local handlers
 	const handleSendMessage = useCallback(() => {
@@ -256,59 +127,6 @@ const ChatInput: React.FC = () => {
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 		handleSendMessage();
-	};
-
-	// Toggle auto-suggestions with notification
-	const toggleAutoSuggestionsWithNotification =
-		useCallback(() => {
-			// Calculate the target state (opposite of current)
-			const newState = !showAutoSuggestions;
-
-			// Directly update the UI store with the new state
-			useUIStore.setState({
-				showAutoSuggestions: newState,
-			});
-
-			// If disabling, clear existing suggestions
-			if (!newState) {
-				clearSuggestions();
-			}
-
-			// Show appropriate toast based on the new state
-			if (newState) {
-				// ENABLED notification
-				toast.showSuccess(
-					'Auto-suggestions Enabled',
-					'Type at least 10 characters for suggestions (max 60)'
-				);
-
-				// Update user settings
-				settingsManager.updateSettings({
-					...appSettings,
-					autoSuggestions: true,
-				});
-			} else {
-				// DISABLED notification
-				toast.showInfo(
-					'Auto-suggestions Disabled',
-					'You can re-enable this feature anytime'
-				);
-
-				// Update user settings
-				settingsManager.updateSettings({
-					...appSettings,
-					autoSuggestions: false,
-				});
-			}
-		}, [
-			showAutoSuggestions,
-			clearSuggestions,
-			appSettings,
-			toast,
-		]);
-
-	const handleSettingsNavigation = () => {
-		navigate('/settings');
 	};
 
 	return (
@@ -430,34 +248,6 @@ const ChatInput: React.FC = () => {
 							}
 						/>
 					</div>
-
-					{/* Auto-suggestions Toggle Button */}
-					<button
-						type='button'
-						onClick={
-							toggleAutoSuggestionsWithNotification
-						}
-						className={`flex-shrink-0 p-3 text-2xl transition-colors ${
-							showAutoSuggestions
-								? isDark
-									? 'text-chat-pink hover:text-chat-orange'
-									: 'text-chat-purple hover:text-chat-orange'
-								: isDark
-								? 'text-chat-accent hover:text-chat-pink'
-								: 'text-chat-light-accent hover:text-chat-purple'
-						}`}
-						title={
-							showAutoSuggestions
-								? 'Disable auto-suggestions'
-								: 'Enable auto-suggestions'
-						}
-					>
-						{showAutoSuggestions ? (
-							<MdAutoAwesome />
-						) : (
-							<MdOutlineAutoAwesome />
-						)}
-					</button>
 				</div>
 
 				{/* Emoji Picker */}
@@ -470,21 +260,6 @@ const ChatInput: React.FC = () => {
 					</div>
 				)}
 
-				{/* Auto-suggestions */}
-				{showAutoSuggestions && (
-					<SmartAutoComplete
-						inputValue={inputValue}
-						onSelectSuggestion={
-							handleSelectSuggestion
-						}
-						isVisible={showAutoSuggestions}
-						onClose={() => {
-							closeAutoSuggestions();
-							clearSuggestions();
-						}}
-					/>
-				)}
-
 				{/* Input Field */}
 				<div className='flex-1 relative min-w-0'>
 					<input
@@ -492,43 +267,14 @@ const ChatInput: React.FC = () => {
 						value={inputValue}
 						onChange={updateInputValue}
 						onFocus={closeEmojiPicker}
-						onKeyDown={handleKeyDown}
 						ref={inputRef}
-						placeholder={
-							showAutoSuggestions
-								? 'Type at least 10 characters for suggestions (max 60)...'
-								: 'Type your message here...'
-						}
+						placeholder='Type your message here...'
 						className={`w-full text-base py-2 px-4 rounded-xl border-2 transition-all duration-300 focus:outline-none focus:ring-0 focus:scale-[1.02] ${
 							isDark
-								? `bg-chat-secondary/50 text-white placeholder:text-chat-accent/60 border-chat-accent/30 focus:border-chat-pink hover:border-chat-orange/40 ${
-										showAutoSuggestions
-											? 'border-chat-pink/70'
-											: ''
-								  }`
-								: `bg-gray-50 text-gray-800 placeholder:text-gray-500 border-chat-purple/30 focus:border-chat-pink hover:border-chat-purple/50 ${
-										showAutoSuggestions
-											? 'border-chat-purple/70'
-											: ''
-								  }`
+								? 'bg-chat-secondary/50 text-white placeholder:text-chat-accent/60 border-chat-accent/30 focus:border-chat-pink hover:border-chat-orange/40'
+								: 'bg-gray-50 text-gray-800 placeholder:text-gray-500 border-chat-purple/30 focus:border-chat-pink hover:border-chat-purple/50'
 						}`}
 					/>
-
-					{/* Auto-suggestions active indicator */}
-					{showAutoSuggestions && (
-						<div className='absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center'>
-							<span
-								className={`text-xs px-2 py-1 rounded-full ${
-									isDark
-										? 'bg-chat-pink/20 text-chat-pink'
-										: 'bg-chat-purple/20 text-chat-purple'
-								}`}
-							>
-								{autoSuggestions.length}{' '}
-								suggestions
-							</span>
-						</div>
-					)}
 				</div>
 
 				{/* Send Button */}
@@ -542,21 +288,6 @@ const ChatInput: React.FC = () => {
 					title='Send message'
 				>
 					<MdSend className='text-xl' />
-				</button>
-
-				{/* More Options (Mobile) */}
-				<button
-					type='button'
-					className='md:hidden flex-shrink-0 p-2 rounded-full text-lg'
-					onClick={handleSettingsNavigation}
-				>
-					<MdMoreHoriz
-						className={
-							isDark
-								? 'text-chat-accent'
-								: 'text-chat-light-accent'
-						}
-					/>
 				</button>
 			</div>
 		</form>

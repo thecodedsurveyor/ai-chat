@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bot } from 'lucide-react';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { cn } from '../../../utils/classNames';
@@ -29,6 +29,23 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
 		toggleFavoritesViewer,
 		toggleChatShareDialog,
 	} = useUIStore();
+	const [isMobile, setIsMobile] = useState(false);
+
+	// Check if screen is mobile size
+	useEffect(() => {
+		const checkMobile = () => {
+			setIsMobile(window.innerWidth < 640);
+		};
+
+		checkMobile();
+		window.addEventListener('resize', checkMobile);
+
+		return () =>
+			window.removeEventListener(
+				'resize',
+				checkMobile
+			);
+	}, []);
 
 	// Local state for chat management
 	const [managingChatId, setManagingChatId] =
@@ -101,15 +118,19 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
 					<div className='p-1.5 rounded-xl bg-gradient-to-r from-chat-pink to-chat-purple flex-shrink-0'>
 						<Bot className='w-4 h-4 text-white' />
 					</div>
-					<h2
-						className={`font-exo text-lg font-bold truncate ${
-							isDark
-								? 'text-chat-accent'
-								: 'text-chat-light-accent'
-						}`}
-					>
-						NeuronFlow
-					</h2>
+					{/* Logo text - only show on larger screens */}
+					{!isMobile && (
+						<h2
+							className={cn(
+								'font-exo text-lg font-bold truncate',
+								isDark
+									? 'text-chat-accent'
+									: 'text-chat-light-accent'
+							)}
+						>
+							NeuronFlow
+						</h2>
+					)}
 				</div>
 
 				{/* Mobile Close Button */}

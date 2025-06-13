@@ -5,7 +5,6 @@ import {
 	User,
 	Settings,
 	LogOut,
-	ChevronDown,
 	BarChart3,
 } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -91,7 +90,7 @@ const UserProfile: React.FC = () => {
 	const renderAvatar = (size: 'small' | 'large') => {
 		const sizeClasses =
 			size === 'small'
-				? 'w-8 h-8 text-sm'
+				? 'w-10 h-10 text-sm'
 				: 'w-12 h-12 text-lg';
 
 		if (user.avatar) {
@@ -128,44 +127,23 @@ const UserProfile: React.FC = () => {
 
 	return (
 		<div className='relative' ref={dropdownRef}>
-			{/* Profile Button */}
+			{/* Profile Button - Only Avatar */}
 			<button
 				onClick={() => setIsOpen(!isOpen)}
-				className={`flex items-center gap-3 px-4 py-2 rounded-xl transition-all duration-200 ${
+				className={`p-1 rounded-full transition-all duration-200 hover:scale-105 ${
 					isDark
-						? 'bg-chat-secondary/50 hover:bg-chat-secondary/70 text-white'
-						: 'bg-white/80 hover:bg-white text-gray-800'
-				} border ${
-					isDark
-						? 'border-white/10'
-						: 'border-gray-200'
-				} shadow-lg hover:shadow-xl`}
+						? 'hover:bg-white/10'
+						: 'hover:bg-gray-100'
+				} ${
+					isOpen
+						? isDark
+							? 'bg-white/10'
+							: 'bg-gray-100'
+						: ''
+				}`}
+				title={`${user.firstName} ${user.lastName}`}
 			>
-				{/* Avatar */}
 				{renderAvatar('small')}
-
-				{/* User Info */}
-				<div className='flex flex-col items-start'>
-					<span className='text-sm font-medium'>
-						{user.firstName} {user.lastName}
-					</span>
-					<span
-						className={`text-xs ${
-							isDark
-								? 'text-gray-400'
-								: 'text-gray-500'
-						}`}
-					>
-						{user.email}
-					</span>
-				</div>
-
-				{/* Dropdown Arrow */}
-				<ChevronDown
-					className={`w-4 h-4 transition-transform duration-200 ${
-						isOpen ? 'rotate-180' : ''
-					}`}
-				/>
 			</button>
 
 			{/* Dropdown Menu */}
@@ -214,15 +192,6 @@ const UserProfile: React.FC = () => {
 									>
 										{user.firstName}{' '}
 										{user.lastName}
-									</div>
-									<div
-										className={`text-sm ${
-											isDark
-												? 'text-gray-400'
-												: 'text-gray-500'
-										}`}
-									>
-										{user.email}
 									</div>
 								</div>
 							</div>
