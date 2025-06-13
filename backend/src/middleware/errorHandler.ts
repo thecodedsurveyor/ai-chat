@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import crypto from 'crypto';
+
 import { ApiResponse, HttpStatusCode } from '../types';
 
 /**
@@ -68,7 +68,7 @@ export const errorHandler = (
 	}
 
 	// Prepare response object
-	const errorResponse: ApiResponse = {
+	const errorResponse: any = {
 		success: false,
 		message,
 		error: errorCode,
