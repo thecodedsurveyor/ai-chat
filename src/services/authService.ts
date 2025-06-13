@@ -231,19 +231,145 @@ class AuthService {
 				await fetch(`${API_BASE_URL}/auth/logout`, {
 					method: 'POST',
 					headers: {
-						Authorization: `Bearer ${this.token}`,
 						'Content-Type': 'application/json',
+						Authorization: `Bearer ${this.token}`,
 					},
 				});
 			}
-		} catch {
-			// Logout error
+		} catch (error) {
+			console.error('Logout API call failed:', error);
+			// Continue with local cleanup even if API call fails
 		} finally {
+			// Clear all authentication data
 			this.token = null;
 			this.refreshToken = null;
+
+			// Get current user before clearing to clean up their data
+			const currentUser = this.getUser();
+
+			// Clear authentication tokens and user data
 			localStorage.removeItem('authToken');
 			localStorage.removeItem('refreshToken');
 			localStorage.removeItem('user');
+
+			// Clear user-specific chat data
+			if (currentUser) {
+				this.clearUserSpecificData(currentUser.id);
+			}
+
+			// Clear any other user-specific data
+			this.clearAllUserData();
+
+			// Call global chat data cleanup if available
+			if (
+				typeof (window as any).clearChatData ===
+				'function'
+			) {
+				(window as any).clearChatData();
+			}
+
+			// Trigger storage event to notify other components
+			window.dispatchEvent(new Event('storage'));
+		}
+	}
+
+	/**
+	 * Clear user-specific data from localStorage
+	 */
+	private clearUserSpecificData(userId: string): void {
+		const userPrefix = `_user_${userId}`;
+		const keysToRemove: string[] = [];
+
+		// Find all keys belonging to this user
+		for (let i = 0; i < localStorage.length; i++) {
+			const key = localStorage.key(i);
+			if (key && key.includes(userPrefix)) {
+				keysToRemove.push(key);
+			}
+		}
+
+		// Remove user-specific keys
+		keysToRemove.forEach((key) =>
+			localStorage.removeItem(key)
+		);
+	}
+
+	/**
+	 * Clear all user data (emergency cleanup)
+	 */
+	private clearAllUserData(): void {
+		const keysToRemove: string[] = [];
+
+		// Find keys that might contain user data
+		const userDataPatterns = [
+			'chats_user_',
+			'chat-',
+			'conversations_user_',
+			'messages_user_',
+			'user_',
+			'offline-',
+		];
+
+		for (let i = 0; i < localStorage.length; i++) {
+			const key = localStorage.key(i);
+			if (key) {
+				const shouldRemove = userDataPatterns.some(
+					(pattern) => key.includes(pattern)
+				);
+				if (shouldRemove) {
+					keysToRemove.push(key);
+				}
+			}
+		}
+
+		// Remove identified keys
+		keysToRemove.forEach((key) =>
+			localStorage.removeItem(key)
+		);
+
+		// Clear IndexedDB data
+		this.clearIndexedDBData();
+	}
+
+	/**
+	 * Clear IndexedDB data
+	 */
+	private async clearIndexedDBData(): Promise<void> {
+		try {
+			// Clear chatbot-related IndexedDB databases
+			const dbNames = [
+				'chatbot-db',
+				'chatbot-offline',
+			];
+
+			for (const dbName of dbNames) {
+				try {
+					const deleteRequest =
+						indexedDB.deleteDatabase(dbName);
+					await new Promise((resolve, reject) => {
+						deleteRequest.onsuccess = () =>
+							resolve(void 0);
+						deleteRequest.onerror = () =>
+							reject(deleteRequest.error);
+						deleteRequest.onblocked = () => {
+							console.warn(
+								`Database ${dbName} deletion blocked`
+							);
+							resolve(void 0); // Continue anyway
+						};
+					});
+				} catch (error) {
+					console.warn(
+						`Failed to clear IndexedDB ${dbName}:`,
+						error
+					);
+				}
+			}
+		} catch (error) {
+			console.warn(
+				'Failed to clear IndexedDB data:',
+				error
+			);
 		}
 	}
 

@@ -1,5 +1,6 @@
 import React, {
 	createContext,
+	useContext,
 	useState,
 	useEffect,
 	useCallback,
@@ -17,36 +18,48 @@ import {
 	callOpenRouter,
 	buildConversationHistory,
 } from '../utils/openRouter';
+import authService from '../services/authService';
 
-type ChatContextType = {
+interface ChatContextType {
+	// Chat management
 	chats: Chat[];
+	setChats: React.Dispatch<React.SetStateAction<Chat[]>>;
 	activeChat: string;
-	messages: Message[];
-	isTyping: boolean;
-	searchResults: SearchResult[];
-	isSearching: boolean;
-	setActiveChat: (id: string) => void;
-	createNewChat: (initialMessage?: string) => void;
-	deleteChat: (id: string) => void;
-	sendMessage: (text: string) => void;
-	handleMessageAction: (
-		action: MessageAction,
-		messageId: string,
-		newText?: string
-	) => void;
-	updateChat: (
-		chatId: string,
-		updates: Partial<Chat>,
-		updateLastActivity?: boolean
-	) => void;
-	searchChats: (filters: SearchFilters) => void;
-	clearSearch: () => void;
-};
+	setActiveChat: React.Dispatch<
+		React.SetStateAction<string>
+	>;
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const ChatContext = createContext<
-	ChatContextType | undefined
->(undefined);
+	// Message management
+	messages: Message[];
+	setMessages: React.Dispatch<
+		React.SetStateAction<Message[]>
+	>;
+	isTyping: boolean;
+	setIsTyping: React.Dispatch<
+		React.SetStateAction<boolean>
+	>;
+
+	// Search functionality
+	searchResults: SearchResult[];
+	setSearchResults: React.Dispatch<
+		React.SetStateAction<SearchResult[]>
+	>;
+	isSearching: boolean;
+	setIsSearching: React.Dispatch<
+		React.SetStateAction<boolean>
+	>;
+
+	// Chat operations
+	addMessage: (message: Message) => void;
+	createNewChat: () => void;
+	deleteChat: (chatId: string) => void;
+	searchMessages: (query: string) => void;
+	clearSearch: () => void;
+}
+
+const ChatContext = createContext<ChatContextType | null>(
+	null
+);
 
 export const ChatProvider = ({
 	children,
@@ -63,38 +76,133 @@ export const ChatProvider = ({
 	>([]);
 	const [isSearching, setIsSearching] = useState(false);
 
-	// Load chats from localStorage on mount
-	useEffect(() => {
-		const savedChats = localStorage.getItem('chats');
-		if (savedChats) {
-			const parsedChats = JSON.parse(savedChats);
-			setChats(parsedChats);
-			if (parsedChats.length > 0) {
-				setActiveChat(parsedChats[0].id);
+	// Helper function to get user-specific localStorage keys
+	const getUserStorageKey = (key: string): string => {
+		const user = authService.getUser();
+		if (!user) return key; // Fallback, but should not happen in authenticated context
+		return `${key}_user_${user.id}`;
+	};
+
+	// Helper function to clear all user-specific data from localStorage
+	const clearUserData = () => {
+		const user = authService.getUser();
+		if (!user) return;
+
+		const userPrefix = `_user_${user.id}`;
+		const keysToRemove: string[] = [];
+
+		// Find all keys belonging to this user
+		for (let i = 0; i < localStorage.length; i++) {
+			const key = localStorage.key(i);
+			if (key && key.includes(userPrefix)) {
+				keysToRemove.push(key);
 			}
 		}
-		// Start with empty chats array - no sample data
-		// Users will create real chats through the interface
+
+		// Remove user-specific keys
+		keysToRemove.forEach((key) =>
+			localStorage.removeItem(key)
+		);
+	};
+
+	// Clear data when user changes or logs out
+	useEffect(() => {
+		const handleStorageChange = () => {
+			const currentUser = authService.getUser();
+			if (!currentUser) {
+				// User logged out - clear all state
+				setChats([]);
+				setActiveChat('');
+				setMessages([]);
+				setSearchResults([]);
+				setIsSearching(false);
+			}
+		};
+
+		// Listen for auth changes
+		window.addEventListener(
+			'storage',
+			handleStorageChange
+		);
+
+		return () => {
+			window.removeEventListener(
+				'storage',
+				handleStorageChange
+			);
+		};
+	}, []);
+
+	// Load chats from user-specific localStorage on mount
+	useEffect(() => {
+		const user = authService.getUser();
+		if (!user) {
+			// No user logged in - clear everything
+			setChats([]);
+			setActiveChat('');
+			setMessages([]);
+			return;
+		}
+
+		const userChatsKey = getUserStorageKey('chats');
+		const savedChats =
+			localStorage.getItem(userChatsKey);
+		if (savedChats) {
+			try {
+				const parsedChats = JSON.parse(savedChats);
+				setChats(parsedChats);
+				if (parsedChats.length > 0) {
+					setActiveChat(parsedChats[0].id);
+				}
+			} catch (error) {
+				console.error(
+					'Error parsing saved chats:',
+					error
+				);
+				// Clear corrupted data
+				localStorage.removeItem(userChatsKey);
+				setChats([]);
+			}
+		}
 	}, []);
 
 	// Load messages when active chat changes
 	useEffect(() => {
-		if (activeChat) {
-			const savedMessages =
-				localStorage.getItem(activeChat);
-			if (savedMessages) {
+		const user = authService.getUser();
+		if (!user || !activeChat) {
+			setMessages([]);
+			return;
+		}
+
+		const userChatKey = getUserStorageKey(activeChat);
+		const savedMessages =
+			localStorage.getItem(userChatKey);
+		if (savedMessages) {
+			try {
 				setMessages(JSON.parse(savedMessages));
-			} else {
+			} catch (error) {
+				console.error(
+					'Error parsing saved messages:',
+					error
+				);
+				// Clear corrupted data
+				localStorage.removeItem(userChatKey);
 				setMessages([]);
 			}
+		} else {
+			setMessages([]);
 		}
 	}, [activeChat]);
 
-	// Save chats to localStorage whenever they change
+	// Save chats to user-specific localStorage whenever they change
 	useEffect(() => {
+		const user = authService.getUser();
+		if (!user) return;
+
 		if (chats.length > 0) {
+			const userChatsKey = getUserStorageKey('chats');
 			localStorage.setItem(
-				'chats',
+				userChatsKey,
 				JSON.stringify(chats)
 			);
 		}
@@ -251,244 +359,193 @@ export const ChatProvider = ({
 		},
 	});
 
-	const createNewChat = (initialMessage?: string) => {
+	const addMessage = (message: Message) => {
+		const user = authService.getUser();
+		if (!user) return;
+
+		const newMessages = [...messages, message];
+		setMessages(newMessages);
+
+		// Save to user-specific localStorage
+		if (activeChat) {
+			const userChatKey =
+				getUserStorageKey(activeChat);
+			localStorage.setItem(
+				userChatKey,
+				JSON.stringify(newMessages)
+			);
+
+			// Update chat's last activity
+			const updatedChats = chats.map((chat) =>
+				chat.id === activeChat
+					? {
+							...chat,
+							lastActivity:
+								new Date().toISOString(),
+							totalMessages:
+								newMessages.length,
+					  }
+					: chat
+			);
+			setChats(updatedChats);
+		}
+	};
+
+	const createNewChat = () => {
+		const user = authService.getUser();
+		if (!user) return;
+
 		const newChat: Chat = {
-			id: crypto.randomUUID(),
-			displayId: `Chat ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`,
+			id: `chat-${Date.now()}`,
+			displayId: `Chat ${chats.length + 1}`,
 			messages: [],
 			createdAt: new Date().toISOString(),
 			lastActivity: new Date().toISOString(),
+			totalMessages: 0,
 		};
 
 		const updatedChats = [newChat, ...chats];
 		setChats(updatedChats);
 		setActiveChat(newChat.id);
+		setMessages([]);
 
-		if (initialMessage) {
-			// If there's an initial message, send it
-			setTimeout(
-				() => sendMessage(initialMessage),
-				100
-			);
-		}
+		// Save to user-specific localStorage
+		const userChatsKey = getUserStorageKey('chats');
+		localStorage.setItem(
+			userChatsKey,
+			JSON.stringify(updatedChats)
+		);
 	};
 
 	const deleteChat = (chatId: string) => {
+		const user = authService.getUser();
+		if (!user) return;
+
+		// Remove from chats array
 		const updatedChats = chats.filter(
 			(chat) => chat.id !== chatId
 		);
 		setChats(updatedChats);
 
-		if (chatId === activeChat) {
-			setActiveChat(
-				updatedChats.length > 0
-					? updatedChats[0].id
-					: ''
-			);
+		// Remove messages from user-specific localStorage
+		const userChatKey = getUserStorageKey(chatId);
+		localStorage.removeItem(userChatKey);
+
+		// If deleting active chat, switch to another or clear
+		if (activeChat === chatId) {
+			if (updatedChats.length > 0) {
+				setActiveChat(updatedChats[0].id);
+			} else {
+				setActiveChat('');
+				setMessages([]);
+			}
+		}
+	};
+
+	const searchMessages = (query: string) => {
+		if (!query.trim()) {
+			setSearchResults([]);
+			setIsSearching(false);
+			return;
 		}
 
-		localStorage.removeItem(chatId);
-	};
+		setIsSearching(true);
+		const results: SearchResult[] = [];
 
-	const updateChat = (
-		chatId: string,
-		updates: Partial<Chat>,
-		updateLastActivity?: boolean
-	) => {
-		setChats((prev) =>
-			prev.map((chat) =>
-				chat.id === chatId
-					? {
-							...chat,
-							...updates,
-							// Only update lastActivity if explicitly requested (for message-related updates)
-							...(updateLastActivity && {
-								lastActivity:
-									new Date().toISOString(),
-							}),
-					  }
-					: chat
-			)
-		);
-	};
+		chats.forEach((chat) => {
+			const user = authService.getUser();
+			if (!user) return;
 
-	const sendMessage = (text: string) => {
-		// Ensure text is a string and handle edge cases
-		const messageText =
-			typeof text === 'string'
-				? text
-				: String(text || '');
-		if (!messageText.trim()) return;
-
-		// Add user message immediately
-		const userMessage: Message = {
-			id: crypto.randomUUID(),
-			type: 'prompt',
-			text: messageText.trim(),
-			timestamp: new Date().toLocaleTimeString(),
-			status: 'sending',
-		};
-
-		const updatedMessages = [...messages, userMessage];
-		setMessages(updatedMessages);
-		setIsTyping(true);
-
-		// Update last activity
-		updateChat(
-			activeChat,
-			{
-				lastActivity: new Date().toISOString(),
-			},
-			true
-		);
-
-		// Save to localStorage
-		localStorage.setItem(
-			activeChat,
-			JSON.stringify(updatedMessages)
-		);
-
-		// Update chat in chats array
-		setChats((prev) =>
-			prev.map((chat) =>
-				chat.id === activeChat
-					? {
-							...chat,
-							messages: updatedMessages,
-							lastActivity:
-								new Date().toISOString(),
-					  }
-					: chat
-			)
-		);
-
-		// Send to API
-		sendMessageMutation.mutate(messageText);
-	};
-
-	// Search functionality
-	const searchChats = useCallback(
-		(filters: SearchFilters) => {
-			setIsSearching(true);
-
-			try {
-				// Perform search synchronously - no need for setTimeout
-				const results = SearchEngine.search(
-					chats,
-					filters
-				);
-				setSearchResults(results);
-			} catch (error) {
-				console.error('Search error:', error);
-				setSearchResults([]);
-			} finally {
-				setIsSearching(false);
-			}
-		},
-		[chats]
-	);
-
-	const clearSearch = useCallback(() => {
-		setSearchResults([]);
-		setIsSearching(false);
-	}, []);
-
-	const handleMessageAction = (
-		action: MessageAction,
-		messageId: string,
-		newText?: string
-	) => {
-		const updatedMessages = messages.map((message) => {
-			if (message.id === messageId) {
-				switch (action) {
-					case 'edit':
-						return {
-							...message,
-							text: newText || message.text,
-							isEdited: true,
-							originalText:
-								message.originalText ||
-								message.text,
-						};
-					case 'favorite':
-						return {
-							...message,
-							isFavorite: true,
-						};
-					case 'unfavorite':
-						return {
-							...message,
-							isFavorite: false,
-						};
-					default:
-						return message;
+			const userChatKey = getUserStorageKey(chat.id);
+			const savedMessages =
+				localStorage.getItem(userChatKey);
+			if (savedMessages) {
+				try {
+					const chatMessages: Message[] =
+						JSON.parse(savedMessages);
+					chatMessages.forEach(
+						(message, index) => {
+							if (
+								message.content
+									.toLowerCase()
+									.includes(
+										query.toLowerCase()
+									)
+							) {
+								results.push({
+									chatId: chat.id,
+									messageIndex: index,
+									message,
+									chatTitle:
+										chat.displayId,
+									preview: message.content
+										.substring(0, 100)
+										.trim(),
+								});
+							}
+						}
+					);
+				} catch (error) {
+					console.error(
+						'Error parsing messages for search:',
+						error
+					);
 				}
 			}
-			return message;
 		});
 
-		if (action === 'delete') {
-			const filteredMessages = messages.filter(
-				(message) => message.id !== messageId
-			);
-			setMessages(filteredMessages);
-			localStorage.setItem(
-				activeChat,
-				JSON.stringify(filteredMessages)
-			);
+		setSearchResults(results);
+		setIsSearching(false);
+	};
 
-			// Update chat in chats array
-			setChats((prev) =>
-				prev.map((chat) =>
-					chat.id === activeChat
-						? {
-								...chat,
-								messages: filteredMessages,
-						  }
-						: chat
-				)
-			);
-		} else {
-			setMessages(updatedMessages);
-			localStorage.setItem(
-				activeChat,
-				JSON.stringify(updatedMessages)
-			);
+	const clearSearch = () => {
+		setSearchResults([]);
+		setIsSearching(false);
+	};
 
-			// Update chat in chats array
-			setChats((prev) =>
-				prev.map((chat) =>
-					chat.id === activeChat
-						? {
-								...chat,
-								messages: updatedMessages,
-						  }
-						: chat
-				)
-			);
-		}
+	// Expose function to clear user data when logging out
+	React.useEffect(() => {
+		// Add a global function to clear user data on logout
+		(window as any).clearChatData = clearUserData;
+
+		return () => {
+			delete (window as any).clearChatData;
+		};
+	}, []);
+
+	const value: ChatContextType = {
+		chats: sortedChats,
+		setChats,
+		activeChat,
+		setActiveChat,
+		messages,
+		setMessages,
+		isTyping,
+		setIsTyping,
+		searchResults,
+		setSearchResults,
+		isSearching,
+		setIsSearching,
+		addMessage,
+		createNewChat,
+		deleteChat,
+		searchMessages,
+		clearSearch,
 	};
 
 	return (
-		<ChatContext.Provider
-			value={{
-				chats: sortedChats,
-				activeChat,
-				messages,
-				isTyping,
-				searchResults,
-				isSearching,
-				setActiveChat,
-				createNewChat,
-				deleteChat,
-				sendMessage,
-				handleMessageAction,
-				updateChat,
-				searchChats,
-				clearSearch,
-			}}
-		>
+		<ChatContext.Provider value={value}>
 			{children}
 		</ChatContext.Provider>
 	);
+};
+
+export const useChat = () => {
+	const context = useContext(ChatContext);
+	if (!context) {
+		throw new Error(
+			'useChat must be used within a ChatProvider'
+		);
+	}
+	return context;
 };
