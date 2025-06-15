@@ -61,7 +61,9 @@ class EmailService {
 		// 2) Read the "from" address and friendly name from .env
 		this.fromEmail =
 			process.env.EMAIL_FROM_ADDRESS ||
-			'noreply@neuronflow.app';
+			(this.provider === EmailProvider.RESEND
+				? 'onboarding@resend.dev' // Resend's verified domain for testing
+				: 'noreply@neuronflow.app');
 		this.fromName =
 			process.env.EMAIL_FROM_NAME || 'NeuronFlow';
 
