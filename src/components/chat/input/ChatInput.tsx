@@ -16,6 +16,8 @@ import {
 	useChats,
 	useMessages,
 } from '../../../stores/chatStore';
+// Document Store import
+import { useActiveDocument } from '../../../stores/documentStore';
 
 import {
 	MdEmojiEmotions,
@@ -25,6 +27,7 @@ import {
 } from 'react-icons/md';
 import type { EmojiData } from '../../../types';
 import VoiceControls from '../../voice/VoiceControls';
+import DocumentUpload from '../../document/DocumentUpload';
 
 import { settingsManager } from '../../../utils/settings';
 
@@ -50,6 +53,9 @@ const ChatInput: React.FC = () => {
 	const { sendMessage, createNewChat } = useChatStore();
 	const chats = useChats();
 	const messages = useMessages();
+
+	// Document state
+	const activeDocument = useActiveDocument();
 
 	// Get app settings
 	const appSettings = settingsManager.getSettings();
@@ -175,6 +181,11 @@ const ChatInput: React.FC = () => {
 						<MdFace />
 					</button>
 
+					{/* Document Upload Button - Mobile */}
+					<div className='flex-shrink-0 scale-75'>
+						<DocumentUpload />
+					</div>
+
 					{/* Voice Controls - Mobile (Compact) */}
 					<div className='flex-shrink-0'>
 						<VoiceControls
@@ -220,6 +231,9 @@ const ChatInput: React.FC = () => {
 					>
 						<MdFace />
 					</button>
+
+					{/* Document Upload Button */}
+					<DocumentUpload />
 
 					{/* Emoji Picker Button */}
 					<button
@@ -268,9 +282,17 @@ const ChatInput: React.FC = () => {
 						onChange={updateInputValue}
 						onFocus={closeEmojiPicker}
 						ref={inputRef}
-						placeholder='Type your message here...'
+						placeholder={
+							activeDocument
+								? `Ask about "${activeDocument.name}"...`
+								: 'Type your message here...'
+						}
 						className={`w-full text-base py-2 px-4 rounded-xl border-2 transition-all duration-300 focus:outline-none focus:ring-0 focus:scale-[1.02] ${
-							isDark
+							activeDocument
+								? isDark
+									? 'bg-chat-pink/10 text-white placeholder:text-chat-pink/80 border-chat-pink/50 focus:border-chat-pink hover:border-chat-pink/70'
+									: 'bg-chat-purple/10 text-gray-800 placeholder:text-chat-purple/80 border-chat-purple/50 focus:border-chat-purple hover:border-chat-purple/70'
+								: isDark
 								? 'bg-chat-secondary/50 text-white placeholder:text-chat-accent/60 border-chat-accent/30 focus:border-chat-pink hover:border-chat-orange/40'
 								: 'bg-gray-50 text-gray-800 placeholder:text-gray-500 border-chat-purple/30 focus:border-chat-pink hover:border-chat-purple/50'
 						}`}

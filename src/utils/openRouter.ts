@@ -1,4 +1,5 @@
 import type { Chat, Message, AIPersona } from '../types';
+import type { UploadedDocument } from '../stores/documentStore';
 
 // Available OpenRouter models - All FREE
 export const OPENROUTER_MODELS = {
@@ -71,7 +72,8 @@ function convertToApiMessage(message: Message): {
 export function buildConversationHistory(
 	currentChat: Chat | undefined,
 	newMessage: string,
-	persona?: AIPersona | null
+	persona?: AIPersona | null,
+	activeDocument?: UploadedDocument | null
 ): Array<{
 	role: 'user' | 'assistant' | 'system';
 	content: string;
@@ -82,9 +84,14 @@ export function buildConversationHistory(
 	}> = [];
 
 	// Add system message - use persona if available, otherwise default
-	const systemContent =
+	let systemContent =
 		persona?.systemPrompt ||
 		`You are a helpful AI assistant. You have memory of our previous conversation in this chat. Use this context to provide relevant, personalized responses. If the user refers to something from earlier in our conversation, acknowledge and build upon that context.`;
+
+	// Add document context if available
+	if (activeDocument) {
+		systemContent += `\n\nIMPORTANT: The user has uploaded a document "${activeDocument.name}" for analysis. Here is the content of the document:\n\n--- DOCUMENT CONTENT ---\n${activeDocument.content}\n--- END DOCUMENT CONTENT ---\n\nWhen answering questions, prioritize information from this document. If the user asks questions about the document content, refer to it directly and provide accurate information based on what's in the document.`;
+	}
 
 	const systemMessage = {
 		role: 'system' as const,

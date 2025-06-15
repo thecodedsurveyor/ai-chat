@@ -14,6 +14,7 @@ import {
 	buildConversationHistory,
 } from '../utils/openRouter';
 import { generatePersonaGreeting } from '../utils/aiPersonas';
+import { useDocumentStore } from './documentStore';
 
 interface ChatState {
 	// Chat data state
@@ -318,12 +319,18 @@ export const useChatStore = create<ChatState>()(
 									state.activeChat
 							);
 
+						// Get active document for context
+						const activeDocument =
+							useDocumentStore.getState()
+								.activeDocument;
+
 						// Build conversation history with persona support
 						const conversationHistory =
 							buildConversationHistory(
 								currentChat,
 								text,
-								state.activePersona
+								state.activePersona,
+								activeDocument
 							);
 
 						// Call OpenRouter API with current model config and conversation history

@@ -18,6 +18,7 @@ import ChatMessages from './messages/ChatMessages';
 import ChatInput from './input/ChatInput';
 import ModalContainer from './modals/ModalContainer';
 import ChatTitle from './ChatTitle';
+import DocumentViewer from '../document/DocumentViewer';
 
 const ChatBotApp = () => {
 	const navigate = useNavigate();
@@ -86,6 +87,9 @@ const ChatBotApp = () => {
 				onGoBack={handleGoBack}
 				getCategoryColor={getCategoryColor}
 			>
+				{/* Document Viewer */}
+				<DocumentViewer />
+
 				{/* Chat Messages */}
 				<ChatMessages
 					containerRef={
