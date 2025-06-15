@@ -1,15 +1,17 @@
-import React, { useCallback, useRef } from 'react';
+import React, {
+	useCallback,
+	useRef,
+	useState,
+} from 'react';
 import {
 	MdAttachFile,
 	MdDescription,
 } from 'react-icons/md';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useDocumentStore } from '../../stores/documentStore';
-import {
-	createDocumentFromFile,
-	isValidDocumentType,
-} from '../../utils/documentParser';
-import toast from 'react-hot-toast';
+import { isValidDocumentType } from '../../utils/documentParser';
+import { documentWorkerManager } from '../../utils/documentWorkerManager';
+import { toast } from 'react-hot-toast';
 
 interface DocumentUploadProps {
 	onUploadComplete?: () => void;
@@ -20,9 +22,21 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({
 }) => {
 	const { isDark } = useTheme();
 	const fileInputRef = useRef<HTMLInputElement>(null);
+	const [uploadProgress, setUploadProgress] = useState(0);
 
-	const { addDocument, setIsProcessing, isProcessing } =
-		useDocumentStore();
+	const {
+		addDocument,
+		setIsProcessing,
+		isProcessing,
+		updateDocumentProgress,
+		cacheDocument,
+	} = useDocumentStore();
+
+	// Local processing state to prevent race conditions
+	const [localProcessing, setLocalProcessing] =
+		useState(false);
+	const isCurrentlyProcessing =
+		isProcessing || localProcessing;
 
 	const handleFileSelect = useCallback(
 		async (files: FileList | null) => {
@@ -47,17 +61,81 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({
 				return;
 			}
 
+			const documentId = `doc_${Date.now()}_${Math.random()
+				.toString(36)
+				.substr(2, 9)}`;
 			setIsProcessing(true);
+			setLocalProcessing(true);
+			setUploadProgress(0);
+
+			// Add initial document to store
+			const initialDocument = {
+				id: documentId,
+				name: file.name,
+				type: file.type || 'unknown',
+				size: file.size,
+				content: '',
+				chunks: [],
+				metadata: {
+					wordCount: 0,
+					characterCount: 0,
+					uploadTime: new Date(),
+					lastAccessed: new Date(),
+					parseTime: 0,
+					preview: '',
+				},
+				uploadedAt: new Date(),
+				isLoaded: false,
+				isProcessing: true,
+				progress: 0,
+			};
+
+			addDocument(initialDocument);
 
 			try {
-				const document =
-					await createDocumentFromFile(file);
-				addDocument(document);
+				await documentWorkerManager.processDocument(
+					file,
+					documentId,
+					{
+						onProgress: ({ progress }) => {
+							setUploadProgress(progress);
+							updateDocumentProgress(
+								documentId,
+								progress
+							);
+						},
+						onComplete: ({ document }) => {
+							cacheDocument(
+								documentId,
+								document.content,
+								document.chunks
+							);
 
-				toast.success(
-					`Document "${file.name}" uploaded and parsed successfully!`
+							// Auto-activate the newly uploaded document
+							const { setActiveDocument } =
+								useDocumentStore.getState();
+							setActiveDocument(document);
+
+							toast.success(
+								`Document "${file.name}" uploaded and is now active!`
+							);
+							onUploadComplete?.();
+							setUploadProgress(100);
+						},
+						onError: ({ error }) => {
+							console.error(
+								'Upload error:',
+								error
+							);
+							toast.error(
+								`Failed to upload ${file.name}: ${error}`
+							);
+							setIsProcessing(false); // Ensure processing state is reset
+							setLocalProcessing(false);
+							setUploadProgress(0);
+						},
+					}
 				);
-				onUploadComplete?.();
 			} catch (error) {
 				console.error('Upload error:', error);
 				toast.error(
@@ -65,11 +143,24 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({
 						? error.message
 						: 'Failed to upload document'
 				);
-			} finally {
+				// Reset processing state immediately on error
 				setIsProcessing(false);
+				setLocalProcessing(false);
+				setUploadProgress(0);
+			} finally {
+				// Ensure processing state is always reset
+				setIsProcessing(false);
+				setLocalProcessing(false);
+				setUploadProgress(0);
 			}
 		},
-		[addDocument, setIsProcessing, onUploadComplete]
+		[
+			addDocument,
+			setIsProcessing,
+			updateDocumentProgress,
+			cacheDocument,
+			onUploadComplete,
+		]
 	);
 
 	const handleButtonClick = useCallback(() => {
@@ -88,18 +179,18 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({
 			<input
 				ref={fileInputRef}
 				type='file'
-				accept='.pdf,.doc,.docx'
+				accept='.pdf,.docx'
 				onChange={handleFileChange}
 				style={{ display: 'none' }}
-				disabled={isProcessing}
+				disabled={isCurrentlyProcessing}
 			/>
 
 			<button
 				type='button'
 				onClick={handleButtonClick}
-				disabled={isProcessing}
-				className={`flex-shrink-0 p-3 text-2xl transition-all duration-200 ${
-					isProcessing
+				disabled={isCurrentlyProcessing}
+				className={`flex-shrink-0 p-3 text-2xl transition-all duration-200 relative ${
+					isCurrentlyProcessing
 						? 'opacity-50 cursor-not-allowed'
 						: 'hover:scale-110'
 				} ${
@@ -108,18 +199,31 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({
 						: 'text-chat-light-accent hover:text-chat-orange'
 				}`}
 				title={
-					isProcessing
-						? 'Processing document...'
+					isCurrentlyProcessing
+						? `Processing document... ${uploadProgress}%`
 						: 'Upload Document (PDF, Word)'
 				}
 			>
-				{isProcessing ? (
+				{isCurrentlyProcessing ? (
 					<div className='animate-spin'>
 						<MdDescription />
 					</div>
 				) : (
 					<MdAttachFile />
 				)}
+
+				{/* Progress indicator */}
+				{isCurrentlyProcessing &&
+					uploadProgress > 0 && (
+						<div className='absolute -bottom-1 left-0 right-0 h-1 bg-gray-200 rounded-full overflow-hidden'>
+							<div
+								className='h-full bg-blue-500 transition-all duration-300'
+								style={{
+									width: `${uploadProgress}%`,
+								}}
+							/>
+						</div>
+					)}
 			</button>
 		</>
 	);

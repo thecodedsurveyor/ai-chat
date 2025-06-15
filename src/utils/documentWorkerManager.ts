@@ -22,6 +22,8 @@ export type WorkerCallback = {
 class DocumentWorkerManager {
 	private worker: Worker | null = null;
 	private callbacks: WorkerCallback = {};
+	private currentFile: File | null = null;
+	private currentDocumentId: string | null = null;
 
 	constructor() {
 		this.initializeWorker();
@@ -57,11 +59,30 @@ class DocumentWorkerManager {
 				);
 				break;
 
-			case 'error':
-				this.callbacks.onError?.(
-					data as WorkerError
-				);
+			case 'error': {
+				const errorData = data as WorkerError;
+				// Check if this needs main thread processing
+				if (
+					errorData.error ===
+						'PDF_MAIN_THREAD_REQUIRED' ||
+					errorData.error ===
+						'DOCX_MAIN_THREAD_REQUIRED'
+				) {
+					console.log(
+						`Falling back to main thread for ${
+							errorData.error ===
+							'PDF_MAIN_THREAD_REQUIRED'
+								? 'PDF'
+								: 'DOCX'
+						} processing`
+					);
+					// Fall back to main thread processing
+					this.handleMainThreadFallback();
+				} else {
+					this.callbacks.onError?.(errorData);
+				}
 				break;
+			}
 
 			default:
 				console.warn(
@@ -78,19 +99,52 @@ class DocumentWorkerManager {
 		});
 	}
 
+	private handleMainThreadFallback() {
+		// When document processing fails in worker, fall back to main thread
+		if (this.currentFile && this.currentDocumentId) {
+			this.processDocumentMainThread(
+				this.currentFile,
+				this.currentDocumentId,
+				this.callbacks
+			)
+				.then((document) => {
+					this.callbacks.onComplete?.({
+						document,
+					});
+				})
+				.catch((error) => {
+					this.callbacks.onError?.({
+						error:
+							error.message ||
+							'Failed to process document',
+					});
+				});
+		}
+	}
+
 	public processDocument(
 		file: File,
 		documentId: string,
 		callbacks: WorkerCallback
 	): Promise<UploadedDocument> {
+		// Store current processing context for fallback
+		this.currentFile = file;
+		this.currentDocumentId = documentId;
+
 		return new Promise((resolve, reject) => {
 			this.callbacks = {
 				...callbacks,
 				onComplete: (result) => {
+					// Clear context after completion
+					this.currentFile = null;
+					this.currentDocumentId = null;
 					callbacks.onComplete?.(result);
 					resolve(result.document);
 				},
 				onError: (error) => {
+					// Clear context after error
+					this.currentFile = null;
+					this.currentDocumentId = null;
 					callbacks.onError?.(error);
 					reject(new Error(error.error));
 				},
@@ -170,81 +224,75 @@ class DocumentWorkerManager {
 			'./documentChunking'
 		);
 
-		try {
-			callbacks.onProgress?.({
-				progress: 10,
-				message: 'Starting document processing...',
-			});
+		callbacks.onProgress?.({
+			progress: 10,
+			message: 'Starting document processing...',
+		});
 
-			const startTime = Date.now();
-			const content = await parseDocument(file);
+		const startTime = Date.now();
+		const content = await parseDocument(file);
 
-			callbacks.onProgress?.({
-				progress: 50,
-				message:
-					'Document parsed, processing content...',
-			});
+		callbacks.onProgress?.({
+			progress: 50,
+			message:
+				'Document parsed, processing content...',
+		});
 
-			const parseTime = Date.now() - startTime;
-			const words = content
-				.trim()
-				.split(/\s+/)
-				.filter((word) => word.length > 0);
-			const preview =
-				content.trim().slice(0, 200) +
-				(content.length > 200 ? '...' : '');
+		const parseTime = Date.now() - startTime;
+		const words = content
+			.trim()
+			.split(/\s+/)
+			.filter((word) => word.length > 0);
+		const preview =
+			content.trim().slice(0, 200) +
+			(content.length > 200 ? '...' : '');
 
-			callbacks.onProgress?.({
-				progress: 70,
-				message: 'Creating document chunks...',
-			});
+		callbacks.onProgress?.({
+			progress: 70,
+			message: 'Creating document chunks...',
+		});
 
-			const chunks = createDocumentChunks(
-				content,
-				documentId
-			);
+		const chunks = createDocumentChunks(
+			content,
+			documentId
+		);
 
-			callbacks.onProgress?.({
-				progress: 85,
-				message: 'Generating summary...',
-			});
+		callbacks.onProgress?.({
+			progress: 85,
+			message: 'Generating summary...',
+		});
 
-			const summary =
-				await this.generateSummaryMainThread(
-					content
-				);
+		const summary =
+			await this.generateSummaryMainThread(content);
 
-			callbacks.onProgress?.({
-				progress: 100,
-				message: 'Document processing complete!',
-			});
+		callbacks.onProgress?.({
+			progress: 100,
+			message: 'Document processing complete!',
+		});
 
-			const document: UploadedDocument = {
-				id: documentId,
-				name: file.name,
-				type: file.type || 'unknown',
-				size: file.size,
-				content,
-				chunks,
-				metadata: {
-					wordCount: words.length,
-					characterCount: content.length,
-					uploadTime: new Date(),
-					lastAccessed: new Date(),
-					parseTime,
-					preview,
-					summary,
-				},
-				uploadedAt: new Date(),
-				isLoaded: true,
-				isProcessing: false,
-				progress: 100,
-			};
+		const document: UploadedDocument = {
+			id: documentId,
+			name: file.name,
+			type: file.type || 'unknown',
+			size: file.size,
+			content,
+			chunks,
+			metadata: {
+				wordCount: words.length,
+				characterCount: content.length,
+				uploadTime: new Date(),
+				lastAccessed: new Date(),
+				parseTime,
+				preview,
+				summary,
+			},
+			uploadedAt: new Date(),
+			isLoaded: true,
+			isProcessing: false,
+			progress: 100,
+		};
 
-			return document;
-		} catch (error) {
-			throw error;
-		}
+		return document;
 	}
 
 	private async generateSummaryMainThread(

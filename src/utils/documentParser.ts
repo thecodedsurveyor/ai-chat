@@ -6,8 +6,8 @@ import type {
 	DocumentMetadata,
 } from '../stores/documentStore';
 
-// Configure PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+// Configure PDF.js worker to use local copy
+pdfjsLib.GlobalWorkerOptions.workerSrc = `/assets/pdf.worker.min.js`;
 
 /**
  * Enhanced document parser that returns content with metadata

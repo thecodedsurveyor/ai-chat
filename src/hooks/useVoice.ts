@@ -78,35 +78,41 @@ export const useVoice = () => {
 			recognition.onerror = (
 				event: SpeechRecognitionErrorEvent
 			) => {
-				console.warn(
-					'Speech recognition event:',
-					event.error
-				);
 				setIsListening(false);
 
 				// Only show toast for actual errors, not normal events
 				if (event.error === 'network') {
+					console.warn(
+						'Speech recognition network error'
+					);
 					toast.error(
 						'Network error - check internet connection'
 					);
 				} else if (event.error === 'not-allowed') {
+					console.warn(
+						'Speech recognition microphone access denied'
+					);
 					toast.error(
 						'Microphone access denied. Please enable microphone permissions.'
 					);
 				} else if (event.error === 'no-speech') {
-					// This is normal - user didn't speak, just log it
-					console.log(
-						'No speech detected (normal timeout)'
-					);
+					// This is normal - user didn't speak, just a timeout
+					// Don't log anything as it's expected behavior
 				} else if (
 					event.error === 'audio-capture'
 				) {
+					console.warn(
+						'Speech recognition audio capture failed'
+					);
 					toast.error(
 						'Audio capture failed - check microphone'
 					);
 				} else if (
 					event.error === 'service-not-allowed'
 				) {
+					console.warn(
+						'Speech recognition service not available'
+					);
 					toast.error(
 						'Speech recognition service not available'
 					);

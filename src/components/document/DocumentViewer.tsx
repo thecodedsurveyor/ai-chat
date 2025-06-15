@@ -45,7 +45,20 @@ const DocumentViewer: React.FC = () => {
 					{documents.map((document) => (
 						<div
 							key={document.id}
-							className={`flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${
+							onClick={() => {
+								// Toggle active document on click
+								if (
+									activeDocument?.id ===
+									document.id
+								) {
+									setActiveDocument(null);
+								} else {
+									setActiveDocument(
+										document
+									);
+								}
+							}}
+							className={`flex items-center gap-3 p-3 rounded-lg border-2 transition-all cursor-pointer ${
 								activeDocument?.id ===
 								document.id
 									? isDark
@@ -55,6 +68,12 @@ const DocumentViewer: React.FC = () => {
 									? 'bg-chat-primary/50 border-chat-accent/30 hover:border-chat-orange/40'
 									: 'bg-white border-gray-300 hover:border-chat-pink/50'
 							}`}
+							title={
+								activeDocument?.id ===
+								document.id
+									? 'Click to deactivate document context'
+									: 'Click to activate document for AI context'
+							}
 						>
 							<MdDescription
 								className={`text-xl ${
@@ -111,7 +130,8 @@ const DocumentViewer: React.FC = () => {
 							)}
 
 							<button
-								onClick={() => {
+								onClick={(e) => {
+									e.stopPropagation(); // Prevent document activation
 									if (
 										activeDocument?.id ===
 										document.id
@@ -152,12 +172,47 @@ const DocumentViewer: React.FC = () => {
 									: 'text-gray-600'
 							}`}
 						>
-							✨ Active document context
-							enabled. Ask questions about "
-							{activeDocument.name}"
+							🤖{' '}
+							<strong>
+								AI Context Active:
+							</strong>{' '}
+							"{activeDocument.name}"
+							<br />
+							<span className='opacity-75'>
+								The AI will prioritize
+								information from this
+								document when answering
+								questions.
+							</span>
 						</p>
 					</div>
 				)}
+
+				{documents.length > 0 &&
+					!activeDocument && (
+						<div
+							className={`mt-3 p-3 rounded-lg ${
+								isDark
+									? 'bg-yellow-900/20 border border-yellow-600/30'
+									: 'bg-yellow-50 border border-yellow-300'
+							}`}
+						>
+							<p
+								className={`text-xs ${
+									isDark
+										? 'text-yellow-400'
+										: 'text-yellow-700'
+								}`}
+							>
+								💡{' '}
+								<strong>
+									No document active.
+								</strong>{' '}
+								Click on a document above to
+								activate it for AI context.
+							</p>
+						</div>
+					)}
 			</div>
 		</div>
 	);

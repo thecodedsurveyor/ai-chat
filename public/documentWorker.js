@@ -1,11 +1,6 @@
 // Document processing web worker
 // This worker handles document parsing in the background to prevent UI blocking
 
-// Import PDF.js for PDF processing
-importScripts(
-	'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js'
-);
-
 // Configuration
 const CHUNK_CONFIG = {
 	MAX_CHUNK_SIZE: 1000,
@@ -310,29 +305,33 @@ async function parseDocument(data) {
 async function parsePDFInWorker(file) {
 	updateProgress(20, 'Reading PDF file...');
 
-	const arrayBuffer = await file.arrayBuffer();
-
-	// Note: This is a simplified PDF parsing for the web worker
-	// In a real implementation, you'd need to handle PDF.js properly in a worker context
-	// For now, we'll simulate the PDF parsing
-
-	updateProgress(40, 'Extracting PDF text...');
-
-	// This would be replaced with actual PDF.js parsing in a production environment
-	const simulatedContent = `PDF Content from ${file.name}\n\nThis is simulated PDF content that would be extracted using PDF.js in a proper web worker implementation.`;
-
-	return simulatedContent;
+	try {
+		// For now, we'll indicate that PDF parsing should be handled in the main thread
+		// since PDF.js has complex worker dependencies that are better handled there
+		throw new Error('PDF_MAIN_THREAD_REQUIRED');
+	} catch (error) {
+		if (error.message === 'PDF_MAIN_THREAD_REQUIRED') {
+			throw error;
+		}
+		throw new Error(
+			`Failed to parse PDF: ${error.message}`
+		);
+	}
 }
 
 async function parseDocxInWorker(file) {
 	updateProgress(20, 'Reading DOCX file...');
 
-	const arrayBuffer = await file.arrayBuffer();
-
-	updateProgress(40, 'Extracting DOCX text...');
-
-	// This would be replaced with actual mammoth parsing in a production environment
-	const simulatedContent = `DOCX Content from ${file.name}\n\nThis is simulated DOCX content that would be extracted using mammoth in a proper web worker implementation.`;
-
-	return simulatedContent;
+	try {
+		// DOCX parsing requires mammoth library which has complex dependencies
+		// Better to handle this in main thread where all libraries are available
+		throw new Error('DOCX_MAIN_THREAD_REQUIRED');
+	} catch (error) {
+		if (error.message === 'DOCX_MAIN_THREAD_REQUIRED') {
+			throw error;
+		}
+		throw new Error(
+			`Failed to parse DOCX: ${error.message}`
+		);
+	}
 }
