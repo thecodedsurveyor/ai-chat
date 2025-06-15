@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../../contexts/ThemeContext';
 import { cn } from '../../utils/classNames';
 import type { VoiceSettings } from '../../types';
+import { useEnhancedTTS } from '../../hooks/useEnhancedTTS';
 // React Icons imports
 import {
 	MdMicOff,
@@ -38,16 +39,19 @@ const VoiceControls: React.FC<VoiceControlsProps> = ({
 }) => {
 	const { isDark } = useTheme();
 	const [isListening, setIsListening] = useState(false);
-	const [isSpeaking, setIsSpeaking] = useState(false);
 	const [transcript, setTranscript] = useState('');
 
 	const [isSupported, setIsSupported] = useState(false);
-	const [voices, setVoices] = useState<
-		SpeechSynthesisVoice[]
-	>([]);
 	const [audioLevel, setAudioLevel] = useState(0);
 	const [lastProcessedCommand, setLastProcessedCommand] =
 		useState<string>('');
+
+	// Enhanced TTS hook
+	const {
+		speak: enhancedSpeak,
+		stop: stopEnhancedTTS,
+		isPlaying: isSpeaking,
+	} = useEnhancedTTS();
 
 	// Use external voice settings if provided, otherwise use default local state
 	const defaultVoiceSettings: VoiceSettings = {
@@ -74,46 +78,22 @@ const VoiceControls: React.FC<VoiceControlsProps> = ({
 
 	// Stop speaking
 	const stopSpeaking = useCallback(() => {
-		if (synthRef.current) {
-			synthRef.current.cancel();
-			setIsSpeaking(false);
-		}
-	}, []);
+		stopEnhancedTTS();
+	}, [stopEnhancedTTS]);
 
-	// Speak text
+	// Speak text using enhanced TTS
 	const speak = useCallback(
 		(text: string) => {
-			if (!synthRef.current || !text.trim()) return;
-
-			synthRef.current.cancel();
+			if (!text.trim()) return;
 
 			const cleanText = text
 				.replace(/[*_`~]/g, '')
 				.replace(/https?:\/\/[^\s]+/g, 'link')
 				.replace(/\n+/g, '. ');
 
-			const utterance = new SpeechSynthesisUtterance(
-				cleanText
-			);
-			utterance.rate = voiceSettings.rate;
-			utterance.pitch = voiceSettings.pitch;
-			utterance.volume = voiceSettings.volume;
-			utterance.lang = voiceSettings.language;
-
-			const voice = voices.find((v) =>
-				v.lang.startsWith(
-					voiceSettings.language.split('-')[0]
-				)
-			);
-			if (voice) utterance.voice = voice;
-
-			utterance.onstart = () => setIsSpeaking(true);
-			utterance.onend = () => setIsSpeaking(false);
-			utterance.onerror = () => setIsSpeaking(false);
-
-			synthRef.current.speak(utterance);
+			enhancedSpeak(cleanText);
 		},
-		[voiceSettings, voices]
+		[enhancedSpeak]
 	);
 
 	// Declare stopListening as a function first to avoid circular dependencies
@@ -420,21 +400,6 @@ const VoiceControls: React.FC<VoiceControlsProps> = ({
 		// Initialize speech synthesis
 		if ('speechSynthesis' in window) {
 			synthRef.current = window.speechSynthesis;
-
-			const loadVoices = () => {
-				const availableVoices =
-					synthRef.current!.getVoices();
-				setVoices(availableVoices);
-			};
-
-			loadVoices();
-			if (
-				synthRef.current.onvoiceschanged !==
-				undefined
-			) {
-				synthRef.current.onvoiceschanged =
-					loadVoices;
-			}
 		}
 
 		return () => {

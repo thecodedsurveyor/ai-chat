@@ -19,6 +19,7 @@ import type {
 } from '../../types';
 import { cn } from '../../utils/classNames';
 import { settingsManager } from '../../utils/settings';
+import { TTSSettings } from './TTSSettings';
 // React Icons imports
 import {
 	MdPalette,
@@ -272,12 +273,19 @@ const SettingsPage: React.FC<SettingsPageProps> = ({
 								)}
 								{activeCategory ===
 									'voiceSynthesis' && (
-									<VoiceSynthesisSettings
-										settings={
+									<TTSSettings
+										isDark={
 											localSettings
-										}
-										onUpdate={
-											updateLocalSettings
+												.theme
+												.mode ===
+												'dark' ||
+											(localSettings
+												.theme
+												.mode ===
+												'auto' &&
+												window.matchMedia(
+													'(prefers-color-scheme: dark)'
+												).matches)
 										}
 									/>
 								)}
@@ -731,297 +739,6 @@ const AccessibilitySettings: React.FC<{
 						</button>
 					</div>
 				))}
-			</div>
-		</div>
-	);
-};
-
-// Voice Synthesis Settings Component
-const VoiceSynthesisSettings: React.FC<{
-	settings: AppSettings;
-	onUpdate: (updates: Partial<AppSettings>) => void;
-}> = ({ settings, onUpdate }) => {
-	const [voices, setVoices] = useState<
-		SpeechSynthesisVoice[]
-	>([]);
-
-	// Load available voices
-	useEffect(() => {
-		const loadVoices = () => {
-			const availableVoices =
-				window.speechSynthesis.getVoices();
-			setVoices(availableVoices);
-		};
-
-		loadVoices();
-		if (
-			window.speechSynthesis.onvoiceschanged !==
-			undefined
-		) {
-			window.speechSynthesis.onvoiceschanged =
-				loadVoices;
-		}
-	}, []);
-
-	const updateVoiceSynthesis = (
-		updates: Partial<typeof settings.voiceSynthesis>
-	) => {
-		onUpdate({
-			voiceSynthesis: {
-				...settings.voiceSynthesis,
-				...updates,
-			},
-		});
-	};
-
-	const testVoice = () => {
-		if (!window.speechSynthesis) return;
-
-		window.speechSynthesis.cancel();
-
-		const utterance = new SpeechSynthesisUtterance(
-			'Hello! This is a test of your voice synthesis settings. How does it sound?'
-		);
-		utterance.rate = settings.voiceSynthesis.rate;
-		utterance.pitch = settings.voiceSynthesis.pitch;
-		utterance.volume = settings.voiceSynthesis.volume;
-		utterance.lang = settings.voiceSynthesis.language;
-
-		const voice = voices.find((v) =>
-			v.lang.startsWith(
-				settings.voiceSynthesis.language.split(
-					'-'
-				)[0]
-			)
-		);
-		if (voice) utterance.voice = voice;
-
-		window.speechSynthesis.speak(utterance);
-	};
-
-	// Languages with flags
-	const languages = [
-		{ code: 'en-US', name: 'English (US)', flag: '🇺🇸' },
-		{ code: 'en-GB', name: 'English (UK)', flag: '🇬🇧' },
-		{ code: 'es-ES', name: 'Spanish', flag: '🇪🇸' },
-		{ code: 'fr-FR', name: 'French', flag: '🇫🇷' },
-		{ code: 'de-DE', name: 'German', flag: '🇩🇪' },
-		{ code: 'it-IT', name: 'Italian', flag: '🇮🇹' },
-		{ code: 'pt-BR', name: 'Portuguese', flag: '🇧🇷' },
-		{ code: 'ja-JP', name: 'Japanese', flag: '🇯🇵' },
-		{ code: 'ko-KR', name: 'Korean', flag: '🇰🇷' },
-		{ code: 'zh-CN', name: 'Chinese', flag: '🇨🇳' },
-		{ code: 'ru-RU', name: 'Russian', flag: '🇷🇺' },
-	];
-
-	return (
-		<div className='space-y-8'>
-			<div>
-				<h3 className='text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2'>
-					Voice Synthesis
-				</h3>
-				<p className='text-gray-600 dark:text-gray-400'>
-					Configure text-to-speech settings and
-					voice output
-				</p>
-			</div>
-
-			{/* Language Selection */}
-			<div className='space-y-3'>
-				<label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
-					Language
-				</label>
-				<select
-					value={settings.voiceSynthesis.language}
-					onChange={(e) =>
-						updateVoiceSynthesis({
-							language: e.target.value,
-						})
-					}
-					className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
-				>
-					{languages.map((lang) => (
-						<option
-							key={lang.code}
-							value={lang.code}
-						>
-							{lang.flag} {lang.name}
-						</option>
-					))}
-				</select>
-			</div>
-
-			{/* Voice Controls */}
-			<div className='grid grid-cols-1 sm:grid-cols-2 gap-6'>
-				{/* Voice Rate */}
-				<div className='space-y-3'>
-					<label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
-						Speed:{' '}
-						{settings.voiceSynthesis.rate.toFixed(
-							1
-						)}
-						x
-					</label>
-					<input
-						type='range'
-						min='0.5'
-						max='2'
-						step='0.1'
-						value={settings.voiceSynthesis.rate}
-						onChange={(e) =>
-							updateVoiceSynthesis({
-								rate: parseFloat(
-									e.target.value
-								),
-							})
-						}
-						className='w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer'
-					/>
-				</div>
-
-				{/* Voice Pitch */}
-				<div className='space-y-3'>
-					<label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
-						Pitch:{' '}
-						{settings.voiceSynthesis.pitch.toFixed(
-							1
-						)}
-					</label>
-					<input
-						type='range'
-						min='0'
-						max='2'
-						step='0.1'
-						value={
-							settings.voiceSynthesis.pitch
-						}
-						onChange={(e) =>
-							updateVoiceSynthesis({
-								pitch: parseFloat(
-									e.target.value
-								),
-							})
-						}
-						className='w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer'
-					/>
-				</div>
-			</div>
-
-			{/* Voice Volume */}
-			<div className='space-y-3'>
-				<label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
-					Volume:{' '}
-					{Math.round(
-						settings.voiceSynthesis.volume * 100
-					)}
-					%
-				</label>
-				<input
-					type='range'
-					min='0'
-					max='1'
-					step='0.1'
-					value={settings.voiceSynthesis.volume}
-					onChange={(e) =>
-						updateVoiceSynthesis({
-							volume: parseFloat(
-								e.target.value
-							),
-						})
-					}
-					className='w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer'
-				/>
-			</div>
-
-			{/* Auto Play */}
-			<div className='flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg'>
-				<div>
-					<h4 className='text-sm font-medium text-gray-900 dark:text-gray-100'>
-						Auto Play Responses
-					</h4>
-					<p className='text-sm text-gray-600 dark:text-gray-400'>
-						Automatically read AI responses
-						aloud
-					</p>
-				</div>
-				<button
-					onClick={() =>
-						updateVoiceSynthesis({
-							autoPlay:
-								!settings.voiceSynthesis
-									.autoPlay,
-						})
-					}
-					className={cn(
-						'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
-						settings.voiceSynthesis.autoPlay
-							? 'bg-blue-600'
-							: 'bg-gray-300 dark:bg-gray-600'
-					)}
-				>
-					<span
-						className={cn(
-							'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
-							settings.voiceSynthesis.autoPlay
-								? 'translate-x-6'
-								: 'translate-x-1'
-						)}
-					/>
-				</button>
-			</div>
-
-			{/* Noise Suppression */}
-			<div className='flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg'>
-				<div>
-					<h4 className='text-sm font-medium text-gray-900 dark:text-gray-100'>
-						Noise Suppression
-					</h4>
-					<p className='text-sm text-gray-600 dark:text-gray-400'>
-						Reduce background noise during
-						speech synthesis
-					</p>
-				</div>
-				<button
-					onClick={() =>
-						updateVoiceSynthesis({
-							noiseSuppressionEnabled:
-								!settings.voiceSynthesis
-									.noiseSuppressionEnabled,
-						})
-					}
-					className={cn(
-						'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
-						settings.voiceSynthesis
-							.noiseSuppressionEnabled
-							? 'bg-blue-600'
-							: 'bg-gray-300 dark:bg-gray-600'
-					)}
-				>
-					<span
-						className={cn(
-							'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
-							settings.voiceSynthesis
-								.noiseSuppressionEnabled
-								? 'translate-x-6'
-								: 'translate-x-1'
-						)}
-					/>
-				</button>
-			</div>
-
-			{/* Test Voice */}
-			<div className='p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg'>
-				<div className='text-center'>
-					<h4 className='text-sm font-medium text-gray-900 dark:text-gray-100 mb-2'>
-						Test Your Settings
-					</h4>
-					<button
-						onClick={testVoice}
-						className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium'
-					>
-						Test Voice
-					</button>
-				</div>
 			</div>
 		</div>
 	);
