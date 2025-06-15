@@ -1,100 +1,223 @@
 import * as pdfjsLib from 'pdfjs-dist';
 import mammoth from 'mammoth';
-import type { UploadedDocument } from '../stores/documentStore';
+import { createDocumentChunks } from './documentChunking';
+import type {
+	UploadedDocument,
+	DocumentMetadata,
+} from '../stores/documentStore';
 
-// Set the worker source for PDF.js
+// Configure PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
-export const parseDocument = async (
-	file: File
-): Promise<string> => {
-	try {
-		const fileType = file.type.toLowerCase();
-		const fileName = file.name.toLowerCase();
+/**
+ * Enhanced document parser that returns content with metadata
+ */
+export async function parseDocumentWithMetadata(
+	file: File,
+	documentId: string
+): Promise<UploadedDocument> {
+	const startTime = Date.now();
+	let content = '';
+	let pageCount: number | undefined;
 
+	try {
 		if (
-			fileType === 'application/pdf' ||
-			fileName.endsWith('.pdf')
+			file.type === 'application/pdf' ||
+			file.name.toLowerCase().endsWith('.pdf')
 		) {
-			return await parsePDF(file);
+			const result = await parsePDF(file);
+			content = result.content;
+			pageCount = result.pageCount;
 		} else if (
-			fileType ===
-				'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-			fileName.endsWith('.docx')
+			file.name.toLowerCase().endsWith('.docx')
 		) {
-			return await parseDocx(file);
-		} else if (
-			fileType === 'application/msword' ||
-			fileName.endsWith('.doc')
-		) {
-			// For .doc files, we'll show a message asking to convert to .docx
-			throw new Error(
-				'Please convert .doc files to .docx format for better compatibility'
-			);
+			content = await parseDocx(file);
 		} else {
 			throw new Error(
-				'Unsupported file format. Please upload PDF or DOCX files.'
+				`Unsupported file type: ${
+					file.type || 'unknown'
+				}`
 			);
 		}
+
+		const parseTime = Date.now() - startTime;
+		const words = content
+			.trim()
+			.split(/\s+/)
+			.filter((word) => word.length > 0);
+		const preview =
+			content.trim().slice(0, 200) +
+			(content.length > 200 ? '...' : '');
+
+		// Create document chunks
+		const chunks = createDocumentChunks(
+			content,
+			documentId
+		);
+
+		const metadata: DocumentMetadata = {
+			pageCount,
+			wordCount: words.length,
+			characterCount: content.length,
+			uploadTime: new Date(),
+			lastAccessed: new Date(),
+			parseTime,
+			preview,
+		};
+
+		const document: UploadedDocument = {
+			id: documentId,
+			name: file.name,
+			type: file.type || 'unknown',
+			size: file.size,
+			content,
+			chunks,
+			metadata,
+			uploadedAt: new Date(),
+			isLoaded: true,
+			isProcessing: false,
+			progress: 100,
+		};
+
+		return document;
 	} catch (error) {
-		console.error('Error parsing document:', error);
+		console.error('Document parsing error:', error);
+		throw error;
+	}
+}
+
+// Keep the original function for backwards compatibility
+export async function parseDocument(
+	file: File
+): Promise<string> {
+	if (
+		file.type === 'application/pdf' ||
+		file.name.toLowerCase().endsWith('.pdf')
+	) {
+		const result = await parsePDF(file);
+		return result.content;
+	} else if (file.name.toLowerCase().endsWith('.docx')) {
+		return await parseDocx(file);
+	} else {
 		throw new Error(
-			`Failed to parse ${file.name}: ${
-				error instanceof Error
-					? error.message
-					: 'Unknown error'
+			`Unsupported file type: ${
+				file.type || 'unknown'
 			}`
 		);
 	}
-};
+}
 
-async function parsePDF(file: File): Promise<string> {
-	const arrayBuffer = await file.arrayBuffer();
-	const pdf = await pdfjsLib.getDocument({
-		data: arrayBuffer,
-	}).promise;
-	let fullText = '';
+interface PDFParseResult {
+	content: string;
+	pageCount: number;
+}
 
-	for (
-		let pageNum = 1;
-		pageNum <= pdf.numPages;
-		pageNum++
-	) {
-		const page = await pdf.getPage(pageNum);
-		const textContent = await page.getTextContent();
-		const pageText = textContent.items
-			.map((item) => ('str' in item ? item.str : ''))
-			.join(' ');
-		fullText += pageText + '\n';
+async function parsePDF(
+	file: File
+): Promise<PDFParseResult> {
+	try {
+		const arrayBuffer = await file.arrayBuffer();
+		const pdf = await pdfjsLib.getDocument({
+			data: arrayBuffer,
+		}).promise;
+
+		let fullText = '';
+		const pageCount = pdf.numPages;
+
+		for (let i = 1; i <= pageCount; i++) {
+			const page = await pdf.getPage(i);
+			const textContent = await page.getTextContent();
+
+			// Extract text with proper spacing
+			const pageText = textContent.items
+				.map((item) => {
+					// Handle TextItem type from PDF.js
+					if (
+						typeof item === 'object' &&
+						item !== null &&
+						'str' in item
+					) {
+						return (item as { str: string })
+							.str;
+					}
+					return '';
+				})
+				.join(' ')
+				.replace(/\s+/g, ' ')
+				.trim();
+
+			if (pageText) {
+				fullText +=
+					(fullText ? '\n\n' : '') +
+					`[Page ${i}]\n${pageText}`;
+			}
+		}
+
+		if (!fullText.trim()) {
+			throw new Error(
+				'No text content found in PDF. The PDF might be image-based or corrupted.'
+			);
+		}
+
+		return {
+			content: fullText.trim(),
+			pageCount,
+		};
+	} catch (error) {
+		console.error('PDF parsing error:', error);
+		if (error instanceof Error) {
+			if (error.message.includes('Invalid PDF')) {
+				throw new Error(
+					'Invalid PDF file. Please ensure the file is not corrupted.'
+				);
+			}
+			if (error.message.includes('password')) {
+				throw new Error(
+					'Password-protected PDFs are not supported.'
+				);
+			}
+		}
+		throw new Error(
+			'Failed to parse PDF. Please try a different file.'
+		);
 	}
-
-	return fullText.trim();
 }
 
 async function parseDocx(file: File): Promise<string> {
-	const arrayBuffer = await file.arrayBuffer();
-	const result = await mammoth.extractRawText({
-		arrayBuffer,
-	});
-	return result.value;
+	try {
+		const arrayBuffer = await file.arrayBuffer();
+		const result = await mammoth.extractRawText({
+			arrayBuffer,
+		});
+
+		if (!result.value.trim()) {
+			throw new Error(
+				'No text content found in the document.'
+			);
+		}
+
+		// Clean up the text
+		const cleanText = result.value
+			.replace(/\r\n/g, '\n')
+			.replace(/\n{3,}/g, '\n\n')
+			.trim();
+
+		return cleanText;
+	} catch (error) {
+		console.error('DOCX parsing error:', error);
+		if (
+			error instanceof Error &&
+			error.message.includes('not a valid zip file')
+		) {
+			throw new Error(
+				'Invalid DOCX file. Please ensure the file is not corrupted.'
+			);
+		}
+		throw new Error(
+			'Failed to parse DOCX file. Please try a different file.'
+		);
+	}
 }
-
-export const createDocumentFromFile = async (
-	file: File
-): Promise<UploadedDocument> => {
-	const content = await parseDocument(file);
-
-	return {
-		id: `doc_${Date.now()}_${Math.random()
-			.toString(36)
-			.substr(2, 9)}`,
-		name: file.name,
-		type: file.type || 'unknown',
-		size: file.size,
-		content,
-		uploadedAt: new Date(),
-	};
-};
 
 export const isValidDocumentType = (
 	file: File
@@ -102,29 +225,14 @@ export const isValidDocumentType = (
 	const validTypes = [
 		'application/pdf',
 		'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
-		'application/msword', // .doc (will show conversion message)
 	];
 
-	const validExtensions = ['.pdf', '.doc', '.docx'];
+	const validExtensions = ['.pdf', '.docx'];
 
 	return (
 		validTypes.includes(file.type) ||
 		validExtensions.some((ext) =>
 			file.name.toLowerCase().endsWith(ext)
 		)
-	);
-};
-
-export const formatFileSize = (bytes: number): string => {
-	if (bytes === 0) return '0 Bytes';
-
-	const k = 1024;
-	const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-	const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-	return (
-		parseFloat((bytes / Math.pow(k, i)).toFixed(2)) +
-		' ' +
-		sizes[i]
 	);
 };
