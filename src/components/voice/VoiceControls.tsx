@@ -81,6 +81,19 @@ const VoiceControls: React.FC<VoiceControlsProps> = ({
 		stopEnhancedTTS();
 	}, [stopEnhancedTTS]);
 
+	// Stop voice recognition when TTS starts to prevent feedback loop
+	useEffect(() => {
+		if (isSpeaking && isListening) {
+			// Stop voice recognition when TTS starts
+			stopListeningFn(
+				recognitionRef.current,
+				animationRef.current,
+				setIsListening,
+				setAudioLevel
+			);
+		}
+	}, [isSpeaking, isListening]);
+
 	// Speak text using enhanced TTS
 	const speak = useCallback(
 		(text: string) => {
@@ -316,6 +329,14 @@ const VoiceControls: React.FC<VoiceControlsProps> = ({
 
 	// Start listening
 	const startListening = useCallback(() => {
+		// Prevent starting voice recognition while TTS is playing
+		if (isSpeaking) {
+			console.log(
+				'Cannot start voice recognition while TTS is playing'
+			);
+			return;
+		}
+
 		if (recognitionRef.current && !isListening) {
 			try {
 				recognitionRef.current.lang =
@@ -333,6 +354,7 @@ const VoiceControls: React.FC<VoiceControlsProps> = ({
 		}
 	}, [
 		isListening,
+		isSpeaking,
 		voiceSettings.language,
 		startAudioMonitoring,
 	]);
@@ -479,6 +501,7 @@ const VoiceControls: React.FC<VoiceControlsProps> = ({
 								)
 						: startListening
 				}
+				disabled={isSpeaking}
 				className={cn(
 					'relative flex items-center justify-center rounded-xl transition-all duration-300',
 					// Responsive sizing based on className
@@ -487,14 +510,20 @@ const VoiceControls: React.FC<VoiceControlsProps> = ({
 						: 'w-10 h-10', // Desktop size
 					isListening
 						? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg shadow-red-500/25'
+						: isSpeaking
+						? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-50'
 						: isDark
 						? 'bg-chat-secondary text-chat-accent hover:text-chat-pink hover:bg-chat-secondary/80'
 						: 'bg-gray-100 text-gray-600 hover:text-chat-pink hover:bg-gray-200'
 				)}
-				whileHover={{ scale: 1.05 }}
-				whileTap={{ scale: 0.95 }}
+				whileHover={{
+					scale: isSpeaking ? 1 : 1.05,
+				}}
+				whileTap={{ scale: isSpeaking ? 1 : 0.95 }}
 				title={
-					isListening
+					isSpeaking
+						? 'Voice recognition disabled while TTS is playing'
+						: isListening
 						? 'Stop voice recognition'
 						: 'Start voice recognition'
 				}
