@@ -1,4 +1,10 @@
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, {
+	useCallback,
+	useMemo,
+	useRef,
+	useState,
+	useEffect,
+} from 'react';
 import Picker from '@emoji-mart/react';
 import data from '@emoji-mart/data';
 import { useTheme } from '../../../contexts/ThemeContext';
@@ -24,6 +30,9 @@ import {
 	MdSend,
 	MdApps,
 	MdFace,
+	MdAdd,
+	MdPsychology,
+	MdExpandMore,
 } from 'react-icons/md';
 import type { EmojiData } from '../../../types';
 import VoiceControls from '../../voice/VoiceControls';
@@ -34,6 +43,11 @@ import { settingsManager } from '../../../utils/settings';
 const ChatInput: React.FC = () => {
 	const { isDark } = useTheme();
 	const inputRef = useRef<HTMLInputElement>(null);
+
+	// Local state for dropdown menus
+	const [showContentTools, setShowContentTools] =
+		useState(false);
+	const [showAITools, setShowAITools] = useState(false);
 
 	// Phase 2: Input state from store
 	const inputValue = useInputValue();
@@ -82,6 +96,8 @@ const ChatInput: React.FC = () => {
 
 		clearInput();
 		closeEmojiPicker();
+		setShowContentTools(false);
+		setShowAITools(false);
 	}, [
 		inputValue,
 		chats.length,
@@ -95,6 +111,7 @@ const ChatInput: React.FC = () => {
 		(emoji: EmojiData) => {
 			appendToInput(emoji.native);
 			closeEmojiPicker();
+			setShowContentTools(false);
 		},
 		[appendToInput, closeEmojiPicker]
 	);
@@ -135,6 +152,44 @@ const ChatInput: React.FC = () => {
 		handleSendMessage();
 	};
 
+	// Close dropdowns when clicking outside
+	const handleInputFocus = useCallback(() => {
+		closeEmojiPicker();
+		setShowContentTools(false);
+		setShowAITools(false);
+	}, [closeEmojiPicker]);
+
+	// Add click outside handler to close dropdowns
+	useEffect(() => {
+		const handleClickOutside = (event: MouseEvent) => {
+			const target = event.target as Element;
+
+			// Don't close if clicking on dropdown buttons or their content
+			if (
+				target.closest('[data-dropdown-trigger]') ||
+				target.closest('[data-dropdown-content]')
+			) {
+				return;
+			}
+
+			// Close all dropdowns
+			setShowContentTools(false);
+			setShowAITools(false);
+			closeEmojiPicker();
+		};
+
+		document.addEventListener(
+			'mousedown',
+			handleClickOutside
+		);
+		return () => {
+			document.removeEventListener(
+				'mousedown',
+				handleClickOutside
+			);
+		};
+	}, [closeEmojiPicker]);
+
 	return (
 		<form
 			onSubmit={handleSubmit}
@@ -151,42 +206,161 @@ const ChatInput: React.FC = () => {
 						: 'bg-white border-2 border-chat-purple/40 hover:border-chat-pink/50'
 				}`}
 			>
-				{/* Mobile: Show only essential buttons */}
-				<div className='md:hidden flex items-center gap-1'>
-					{/* Templates Button - Mobile */}
-					<button
-						type='button'
-						onClick={toggleUnifiedTemplates}
-						className={`flex-shrink-0 p-2 text-lg transition-colors ${
-							isDark
-								? 'text-chat-accent hover:text-chat-purple'
-								: 'text-chat-light-accent hover:text-chat-purple'
-						}`}
-						title='Templates'
-					>
-						<MdApps />
-					</button>
+				{/* Mobile: Grouped layout matching desktop */}
+				<div className='md:hidden flex items-center gap-2'>
+					{/* Content Tools Group - Mobile */}
+					<div className='relative'>
+						<button
+							type='button'
+							data-dropdown-trigger
+							onClick={() =>
+								setShowContentTools(
+									!showContentTools
+								)
+							}
+							className={`flex items-center gap-1 p-2 rounded-lg text-sm transition-colors ${
+								isDark
+									? 'text-chat-accent hover:text-chat-purple hover:bg-chat-secondary/50'
+									: 'text-chat-light-accent hover:text-chat-purple hover:bg-gray-100'
+							}`}
+							title='Content Tools'
+						>
+							<MdAdd className='text-lg' />
+							<MdExpandMore
+								className={`text-sm transition-transform ${
+									showContentTools
+										? 'rotate-180'
+										: ''
+								}`}
+							/>
+						</button>
 
-					{/* Persona Selector Button - Mobile */}
-					<button
-						type='button'
-						onClick={togglePersonaSelector}
-						className={`flex-shrink-0 p-2 text-lg transition-colors ${
-							isDark
-								? 'text-chat-accent hover:text-chat-pink'
-								: 'text-chat-light-accent hover:text-chat-pink'
-						}`}
-						title='AI Personas'
-					>
-						<MdFace />
-					</button>
-
-					{/* Document Upload Button - Mobile */}
-					<div className='flex-shrink-0 scale-75'>
-						<DocumentUpload />
+						{showContentTools && (
+							<div
+								data-dropdown-content
+								className={`absolute bottom-full left-0 mb-2 p-2 rounded-lg shadow-lg border z-20 ${
+									isDark
+										? 'bg-chat-secondary border-chat-accent/30'
+										: 'bg-white border-gray-300'
+								}`}
+							>
+								<div className='flex flex-col gap-1 min-w-max'>
+									<button
+										type='button'
+										onClick={() => {
+											toggleUnifiedTemplates();
+											setShowContentTools(
+												false
+											);
+										}}
+										className={`flex items-center gap-2 p-2 rounded text-sm transition-colors ${
+											isDark
+												? 'text-chat-accent hover:text-chat-purple hover:bg-chat-primary/50'
+												: 'text-gray-700 hover:text-chat-purple hover:bg-gray-100'
+										}`}
+									>
+										<MdApps />
+										Templates
+									</button>
+									<button
+										type='button'
+										onClick={() => {
+											toggleEmojiPicker();
+											setShowContentTools(
+												false
+											);
+										}}
+										className={`flex items-center gap-2 p-2 rounded text-sm transition-colors ${
+											isDark
+												? 'text-chat-accent hover:text-chat-orange hover:bg-chat-primary/50'
+												: 'text-gray-700 hover:text-chat-orange hover:bg-gray-100'
+										}`}
+									>
+										<MdEmojiEmotions />
+										Emojis
+									</button>
+								</div>
+							</div>
+						)}
 					</div>
 
-					{/* Voice Controls - Mobile (Compact) */}
+					{/* AI & Documents Group - Mobile */}
+					<div className='relative'>
+						<button
+							type='button'
+							data-dropdown-trigger
+							onClick={() =>
+								setShowAITools(!showAITools)
+							}
+							className={`flex items-center gap-1 p-2 rounded-lg text-sm transition-colors ${
+								isDark
+									? 'text-chat-accent hover:text-chat-pink hover:bg-chat-secondary/50'
+									: 'text-chat-light-accent hover:text-chat-pink hover:bg-gray-100'
+							}`}
+							title='AI & Documents'
+						>
+							<MdPsychology className='text-lg' />
+							<MdExpandMore
+								className={`text-sm transition-transform ${
+									showAITools
+										? 'rotate-180'
+										: ''
+								}`}
+							/>
+						</button>
+
+						{showAITools && (
+							<div
+								data-dropdown-content
+								className={`absolute bottom-full left-0 mb-2 p-2 rounded-lg shadow-lg border z-20 ${
+									isDark
+										? 'bg-chat-secondary border-chat-accent/30'
+										: 'bg-white border-gray-300'
+								}`}
+							>
+								<div className='flex flex-col gap-1 min-w-max'>
+									<button
+										type='button'
+										onClick={() => {
+											togglePersonaSelector();
+											setShowAITools(
+												false
+											);
+										}}
+										className={`flex items-center gap-2 p-2 rounded text-sm transition-colors ${
+											isDark
+												? 'text-chat-accent hover:text-chat-pink hover:bg-chat-primary/50'
+												: 'text-gray-700 hover:text-chat-pink hover:bg-gray-100'
+										}`}
+									>
+										<MdFace />
+										AI Personas
+									</button>
+									<div
+										onClick={() =>
+											setShowAITools(
+												false
+											)
+										}
+										className={`flex items-center gap-2 p-2 rounded text-sm transition-colors cursor-pointer ${
+											isDark
+												? 'text-chat-accent hover:text-chat-orange hover:bg-chat-primary/50'
+												: 'text-gray-700 hover:text-chat-orange hover:bg-gray-100'
+										}`}
+									>
+										<div className='scale-75'>
+											<DocumentUpload />
+										</div>
+										<span>
+											Documents
+										</span>
+									</div>
+								</div>
+							</div>
+						)}
+					</div>
+
+					{/* Voice Controls - Mobile */}
 					<div className='flex-shrink-0'>
 						<VoiceControls
 							onVoiceInput={handleVoiceInput}
@@ -202,53 +376,161 @@ const ChatInput: React.FC = () => {
 					</div>
 				</div>
 
-				{/* Desktop: Show all buttons */}
-				<div className='hidden md:flex items-center gap-4'>
-					{/* Templates Button */}
-					<button
-						type='button'
-						onClick={toggleUnifiedTemplates}
-						className={`flex-shrink-0 p-3 text-2xl transition-colors ${
-							isDark
-								? 'text-chat-accent hover:text-chat-purple'
-								: 'text-chat-light-accent hover:text-chat-purple'
-						}`}
-						title='Templates'
-					>
-						<MdApps />
-					</button>
+				{/* Desktop: Grouped buttons for cleaner layout */}
+				<div className='hidden md:flex items-center gap-3'>
+					{/* Content Tools Group */}
+					<div className='relative'>
+						<button
+							type='button'
+							data-dropdown-trigger
+							onClick={() =>
+								setShowContentTools(
+									!showContentTools
+								)
+							}
+							className={`flex items-center gap-1 p-2 rounded-lg text-sm transition-colors ${
+								isDark
+									? 'text-chat-accent hover:text-chat-purple hover:bg-chat-secondary/50'
+									: 'text-chat-light-accent hover:text-chat-purple hover:bg-gray-100'
+							}`}
+							title='Content Tools'
+						>
+							<MdAdd className='text-lg' />
+							<MdExpandMore
+								className={`text-sm transition-transform ${
+									showContentTools
+										? 'rotate-180'
+										: ''
+								}`}
+							/>
+						</button>
 
-					{/* Persona Selector Button */}
-					<button
-						type='button'
-						onClick={togglePersonaSelector}
-						className={`flex-shrink-0 p-3 text-2xl transition-colors ${
-							isDark
-								? 'text-chat-accent hover:text-chat-pink'
-								: 'text-chat-light-accent hover:text-chat-pink'
-						}`}
-						title='AI Personas'
-					>
-						<MdFace />
-					</button>
+						{showContentTools && (
+							<div
+								data-dropdown-content
+								className={`absolute bottom-full left-0 mb-2 p-2 rounded-lg shadow-lg border z-20 ${
+									isDark
+										? 'bg-chat-secondary border-chat-accent/30'
+										: 'bg-white border-gray-300'
+								}`}
+							>
+								<div className='flex flex-col gap-1 min-w-max'>
+									<button
+										type='button'
+										onClick={() => {
+											toggleUnifiedTemplates();
+											setShowContentTools(
+												false
+											);
+										}}
+										className={`flex items-center gap-2 p-2 rounded text-sm transition-colors ${
+											isDark
+												? 'text-chat-accent hover:text-chat-purple hover:bg-chat-primary/50'
+												: 'text-gray-700 hover:text-chat-purple hover:bg-gray-100'
+										}`}
+									>
+										<MdApps />
+										Templates
+									</button>
+									<button
+										type='button'
+										onClick={() => {
+											toggleEmojiPicker();
+											setShowContentTools(
+												false
+											);
+										}}
+										className={`flex items-center gap-2 p-2 rounded text-sm transition-colors ${
+											isDark
+												? 'text-chat-accent hover:text-chat-orange hover:bg-chat-primary/50'
+												: 'text-gray-700 hover:text-chat-orange hover:bg-gray-100'
+										}`}
+									>
+										<MdEmojiEmotions />
+										Emojis
+									</button>
+								</div>
+							</div>
+						)}
+					</div>
 
-					{/* Document Upload Button */}
-					<DocumentUpload />
+					{/* AI & Documents Group */}
+					<div className='relative'>
+						<button
+							type='button'
+							data-dropdown-trigger
+							onClick={() =>
+								setShowAITools(!showAITools)
+							}
+							className={`flex items-center gap-1 p-2 rounded-lg text-sm transition-colors ${
+								isDark
+									? 'text-chat-accent hover:text-chat-pink hover:bg-chat-secondary/50'
+									: 'text-chat-light-accent hover:text-chat-pink hover:bg-gray-100'
+							}`}
+							title='AI & Documents'
+						>
+							<MdPsychology className='text-lg' />
+							<MdExpandMore
+								className={`text-sm transition-transform ${
+									showAITools
+										? 'rotate-180'
+										: ''
+								}`}
+							/>
+						</button>
 
-					{/* Emoji Picker Button */}
-					<button
-						type='button'
-						onClick={toggleEmojiPicker}
-						className={`flex-shrink-0 p-3 text-2xl transition-colors ${
-							isDark
-								? 'text-chat-accent hover:text-chat-orange'
-								: 'text-chat-light-accent hover:text-chat-orange'
-						}`}
-					>
-						<MdEmojiEmotions />
-					</button>
+						{showAITools && (
+							<div
+								data-dropdown-content
+								className={`absolute bottom-full left-0 mb-2 p-2 rounded-lg shadow-lg border z-20 ${
+									isDark
+										? 'bg-chat-secondary border-chat-accent/30'
+										: 'bg-white border-gray-300'
+								}`}
+							>
+								<div className='flex flex-col gap-1 min-w-max'>
+									<button
+										type='button'
+										onClick={() => {
+											togglePersonaSelector();
+											setShowAITools(
+												false
+											);
+										}}
+										className={`flex items-center gap-2 p-2 rounded text-sm transition-colors ${
+											isDark
+												? 'text-chat-accent hover:text-chat-pink hover:bg-chat-primary/50'
+												: 'text-gray-700 hover:text-chat-pink hover:bg-gray-100'
+										}`}
+									>
+										<MdFace />
+										AI Personas
+									</button>
+									<div
+										onClick={() =>
+											setShowAITools(
+												false
+											)
+										}
+										className={`flex items-center gap-2 p-2 rounded text-sm transition-colors cursor-pointer ${
+											isDark
+												? 'text-chat-accent hover:text-chat-orange hover:bg-chat-primary/50'
+												: 'text-gray-700 hover:text-chat-orange hover:bg-gray-100'
+										}`}
+									>
+										<div className='scale-75'>
+											<DocumentUpload />
+										</div>
+										<span>
+											Documents
+										</span>
+									</div>
+								</div>
+							</div>
+						)}
+					</div>
 
-					{/* Voice Controls - Desktop */}
+					{/* Voice Controls - Standalone */}
 					<div className='flex-shrink-0'>
 						<VoiceControls
 							onVoiceInput={handleVoiceInput}
@@ -280,7 +562,7 @@ const ChatInput: React.FC = () => {
 						type='text'
 						value={inputValue}
 						onChange={updateInputValue}
-						onFocus={closeEmojiPicker}
+						onFocus={handleInputFocus}
 						ref={inputRef}
 						placeholder={
 							activeDocument
