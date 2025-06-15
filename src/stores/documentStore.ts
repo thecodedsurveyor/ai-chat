@@ -18,7 +18,9 @@ interface DocumentState {
 	// Actions
 	addDocument: (document: UploadedDocument) => void;
 	removeDocument: (documentId: string) => void;
-	setActiveDocument: (document: UploadedDocument | null) => void;
+	setActiveDocument: (
+		document: UploadedDocument | null
+	) => void;
 	setIsProcessing: (isProcessing: boolean) => void;
 	clearDocuments: () => void;
 }
@@ -33,7 +35,10 @@ export const useDocumentStore = create<DocumentState>()(
 
 				addDocument: (document) =>
 					set((state) => ({
-						documents: [...state.documents, document],
+						documents: [
+							...state.documents,
+							document,
+						],
 						activeDocument: document,
 					})),
 
@@ -43,7 +48,8 @@ export const useDocumentStore = create<DocumentState>()(
 							(doc) => doc.id !== documentId
 						),
 						activeDocument:
-							state.activeDocument?.id === documentId
+							state.activeDocument?.id ===
+							documentId
 								? null
 								: state.activeDocument,
 					})),
@@ -75,4 +81,4 @@ export const useActiveDocument = () =>
 	useDocumentStore((state) => state.activeDocument);
 
 export const useIsProcessing = () =>
-	useDocumentStore((state) => state.isProcessing); 
+	useDocumentStore((state) => state.isProcessing);

@@ -33,7 +33,7 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({
 			// Validate file type
 			if (!isValidDocumentType(file)) {
 				toast.error(
-					'Please upload a PDF or Word document (.pdf, .doc, .docx)'
+					'Please upload a PDF or Word document (.pdf, .docx)'
 				);
 				return;
 			}
@@ -88,7 +88,7 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({
 			<input
 				ref={fileInputRef}
 				type='file'
-				accept='.pdf,.doc,.docx,.odt'
+				accept='.pdf,.doc,.docx'
 				onChange={handleFileChange}
 				style={{ display: 'none' }}
 				disabled={isProcessing}
