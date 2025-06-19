@@ -135,7 +135,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
 											content={
 												message.text
 											}
-											className='text-white'
+											isUser={isUser}
 										/>
 									</div>
 
@@ -205,7 +205,14 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
 				  })}
 
 			{/* Enhanced Typing Indicator */}
-			<EnhancedTypingIndicator isVisible={isTyping} />
+			<EnhancedTypingIndicator
+				isVisible={isTyping}
+				isStreaming={
+					messages.length > 0 &&
+					messages[messages.length - 1]?.text ===
+						''
+				}
+			/>
 
 			<div ref={scrollRef} />
 		</div>

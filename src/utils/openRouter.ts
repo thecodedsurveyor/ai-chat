@@ -23,21 +23,39 @@ export interface OpenRouterConfig {
 	stream?: boolean;
 }
 
-// Default configuration
+// Default configuration - optimized for speed
 export const DEFAULT_CONFIG: OpenRouterConfig = {
 	model: OPENROUTER_MODELS.DEEPSEEK_R1T_CHIMERA_FREE,
-	max_tokens: 1000,
+	max_tokens: 750, // Reduced for faster responses
 	temperature: 0.7,
 	top_p: 0.9,
 };
 
-// Context-aware memory configuration
+// Fast response configuration for quick queries
+export const FAST_CONFIG: OpenRouterConfig = {
+	model: OPENROUTER_MODELS.LLAMA_3_8B_GROQ, // Faster model
+	max_tokens: 500,
+	temperature: 0.5, // Lower for more focused responses
+	top_p: 0.8,
+};
+
+// Context-aware memory configuration - optimized for speed
 const CONTEXT_CONFIG = {
-	MAX_TOKENS: 8000, // Conservative limit for context window
-	RESERVE_FOR_RESPONSE: 1000, // Reserve tokens for AI response
+	MAX_TOKENS: 6000, // Reduced from 8000 for faster processing
+	RESERVE_FOR_RESPONSE: 750, // Matches max_tokens
 	CHARS_PER_TOKEN: 4, // Approximate character to token ratio
 	MIN_MESSAGES: 2, // Minimum messages to include
-	MAX_MESSAGES: 50, // Maximum messages to prevent infinite loops
+	MAX_MESSAGES: 20, // Reduced from 50 for faster processing
+};
+
+// Performance optimization: Faster models for specific use cases
+export const FAST_MODELS = {
+	QUICK_RESPONSES: OPENROUTER_MODELS.LLAMA_3_8B_GROQ,
+	CODE_ANALYSIS: OPENROUTER_MODELS.LLAMA_3_8B_GROQ,
+	SIMPLE_QUESTIONS: OPENROUTER_MODELS.LLAMA_3_8B_GROQ,
+	COMPLEX_REASONING:
+		OPENROUTER_MODELS.DEEPSEEK_R1T_CHIMERA_FREE,
+	CREATIVE_WRITING: OPENROUTER_MODELS.LLAMA_3_1_8B_FREE, // Fixed model name
 };
 
 /**
@@ -205,7 +223,7 @@ export function formatContextAwareMessage(
 }
 
 /**
- * Enhanced API call with proper conversation history
+ * Enhanced API call with streaming support for faster responses
  */
 export async function callOpenRouter(
 	messageOrMessages:
@@ -214,7 +232,8 @@ export async function callOpenRouter(
 				role: 'user' | 'assistant' | 'system';
 				content: string;
 		  }>,
-	config: Partial<OpenRouterConfig> = {}
+	config: Partial<OpenRouterConfig> = {},
+	onToken?: (token: string) => void
 ): Promise<string> {
 	const API_URL =
 		'https://openrouter.ai/api/v1/chat/completions';
@@ -252,6 +271,9 @@ export async function callOpenRouter(
 			  ]
 			: messageOrMessages;
 
+	// Enable streaming if onToken callback is provided
+	const shouldStream = !!onToken;
+
 	try {
 		const response = await fetch(API_URL, {
 			method: 'POST',
@@ -266,7 +288,7 @@ export async function callOpenRouter(
 				max_tokens: finalConfig.max_tokens,
 				temperature: finalConfig.temperature,
 				top_p: finalConfig.top_p,
-				stream: finalConfig.stream || false,
+				stream: shouldStream,
 			}),
 		});
 
@@ -305,6 +327,57 @@ export async function callOpenRouter(
 			throw new Error(errorMessage);
 		}
 
+		// Handle streaming response
+		if (shouldStream && response.body) {
+			const reader = response.body.getReader();
+			const decoder = new TextDecoder();
+			let content = '';
+
+			try {
+				while (true) {
+					const { done, value } =
+						await reader.read();
+					if (done) break;
+
+					const chunk = decoder.decode(value, {
+						stream: true,
+					});
+					const lines = chunk.split('\n');
+
+					for (const line of lines) {
+						if (line.startsWith('data: ')) {
+							const data = line.slice(6);
+
+							if (data === '[DONE]') {
+								return content;
+							}
+
+							try {
+								const parsed =
+									JSON.parse(data);
+								const delta =
+									parsed.choices?.[0]
+										?.delta?.content;
+
+								if (delta) {
+									content += delta;
+									onToken(delta);
+								}
+							} catch {
+								// Skip invalid JSON lines
+								continue;
+							}
+						}
+					}
+				}
+			} finally {
+				reader.releaseLock();
+			}
+
+			return content;
+		}
+
+		// Handle non-streaming response (fallback)
 		const data = await response.json();
 
 		if (
@@ -329,4 +402,76 @@ export async function callOpenRouter(
 			'Unknown error occurred while calling OpenRouter API'
 		);
 	}
+}
+
+/**
+ * Suggests the optimal model based on query characteristics for faster responses
+ */
+export function suggestOptimalModel(
+	query: string
+): OpenRouterModel {
+	const lowercaseQuery = query.toLowerCase();
+
+	// Short queries (< 50 chars) - use fastest model
+	if (query.length < 50) {
+		return FAST_MODELS.QUICK_RESPONSES;
+	}
+
+	// Code-related queries
+	if (
+		lowercaseQuery.includes('code') ||
+		lowercaseQuery.includes('function') ||
+		lowercaseQuery.includes('debug') ||
+		lowercaseQuery.includes('programming')
+	) {
+		return FAST_MODELS.CODE_ANALYSIS;
+	}
+
+	// Simple question patterns
+	if (
+		lowercaseQuery.startsWith('what') ||
+		lowercaseQuery.startsWith('how') ||
+		lowercaseQuery.startsWith('why') ||
+		lowercaseQuery.startsWith('when') ||
+		lowercaseQuery.startsWith('where')
+	) {
+		return FAST_MODELS.SIMPLE_QUESTIONS;
+	}
+
+	// Creative tasks
+	if (
+		lowercaseQuery.includes('write') ||
+		lowercaseQuery.includes('create') ||
+		lowercaseQuery.includes('story') ||
+		lowercaseQuery.includes('poem')
+	) {
+		return FAST_MODELS.CREATIVE_WRITING;
+	}
+
+	// Default to balanced model for complex queries
+	return FAST_MODELS.COMPLEX_REASONING;
+}
+
+/**
+ * Get optimized config based on query type
+ */
+export function getOptimizedConfig(
+	query: string
+): OpenRouterConfig {
+	const suggestedModel = suggestOptimalModel(query);
+
+	// Fast config for simple queries
+	if (query.length < 100) {
+		return {
+			...FAST_CONFIG,
+			model: suggestedModel,
+			max_tokens: 300, // Even shorter for quick responses
+		};
+	}
+
+	// Standard optimized config
+	return {
+		...DEFAULT_CONFIG,
+		model: suggestedModel,
+	};
 }

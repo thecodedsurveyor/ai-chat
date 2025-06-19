@@ -282,7 +282,7 @@ const ChatInput: React.FC<ChatInputProps> = (props) => {
 												: 'text-gray-700 hover:text-chat-purple hover:bg-gray-100'
 										}`}
 									>
-										<MdApps />
+										<MdApps className='text-lg' />
 										Templates
 									</button>
 									<button
@@ -299,7 +299,7 @@ const ChatInput: React.FC<ChatInputProps> = (props) => {
 												: 'text-gray-700 hover:text-chat-orange hover:bg-gray-100'
 										}`}
 									>
-										<MdEmojiEmotions />
+										<MdEmojiEmotions className='text-lg' />
 										Emojis
 									</button>
 								</div>
@@ -356,7 +356,7 @@ const ChatInput: React.FC<ChatInputProps> = (props) => {
 												: 'text-gray-700 hover:text-chat-pink hover:bg-gray-100'
 										}`}
 									>
-										<MdFace />
+										<MdFace className='text-lg' />
 										AI Personas
 									</button>
 									<div
@@ -452,7 +452,7 @@ const ChatInput: React.FC<ChatInputProps> = (props) => {
 												: 'text-gray-700 hover:text-chat-purple hover:bg-gray-100'
 										}`}
 									>
-										<MdApps />
+										<MdApps className='text-xl' />
 										Templates
 									</button>
 									<button
@@ -469,7 +469,7 @@ const ChatInput: React.FC<ChatInputProps> = (props) => {
 												: 'text-gray-700 hover:text-chat-orange hover:bg-gray-100'
 										}`}
 									>
-										<MdEmojiEmotions />
+										<MdEmojiEmotions className='text-xl' />
 										Emojis
 									</button>
 								</div>
@@ -526,7 +526,7 @@ const ChatInput: React.FC<ChatInputProps> = (props) => {
 												: 'text-gray-700 hover:text-chat-pink hover:bg-gray-100'
 										}`}
 									>
-										<MdFace />
+										<MdFace className='text-xl' />
 										AI Personas
 									</button>
 									<div

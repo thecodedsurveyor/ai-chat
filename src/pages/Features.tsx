@@ -130,6 +130,18 @@ const Features = () => {
 		],
 		ai: [
 			{
+				icon: <Zap className='w-6 h-6' />,
+				title: 'Lightning-Fast AI Responses',
+				description:
+					'Optimized AI processing with real-time streaming for instant responses.',
+				highlights: [
+					'Real-time streaming',
+					'Auto model selection',
+					'Reduced token limits',
+					'Optimized prompts',
+				],
+			},
+			{
 				icon: <Brain className='w-6 h-6' />,
 				title: 'Context-Aware Conversations',
 				description:

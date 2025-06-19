@@ -355,6 +355,35 @@ export const useChatStore = create<ChatState>()(
 							messagesWithUser.length,
 					});
 
+					// Create initial AI message for streaming
+					const aiMessageId = (
+						Date.now() + 1
+					).toString();
+					const initialAiMessage: Message = {
+						id: aiMessageId,
+						type: 'response',
+						text: '',
+						timestamp:
+							new Date().toLocaleTimeString(
+								[],
+								{
+									hour: '2-digit',
+									minute: '2-digit',
+								}
+							),
+						status: 'delivered',
+					};
+
+					// Add empty AI message to start streaming
+					const messagesWithInitialAI = [
+						...messagesWithUser,
+						initialAiMessage,
+					];
+					set({
+						messages: messagesWithInitialAI,
+						isTyping: true,
+					});
+
 					try {
 						// Get active document if available
 						const documentStore =
@@ -377,39 +406,76 @@ export const useChatStore = create<ChatState>()(
 								activeDocument
 							);
 
-						// Call API
+						// Get optimized config for faster responses
+						const { getOptimizedConfig } =
+							await import(
+								'../utils/openRouter'
+							);
+						const optimizedConfig = {
+							...state.modelConfig,
+							...getOptimizedConfig(text),
+							stream: true, // Enable streaming
+						};
+
+						// Call API with streaming
+						let isFirstToken = true;
 						const response =
 							await callOpenRouter(
 								conversationHistory,
-								state.modelConfig
+								optimizedConfig,
+								(token: string) => {
+									// Stop typing indicator on first token
+									if (isFirstToken) {
+										isFirstToken =
+											false;
+										set({
+											isTyping: false,
+										});
+									}
+
+									// Update the AI message with each token
+									const currentState =
+										get();
+									const updatedMessages =
+										currentState.messages.map(
+											(msg) =>
+												msg.id ===
+												aiMessageId
+													? {
+															...msg,
+															text:
+																msg.text +
+																token,
+													  }
+													: msg
+										);
+									set({
+										messages:
+											updatedMessages,
+									});
+								}
 							);
 
-						// Add AI response
-						const aiMessage: Message = {
-							id: (Date.now() + 1).toString(),
-							type: 'response',
-							text: response,
-							timestamp:
-								new Date().toLocaleTimeString(
-									[],
-									{
-										hour: '2-digit',
-										minute: '2-digit',
-									}
-								),
-							status: 'delivered',
-						};
+						// Final update with complete response
+						const currentState = get();
+						const finalMessages =
+							currentState.messages.map(
+								(msg) =>
+									msg.id === aiMessageId
+										? {
+												...msg,
+												text: response,
+												status: 'delivered' as const,
+										  }
+										: msg
+							);
 
-						const finalMessages = [
-							...messagesWithUser,
-							aiMessage,
-						];
 						set({
 							messages: finalMessages,
 							isTyping: false,
 						});
 
-						// Update chat with AI response
+						// Update chat with final AI response
 						get().updateChat(state.activeChat, {
 							messages: finalMessages,
 							lastActivity:
@@ -456,9 +522,15 @@ export const useChatStore = create<ChatState>()(
 							status: 'error',
 						};
 
+						// Remove the incomplete AI message and add error message
 						const currentState = get();
+						const messagesWithoutIncomplete =
+							currentState.messages.filter(
+								(msg) =>
+									msg.id !== aiMessageId
+							);
 						const newMessages = [
-							...currentState.messages,
+							...messagesWithoutIncomplete,
 							errorMessage,
 						];
 
