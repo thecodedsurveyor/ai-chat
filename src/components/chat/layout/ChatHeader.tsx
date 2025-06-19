@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bot } from 'lucide-react';
+import { Bot, User, Sparkles } from 'lucide-react';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { cn } from '../../../utils/classNames';
 import { MdMenu, MdMessage } from 'react-icons/md';
@@ -10,16 +10,27 @@ import {
 } from '../../../stores';
 import ModelSelector from '../modals/ModelSelector';
 import UserProfile from '../../ui/UserProfile';
+import { useNavigate } from 'react-router-dom';
 
 interface ChatHeaderProps {
 	onGoBack: () => void;
+	isGuestMode?: boolean;
+	guestUsageStats?: {
+		used: number;
+		remaining: number;
+		total: number;
+		percentage: number;
+	};
 }
 
 const ChatHeader: React.FC<ChatHeaderProps> = ({
 	onGoBack,
+	isGuestMode = false,
+	guestUsageStats,
 }) => {
 	const { isDark } = useTheme();
 	const { toggleChatList } = useUIStore();
+	const navigate = useNavigate();
 	const chats = useChats();
 	const activeChat = useActiveChat();
 	const [isMobile, setIsMobile] = useState(false);
@@ -43,6 +54,10 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 	const messageCount =
 		chats.find((c) => c.id === activeChat)?.messages
 			.length || 0;
+
+	const handleGuestSignUp = () => {
+		navigate('/auth?mode=signup');
+	};
 
 	return (
 		<header
@@ -138,14 +153,83 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 						</div>
 
 						{/* Model Selector */}
-						<ModelSelector />
+						<ModelSelector
+							isGuestMode={isGuestMode}
+						/>
 					</div>
 				)}
 			</div>
 
-			{/* Right Section - User Profile */}
-			<div className='flex items-center justify-end min-w-0'>
-				<UserProfile />
+			{/* Right Section - User Profile or Guest Indicator */}
+			<div className='flex items-center justify-end min-w-0 gap-3'>
+				{isGuestMode ? (
+					<>
+						{/* Guest Usage Indicator */}
+						<div
+							className={cn(
+								'flex items-center gap-2 px-3 py-2 rounded-xl border-2 shadow-sm',
+								'transition-all duration-200 hover:shadow-md cursor-pointer',
+								isDark
+									? 'bg-chat-secondary border-chat-accent/30 hover:bg-chat-accent/10'
+									: 'bg-white border-blue-200 hover:bg-blue-50'
+							)}
+							onClick={handleGuestSignUp}
+							title='Click to sign up for unlimited messages'
+						>
+							<div className='p-1 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 flex-shrink-0'>
+								<Sparkles className='w-3 h-3 text-white' />
+							</div>
+							<div className='text-left min-w-0'>
+								<div
+									className={cn(
+										'text-xs font-bold leading-tight',
+										isDark
+											? 'text-white'
+											: 'text-gray-800'
+									)}
+								>
+									{guestUsageStats?.remaining ||
+										0}{' '}
+									left
+								</div>
+								<div
+									className={cn(
+										'text-xs opacity-75',
+										isDark
+											? 'text-chat-accent'
+											: 'text-blue-600'
+									)}
+								>
+									Guest mode
+								</div>
+							</div>
+						</div>
+
+						{/* Guest Profile Icon */}
+						<div
+							className={cn(
+								'p-2 rounded-xl border-2 shadow-sm cursor-pointer',
+								'transition-all duration-200 hover:shadow-md',
+								isDark
+									? 'bg-chat-secondary border-chat-accent/30 hover:bg-chat-accent/10'
+									: 'bg-white border-gray-200 hover:bg-gray-50'
+							)}
+							onClick={handleGuestSignUp}
+							title='Sign up to unlock all features'
+						>
+							<User
+								className={cn(
+									'w-5 h-5',
+									isDark
+										? 'text-chat-accent'
+										: 'text-gray-600'
+								)}
+							/>
+						</div>
+					</>
+				) : (
+					<UserProfile />
+				)}
 			</div>
 		</header>
 	);

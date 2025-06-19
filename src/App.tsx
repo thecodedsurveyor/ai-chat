@@ -39,7 +39,6 @@ import ToastContainer from './components/ui/ToastContainer';
 import ScrollToTop from './components/ui/ScrollToTop';
 import BackToTop from './components/ui/BackToTop';
 import { useChats } from './stores/chatStore';
-import ProtectedRoute from './components/auth/ProtectedRoute';
 import AdminDashboard from './components/admin/AdminDashboard';
 import { useEffect } from 'react';
 import SessionManager from './utils/sessionManager';
@@ -157,15 +156,13 @@ const App = () => {
 										</PageWrapper>
 									}
 								/>
-								{/* Dedicated NeuronFlow Chat route */}
+								{/* Dedicated NeuronFlow Chat route - Now supports guest mode */}
 								<Route
 									path='/chat'
 									element={
-										<ProtectedRoute>
-											<ChatProvider>
-												<ChatBotApp />
-											</ChatProvider>
-										</ProtectedRoute>
+										<ChatProvider>
+											<ChatBotApp />
+										</ChatProvider>
 									}
 								/>
 								{/* Analytics route */}

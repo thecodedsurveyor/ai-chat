@@ -103,8 +103,9 @@ const MessageActions = ({
 	};
 
 	const handleSaveEdit = () => {
-		if (editText.trim() && editText !== message.text) {
-			onAction('edit', message.id, editText.trim());
+		const trimmedText = editText.trim();
+		if (trimmedText && trimmedText !== message.text) {
+			onAction('edit', message.id, trimmedText);
 		}
 		setIsEditing(false);
 	};
@@ -250,7 +251,8 @@ const MessageActions = ({
 							onClick={handleSaveEdit}
 							disabled={
 								!editText.trim() ||
-								editText === message.text
+								editText.trim() ===
+									message.text
 							}
 							className='p-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all text-lg disabled:opacity-50 disabled:cursor-not-allowed'
 							title='Save Changes'

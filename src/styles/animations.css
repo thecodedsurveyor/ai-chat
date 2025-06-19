@@ -40,3 +40,13 @@
 .typing-dot-3 {
 	animation: pulse-delay-3 1.5s infinite 0.4s;
 }
+
+/* Shimmer animation for disabled states */
+@keyframes shimmer {
+	0% {
+		transform: translateX(-100%);
+	}
+	100% {
+		transform: translateX(200%);
+	}
+}

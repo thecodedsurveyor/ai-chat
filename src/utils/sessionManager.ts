@@ -12,11 +12,11 @@ export class SessionManager {
 	 */
 	static async validateSession(): Promise<boolean> {
 		// Prevent multiple simultaneous checks
-		if (this.checkInProgress) {
+		if (SessionManager.checkInProgress) {
 			return authService.isAuthenticated();
 		}
 
-		this.checkInProgress = true;
+		SessionManager.checkInProgress = true;
 
 		try {
 			if (!authService.isAuthenticated()) {
@@ -38,7 +38,7 @@ export class SessionManager {
 			await authService.logout();
 			return false;
 		} finally {
-			this.checkInProgress = false;
+			SessionManager.checkInProgress = false;
 		}
 	}
 
@@ -47,11 +47,11 @@ export class SessionManager {
 	 */
 	static initSessionMonitoring(): void {
 		// Check session validity on app start
-		this.validateSession();
+		SessionManager.validateSession();
 
 		// Set up periodic session checks (every 5 minutes)
 		setInterval(() => {
-			this.validateSession();
+			SessionManager.validateSession();
 		}, 5 * 60 * 1000);
 
 		// Check session when user becomes active (focus/visibility change)
@@ -60,13 +60,13 @@ export class SessionManager {
 				'visibilitychange',
 				() => {
 					if (!document.hidden) {
-						this.validateSession();
+						SessionManager.validateSession();
 					}
 				}
 			);
 
 			window.addEventListener('focus', () => {
-				this.validateSession();
+				SessionManager.validateSession();
 			});
 		}
 	}
@@ -75,8 +75,8 @@ export class SessionManager {
 	 * Force a session check - useful after critical operations
 	 */
 	static async forceSessionCheck(): Promise<boolean> {
-		this.checkInProgress = false; // Reset the flag to allow forced check
-		return await this.validateSession();
+		SessionManager.checkInProgress = false; // Reset the flag to allow forced check
+		return await SessionManager.validateSession();
 	}
 }
 

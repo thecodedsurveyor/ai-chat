@@ -36,9 +36,10 @@ export class JWTUtils {
 		payload: Omit<JWTPayload, 'iat' | 'exp'>
 	): AuthTokens {
 		return {
-			accessToken: this.generateAccessToken(payload),
+			accessToken:
+				JWTUtils.generateAccessToken(payload),
 			refreshToken:
-				this.generateRefreshToken(payload),
+				JWTUtils.generateRefreshToken(payload),
 		};
 	}
 
@@ -85,7 +86,7 @@ export class JWTUtils {
 	 * Get token expiration date
 	 */
 	static getTokenExpiration(token: string): Date | null {
-		const decoded = this.decodeToken(token);
+		const decoded = JWTUtils.decodeToken(token);
 		if (decoded && decoded.exp) {
 			return new Date(decoded.exp * 1000);
 		}
@@ -96,7 +97,8 @@ export class JWTUtils {
 	 * Check if token is expired
 	 */
 	static isTokenExpired(token: string): boolean {
-		const expiration = this.getTokenExpiration(token);
+		const expiration =
+			JWTUtils.getTokenExpiration(token);
 		if (!expiration) return true;
 		return expiration < new Date();
 	}

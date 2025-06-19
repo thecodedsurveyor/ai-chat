@@ -8,12 +8,21 @@ interface ChatLayoutProps {
 	children: React.ReactNode;
 	onGoBack: () => void;
 	getCategoryColor: (category?: string) => string;
+	isGuestMode?: boolean;
+	guestUsageStats?: {
+		used: number;
+		remaining: number;
+		total: number;
+		percentage: number;
+	};
 }
 
 const ChatLayout: React.FC<ChatLayoutProps> = ({
 	children,
 	onGoBack,
 	getCategoryColor,
+	isGuestMode = false,
+	guestUsageStats,
 }) => {
 	const { isDark } = useTheme();
 	const { showChatList, closeChatList } = useUIStore();
@@ -34,7 +43,11 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
 			{/* Main Chat Area */}
 			<div className='flex flex-1 flex-col'>
 				{/* Chat Header */}
-				<ChatHeader onGoBack={onGoBack} />
+				<ChatHeader
+					onGoBack={onGoBack}
+					isGuestMode={isGuestMode}
+					guestUsageStats={guestUsageStats}
+				/>
 
 				{/* Chat Content */}
 				{children}

@@ -220,7 +220,8 @@ export class TemplateManager {
 	 * Get all templates (default + custom)
 	 */
 	static getAllTemplates(): ConversationTemplate[] {
-		const customTemplates = this.getCustomTemplates();
+		const customTemplates =
+			TemplateManager.getCustomTemplates();
 		return [...defaultTemplates, ...customTemplates];
 	}
 
@@ -230,7 +231,7 @@ export class TemplateManager {
 	static getCustomTemplates(): ConversationTemplate[] {
 		try {
 			const stored = localStorage.getItem(
-				this.STORAGE_KEY
+				TemplateManager.STORAGE_KEY
 			);
 			return stored ? JSON.parse(stored) : [];
 		} catch (error) {
@@ -250,7 +251,7 @@ export class TemplateManager {
 	): void {
 		try {
 			localStorage.setItem(
-				this.STORAGE_KEY,
+				TemplateManager.STORAGE_KEY,
 				JSON.stringify(templates)
 			);
 		} catch (error) {
@@ -278,9 +279,12 @@ export class TemplateManager {
 			usageCount: 0,
 		};
 
-		const customTemplates = this.getCustomTemplates();
+		const customTemplates =
+			TemplateManager.getCustomTemplates();
 		customTemplates.push(newTemplate);
-		this.saveCustomTemplates(customTemplates);
+		TemplateManager.saveCustomTemplates(
+			customTemplates
+		);
 	}
 
 	/**
@@ -289,14 +293,17 @@ export class TemplateManager {
 	static incrementUsageCount(templateId: string): void {
 		// For default templates, we might store usage stats separately
 		// For custom templates, update the stored data
-		const customTemplates = this.getCustomTemplates();
+		const customTemplates =
+			TemplateManager.getCustomTemplates();
 		const template = customTemplates.find(
 			(t) => t.id === templateId
 		);
 
 		if (template) {
 			template.usageCount++;
-			this.saveCustomTemplates(customTemplates);
+			TemplateManager.saveCustomTemplates(
+				customTemplates
+			);
 		}
 
 		// For default templates, we could store usage stats in a separate object
@@ -307,11 +314,12 @@ export class TemplateManager {
 	 * Delete a custom template
 	 */
 	static deleteCustomTemplate(templateId: string): void {
-		const customTemplates = this.getCustomTemplates();
+		const customTemplates =
+			TemplateManager.getCustomTemplates();
 		const filtered = customTemplates.filter(
 			(t) => t.id !== templateId
 		);
-		this.saveCustomTemplates(filtered);
+		TemplateManager.saveCustomTemplates(filtered);
 	}
 
 	/**
@@ -320,7 +328,8 @@ export class TemplateManager {
 	static getTemplatesByCategory(
 		category: string
 	): ConversationTemplate[] {
-		const allTemplates = this.getAllTemplates();
+		const allTemplates =
+			TemplateManager.getAllTemplates();
 		if (category === 'all') return allTemplates;
 		return allTemplates.filter(
 			(t) => t.category === category
@@ -333,7 +342,8 @@ export class TemplateManager {
 	static searchTemplates(
 		query: string
 	): ConversationTemplate[] {
-		const allTemplates = this.getAllTemplates();
+		const allTemplates =
+			TemplateManager.getAllTemplates();
 		const searchTerm = query.toLowerCase();
 
 		return allTemplates.filter(

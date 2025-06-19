@@ -51,8 +51,6 @@ const PersonaSelector: React.FC<PersonaSelectorProps> = ({
 	// Map persona icon strings to React components
 	const getPersonaIcon = (iconName: string) => {
 		switch (iconName) {
-			case 'MdAndroid':
-				return MdAndroid;
 			case 'MdSchool':
 				return MdSchool;
 			case 'MdCode':
@@ -71,6 +69,7 @@ const PersonaSelector: React.FC<PersonaSelectorProps> = ({
 				return MdSpa;
 			case 'MdRestaurant':
 				return MdRestaurant;
+			case 'MdAndroid':
 			default:
 				return MdAndroid;
 		}

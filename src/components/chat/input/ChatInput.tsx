@@ -40,7 +40,18 @@ import DocumentUpload from '../../document/DocumentUpload';
 
 import { settingsManager } from '../../../utils/settings';
 
-const ChatInput: React.FC = () => {
+interface ChatInputProps {
+	onBeforeSend?: () => boolean;
+	onAfterSend?: () => void;
+	isGuestMode?: boolean;
+}
+
+const ChatInput: React.FC<ChatInputProps> = (props) => {
+	const {
+		onBeforeSend,
+		onAfterSend,
+		isGuestMode = false,
+	} = props;
 	const { isDark } = useTheme();
 	const inputRef = useRef<HTMLInputElement>(null);
 
@@ -88,10 +99,20 @@ const ChatInput: React.FC = () => {
 	const handleSendMessage = useCallback(() => {
 		if (!inputValue.trim()) return;
 
+		// Check guest usage limit before sending
+		if (onBeforeSend && !onBeforeSend()) {
+			return; // Usage limit reached or other restriction
+		}
+
 		if (chats.length === 0) {
 			createNewChat(inputValue);
 		} else {
 			sendMessage(inputValue);
+		}
+
+		// Increment guest usage after successful send
+		if (onAfterSend) {
+			onAfterSend();
 		}
 
 		clearInput();
@@ -105,6 +126,8 @@ const ChatInput: React.FC = () => {
 		sendMessage,
 		clearInput,
 		closeEmojiPicker,
+		onBeforeSend,
+		onAfterSend,
 	]);
 
 	const handleEmojiClick = useCallback(
@@ -558,6 +581,17 @@ const ChatInput: React.FC = () => {
 
 				{/* Input Field */}
 				<div className='flex-1 relative min-w-0'>
+					{isGuestMode && (
+						<div
+							className={`absolute -top-6 left-0 text-xs px-2 py-1 rounded ${
+								isDark
+									? 'bg-yellow-600/20 text-yellow-400 border border-yellow-600/30'
+									: 'bg-yellow-100 text-yellow-700 border border-yellow-300'
+							}`}
+						>
+							🎯 Guest Mode - Limited Usage
+						</div>
+					)}
 					<input
 						type='text'
 						value={inputValue}

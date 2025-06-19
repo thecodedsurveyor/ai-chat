@@ -95,6 +95,11 @@ self.addEventListener('sync', (event) => {
 
 // Message event for communication with main app
 self.addEventListener('message', (event) => {
+	// Validate origin for security
+	if (event.origin !== self.location.origin) {
+		return;
+	}
+
 	if (event.data && event.data.type === 'SKIP_WAITING') {
 		self.skipWaiting();
 	}

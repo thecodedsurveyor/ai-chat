@@ -10,9 +10,16 @@ import {
 	MdExpandMore,
 	MdCheck,
 	MdSmartToy,
+	MdLock,
 } from 'react-icons/md';
 
-const ModelSelector: React.FC = () => {
+interface ModelSelectorProps {
+	isGuestMode?: boolean;
+}
+
+const ModelSelector: React.FC<ModelSelectorProps> = ({
+	isGuestMode = false,
+}) => {
 	const { isDark } = useTheme();
 	const [isOpen, setIsOpen] = useState(false);
 
@@ -24,8 +31,24 @@ const ModelSelector: React.FC = () => {
 	);
 
 	const handleModelChange = (model: string) => {
+		// Prevent model change for guest users
+		if (isGuestMode) {
+			return;
+		}
 		setModelConfig({ model: model as OpenRouterModel });
 		setIsOpen(false);
+	};
+
+	// Get available models based on user type
+	const getAvailableModels = () => {
+		if (isGuestMode) {
+			// Only allow the default free model for guests
+			return {
+				DEEPSEEK_R1T_CHIMERA_FREE:
+					OPENROUTER_MODELS.DEEPSEEK_R1T_CHIMERA_FREE,
+			};
+		}
+		return OPENROUTER_MODELS;
 	};
 
 	// Get display name for current model
@@ -97,18 +120,38 @@ const ModelSelector: React.FC = () => {
 		<div className='relative'>
 			{/* Model Selector Button */}
 			<button
-				onClick={() => setIsOpen(!isOpen)}
+				onClick={() =>
+					!isGuestMode && setIsOpen(!isOpen)
+				}
+				disabled={isGuestMode}
+				title={
+					isGuestMode
+						? 'Sign up to unlock all AI models'
+						: 'Select AI Model'
+				}
 				className={cn(
 					'flex items-center gap-2 sm:gap-3 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl border-2 transition-all duration-200',
-					'min-w-[140px] sm:min-w-[180px] shadow-md hover:shadow-lg active:scale-95',
+					'min-w-[140px] sm:min-w-[180px] shadow-md',
 					'focus:outline-none focus:ring-2 focus:ring-offset-2',
-					isDark
-						? 'bg-chat-secondary border-chat-accent/30 text-white hover:border-chat-accent focus:ring-chat-accent'
-						: 'bg-white border-gray-300 text-gray-800 hover:border-gray-400 focus:ring-blue-500',
-					isOpen &&
-						(isDark
-							? 'border-chat-accent bg-chat-secondary/80 shadow-lg'
-							: 'border-blue-500 bg-blue-50 shadow-lg')
+					isGuestMode
+						? cn(
+								'cursor-not-allowed relative overflow-hidden',
+								isDark
+									? 'bg-gradient-to-br from-slate-800/60 to-slate-700/60 border-slate-600/50 text-slate-400'
+									: 'bg-gradient-to-br from-slate-100/80 to-slate-200/60 border-slate-300/70 text-slate-500',
+								// Subtle shimmer effect
+								'before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent before:translate-x-[-100%] before:animate-[shimmer_3s_ease-in-out_infinite]'
+						  )
+						: cn(
+								'hover:shadow-lg active:scale-95',
+								isDark
+									? 'bg-chat-secondary border-chat-accent/30 text-white hover:border-chat-accent focus:ring-chat-accent'
+									: 'bg-white border-gray-300 text-gray-800 hover:border-gray-400 focus:ring-blue-500',
+								isOpen &&
+									(isDark
+										? 'border-chat-accent bg-chat-secondary/80 shadow-lg'
+										: 'border-blue-500 bg-blue-50 shadow-lg')
+						  )
 				)}
 				aria-label='Select AI Model'
 				aria-expanded={isOpen}
@@ -117,7 +160,11 @@ const ModelSelector: React.FC = () => {
 				<div
 					className={cn(
 						'p-1 sm:p-1.5 rounded-lg bg-gradient-to-r flex-shrink-0 shadow-sm',
-						currentModelInfo.color
+						isGuestMode
+							? isDark
+								? 'bg-gradient-to-br from-slate-600 to-slate-500'
+								: 'bg-gradient-to-br from-slate-400 to-slate-300'
+							: currentModelInfo.color
 					)}
 				>
 					<MdSmartToy className='w-3 h-3 sm:w-4 sm:h-4 text-white' />
@@ -128,7 +175,11 @@ const ModelSelector: React.FC = () => {
 					<div
 						className={cn(
 							'text-xs sm:text-sm font-semibold truncate leading-tight',
-							isDark
+							isGuestMode
+								? isDark
+									? 'text-slate-400'
+									: 'text-slate-500'
+								: isDark
 								? 'text-white'
 								: 'text-gray-800'
 						)}
@@ -137,26 +188,60 @@ const ModelSelector: React.FC = () => {
 					</div>
 					<div
 						className={cn(
-							'text-xs opacity-75 truncate',
-							isDark
-								? 'text-chat-accent'
-								: 'text-gray-600'
+							'text-xs truncate',
+							isGuestMode
+								? isDark
+									? 'text-slate-500 opacity-90'
+									: 'text-slate-400 opacity-90'
+								: cn(
+										'opacity-75',
+										isDark
+											? 'text-chat-accent'
+											: 'text-gray-600'
+								  )
 						)}
 					>
-						{currentModelInfo.provider}
+						{isGuestMode
+							? 'Guest Mode Only'
+							: currentModelInfo.provider}
 					</div>
 				</div>
 
-				{/* Dropdown Arrow */}
-				<MdExpandMore
-					className={cn(
-						'w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 flex-shrink-0',
-						isDark
-							? 'text-chat-accent'
-							: 'text-gray-500',
-						isOpen && 'rotate-180'
-					)}
-				/>
+				{/* Dropdown Arrow or Lock Icon */}
+				{isGuestMode ? (
+					<div className='flex items-center space-x-2'>
+						<span
+							className={cn(
+								'text-xs font-medium',
+								isDark
+									? 'text-slate-400'
+									: 'text-slate-500'
+							)}
+						>
+							Locked
+						</span>
+						<div
+							className={cn(
+								'p-1.5 rounded-lg shadow-sm',
+								isDark
+									? 'bg-gradient-to-br from-amber-600/80 to-orange-600/80'
+									: 'bg-gradient-to-br from-amber-500/90 to-orange-500/90'
+							)}
+						>
+							<MdLock className='w-3 h-3 text-white' />
+						</div>
+					</div>
+				) : (
+					<MdExpandMore
+						className={cn(
+							'w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 flex-shrink-0',
+							isDark
+								? 'text-chat-accent'
+								: 'text-gray-500',
+							isOpen && 'rotate-180'
+						)}
+					/>
+				)}
 			</button>
 
 			{/* Dropdown Menu */}
@@ -179,7 +264,7 @@ const ModelSelector: React.FC = () => {
 						)}
 					>
 						{Object.entries(
-							OPENROUTER_MODELS
+							getAvailableModels()
 						).map(([key, value]) => {
 							const modelInfo =
 								getModelInfo(key);

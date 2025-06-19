@@ -15,6 +15,36 @@ import {
 } from '../utils/openRouter';
 import { generatePersonaGreeting } from '../utils/aiPersonas';
 import { useDocumentStore } from './documentStore';
+import { authService } from '../services/authService';
+
+// Helper function to get user-specific storage key
+const getUserStorageKey = () => {
+	const user = authService.getUser();
+	if (user?.id) {
+		return `chat-store-user-${user.id}`;
+	}
+	// For guest users, use a session-specific key
+	let guestId = localStorage.getItem('guest-session-id');
+	if (!guestId) {
+		guestId = `guest-${Date.now()}-${Math.random()
+			.toString(36)
+			.substr(2, 9)}`;
+		localStorage.setItem('guest-session-id', guestId);
+	}
+	return `chat-store-${guestId}`;
+};
+
+// Helper function to clear guest data when user registers/logs in
+const clearGuestDataOnAuth = () => {
+	const guestId = localStorage.getItem(
+		'guest-session-id'
+	);
+	if (guestId) {
+		const guestStorageKey = `chat-store-${guestId}`;
+		localStorage.removeItem(guestStorageKey);
+		localStorage.removeItem('guest-session-id');
+	}
+};
 
 interface ChatState {
 	// Chat data state
@@ -58,6 +88,10 @@ interface ChatState {
 		messageId: string,
 		data?: string
 	) => void;
+
+	// User management
+	clearAllData: () => void;
+	migrateGuestDataToUser: () => void;
 }
 
 export const useChatStore = create<ChatState>()(
@@ -199,38 +233,45 @@ export const useChatStore = create<ChatState>()(
 				},
 				deleteChat: (chatId) =>
 					set((state) => {
-						const newChats = state.chats.filter(
-							(chat) => chat.id !== chatId
-						);
+						const updatedChats =
+							state.chats.filter(
+								(chat) => chat.id !== chatId
+							);
 						const newActiveChat =
 							state.activeChat === chatId
-								? null
+								? updatedChats.length > 0
+									? updatedChats[0].id
+									: null
 								: state.activeChat;
+
 						return {
-							chats: newChats,
+							chats: updatedChats,
 							activeChat: newActiveChat,
-							messages: newActiveChat
-								? state.messages
-								: [],
+							messages:
+								newActiveChat ===
+								state.activeChat
+									? state.messages
+									: updatedChats.find(
+											(c) =>
+												c.id ===
+												newActiveChat
+									  )?.messages || [],
 						};
 					}),
+
 				updateChat: (chatId, updates) =>
 					set((state) => ({
 						chats: state.chats.map((chat) =>
 							chat.id === chatId
-								? {
-										...chat,
-										...updates,
-										lastActivity:
-											new Date().toISOString(),
-								  }
+								? { ...chat, ...updates }
 								: chat
 						),
 					})),
+
 				setIsTyping: (isTyping) =>
 					set({ isTyping }),
-				setSearchResults: (results) =>
-					set({ searchResults: results }),
+				setSearchResults: (searchResults) =>
+					set({ searchResults }),
 				setIsSearching: (isSearching) =>
 					set({ isSearching }),
 				clearSearch: () =>
@@ -239,43 +280,48 @@ export const useChatStore = create<ChatState>()(
 						isSearching: false,
 					}),
 
-				// Complex actions
-				createNewChat: (initialMessage) => {
+				createNewChat: (
+					initialMessage?: string
+				) => {
+					const state = get();
+					const newChatId = `chat-${Date.now()}`;
 					const newChat: Chat = {
-						id: Date.now().toString(),
-						displayId: initialMessage
-							? initialMessage.slice(0, 50) +
-							  (initialMessage.length > 50
-									? '...'
-									: '')
-							: 'New Chat',
+						id: newChatId,
+						displayId: `Chat ${
+							state.chats.length + 1
+						}`,
 						messages: [],
 						createdAt: new Date().toISOString(),
 						lastActivity:
 							new Date().toISOString(),
-						category: 'general',
+						totalMessages: 0,
 					};
 
-					set((state) => ({
-						chats: [newChat, ...state.chats],
-						activeChat: newChat.id,
+					const updatedChats = [
+						newChat,
+						...state.chats,
+					];
+					set({
+						chats: updatedChats,
+						activeChat: newChatId,
 						messages: [],
-					}));
+					});
 
-					// If there's an initial message, send it
+					// Send initial message if provided
 					if (initialMessage) {
-						get().sendMessage(initialMessage);
+						setTimeout(() => {
+							get().sendMessage(
+								initialMessage
+							);
+						}, 100);
 					}
 				},
 
-				sendMessage: async (text) => {
+				sendMessage: async (text: string) => {
 					const state = get();
-					if (!state.activeChat) {
-						// Create new chat if none exists
-						get().createNewChat(text);
-						return;
-					}
+					if (!state.activeChat) return;
 
+					// Add user message
 					const userMessage: Message = {
 						id: Date.now().toString(),
 						type: 'prompt',
@@ -291,40 +337,38 @@ export const useChatStore = create<ChatState>()(
 						status: 'sent',
 					};
 
-					// Add user message
-					set((state) => ({
-						messages: [
-							...state.messages,
-							userMessage,
-						],
+					const messagesWithUser = [
+						...state.messages,
+						userMessage,
+					];
+					set({
+						messages: messagesWithUser,
 						isTyping: true,
-					}));
+					});
 
-					// Update chat with new message
-					get().updateChat(state.activeChat!, {
-						messages: [
-							...state.messages,
-							userMessage,
-						],
+					// Update chat with user message
+					get().updateChat(state.activeChat, {
+						messages: messagesWithUser,
 						lastActivity:
 							new Date().toISOString(),
+						totalMessages:
+							messagesWithUser.length,
 					});
 
 					try {
-						// Get current chat for context-aware messaging
+						// Get active document if available
+						const documentStore =
+							useDocumentStore.getState();
+						const activeDocument =
+							documentStore.activeDocument;
+
+						// Build conversation history for API
 						const currentChat =
 							state.chats.find(
-								(chat) =>
-									chat.id ===
+								(c) =>
+									c.id ===
 									state.activeChat
 							);
-
-						// Get active document for context
-						const activeDocument =
-							useDocumentStore.getState()
-								.activeDocument;
-
-						// Build conversation history with persona support
 						const conversationHistory =
 							buildConversationHistory(
 								currentChat,
@@ -333,17 +377,18 @@ export const useChatStore = create<ChatState>()(
 								activeDocument
 							);
 
-						// Call OpenRouter API with current model config and conversation history
-						const aiResponse =
+						// Call API
+						const response =
 							await callOpenRouter(
 								conversationHistory,
 								state.modelConfig
 							);
 
+						// Add AI response
 						const aiMessage: Message = {
 							id: (Date.now() + 1).toString(),
 							type: 'response',
-							text: aiResponse,
+							text: response,
 							timestamp:
 								new Date().toLocaleTimeString(
 									[],
@@ -355,46 +400,25 @@ export const useChatStore = create<ChatState>()(
 							status: 'delivered',
 						};
 
-						const currentState = get();
-						const updatedMessages =
-							currentState.messages.map(
-								(msg, index) =>
-									index ===
-										currentState
-											.messages
-											.length -
-											1 &&
-									msg.type === 'prompt'
-										? {
-												...msg,
-												status: 'delivered' as const,
-										  }
-										: msg
-							);
-
-						const newMessages = [
-							...updatedMessages,
+						const finalMessages = [
+							...messagesWithUser,
 							aiMessage,
 						];
-
 						set({
-							messages: newMessages,
+							messages: finalMessages,
 							isTyping: false,
 						});
 
 						// Update chat with AI response
-						get().updateChat(
-							currentState.activeChat!,
-							{
-								messages: newMessages,
-								lastActivity:
-									new Date().toISOString(),
-							}
-						);
+						get().updateChat(state.activeChat, {
+							messages: finalMessages,
+							lastActivity:
+								new Date().toISOString(),
+							totalMessages:
+								finalMessages.length,
+						});
 					} catch (error) {
-						// Error occurred during streaming
-
-						// Create error message for user
+						// Handle error
 						const errorMessage: Message = {
 							id: (Date.now() + 2).toString(),
 							type: 'response',
@@ -560,14 +584,81 @@ export const useChatStore = create<ChatState>()(
 						messages: updatedMessages,
 					});
 				},
+
+				// User management functions
+				clearAllData: () => {
+					set({
+						messages: [],
+						chats: [],
+						activeChat: null,
+						searchResults: [],
+						isSearching: false,
+						activePersona: null,
+						modelConfig: DEFAULT_CONFIG,
+					});
+				},
+
+				migrateGuestDataToUser: () => {
+					const guestId = localStorage.getItem(
+						'guest-session-id'
+					);
+					if (
+						guestId &&
+						authService.isAuthenticated()
+					) {
+						const guestStorageKey = `chat-store-${guestId}`;
+						const guestData =
+							localStorage.getItem(
+								guestStorageKey
+							);
+
+						if (guestData) {
+							try {
+								const parsedData =
+									JSON.parse(guestData);
+								// Set the guest data as initial data for the authenticated user
+								set({
+									chats:
+										parsedData.state
+											?.chats || [],
+									activeChat:
+										parsedData.state
+											?.activeChat ||
+										null,
+									modelConfig:
+										parsedData.state
+											?.modelConfig ||
+										DEFAULT_CONFIG,
+								});
+							} catch (error) {
+								console.error(
+									'Error migrating guest data:',
+									error
+								);
+							}
+						}
+
+						// Clean up guest data
+						clearGuestDataOnAuth();
+					}
+				},
 			}),
 			{
-				name: 'chat-store',
+				name: getUserStorageKey(),
 				partialize: (state) => ({
 					chats: state.chats,
 					activeChat: state.activeChat,
 					modelConfig: state.modelConfig,
 				}),
+				onRehydrateStorage: () => (state) => {
+					// Clear messages on rehydration since they're stored in chat objects
+					if (state) {
+						state.messages = [];
+						state.searchResults = [];
+						state.isSearching = false;
+						state.isTyping = false;
+					}
+				},
 			}
 		),
 		{

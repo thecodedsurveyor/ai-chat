@@ -17,10 +17,17 @@ interface FeatureFlag {
 	category: 'ui' | 'api' | 'feature' | 'experiment';
 }
 
+interface UserPreferences {
+	theme?: string;
+	language?: string;
+	voiceEnabled?: boolean;
+	[key: string]: unknown;
+}
+
 // Mock admin user for authentication
 const ADMIN_CREDENTIALS = {
-	email: 'admin@neuronflow.ai',
-	password: 'admin123!', // In production, this should be hashed
+	email: process.env.ADMIN_EMAIL,
+	passwordHash: process.env.ADMIN_PASSWORD,
 	user: {
 		id: 'admin-1',
 		email: 'admin@neuronflow.ai',
@@ -85,7 +92,7 @@ export class AdminController {
 
 			if (
 				email === ADMIN_CREDENTIALS.email &&
-				password === ADMIN_CREDENTIALS.password
+				password === ADMIN_CREDENTIALS.passwordHash
 			) {
 				// In production, implement proper JWT token generation
 				const token = 'admin-jwt-token-here';
@@ -257,14 +264,17 @@ export class AdminController {
 						],
 						settings: {
 							theme:
-								(user.preferences as any)
-									?.theme || 'dark',
+								(
+									user.preferences as UserPreferences
+								)?.theme || 'dark',
 							language:
-								(user.preferences as any)
-									?.language || 'en',
+								(
+									user.preferences as UserPreferences
+								)?.language || 'en',
 							voiceEnabled:
-								(user.preferences as any)
-									?.voiceEnabled || false,
+								(
+									user.preferences as UserPreferences
+								)?.voiceEnabled || false,
 						},
 					};
 				})
@@ -292,9 +302,7 @@ export class AdminController {
 	) {
 		try {
 			// Get system metrics
-			const cpuUsage = process.cpuUsage();
 			const memoryUsage = process.memoryUsage();
-			const uptime = process.uptime();
 
 			// Mock service health checks
 			const services = [
@@ -578,8 +586,6 @@ export class AdminController {
 				},
 			});
 			const totalChats = await prisma.chat.count();
-			const totalConversations =
-				await prisma.conversation.count();
 			const totalMessages =
 				await prisma.message.count();
 

@@ -403,12 +403,14 @@ class OfflineDataManager {
 			// Starting offline data sync...
 
 			// Import services when needed to avoid circular dependencies
-			const { authService } = await import(
+			const authServiceModule = await import(
 				'./authService'
 			);
 
 			// Sync user profile
-			await this.syncUserProfile(authService);
+			await this.syncUserProfile(
+				authServiceModule.authService
+			);
 
 			// Sync conversations
 			await this.syncConversations();
@@ -422,9 +424,13 @@ class OfflineDataManager {
 		}
 	}
 
-	private async syncUserProfile(
-		authService: typeof import('./authService').authService
-	): Promise<void> {
+	private async syncUserProfile(authService: {
+		updateProfile: (data: {
+			firstName: string;
+			lastName: string;
+			preferences: Record<string, unknown>;
+		}) => Promise<{ success: boolean }>;
+	}): Promise<void> {
 		const localProfile = await this.getUserProfile();
 		if (
 			!localProfile ||

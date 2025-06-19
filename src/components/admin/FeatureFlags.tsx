@@ -13,7 +13,6 @@ import {
 	Code,
 	CheckCircle,
 	XCircle,
-	AlertTriangle,
 } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import type {
@@ -42,8 +41,9 @@ const FeatureFlags: React.FC<FeatureFlagProps> = ({
 	const [newFlag, setNewFlag] = useState({
 		name: '',
 		description: '',
-		category: 'feature' as const,
-		environment: 'development' as const,
+		category: 'feature' as FeatureFlag['category'],
+		environment:
+			'development' as FeatureFlag['environment'],
 		enabled: false,
 		rolloutPercentage: 0,
 		targetUsers: [] as string[],
@@ -161,7 +161,7 @@ const FeatureFlags: React.FC<FeatureFlagProps> = ({
 				month: 'short',
 				day: 'numeric',
 			});
-		} catch (error) {
+		} catch {
 			return 'Invalid Date';
 		}
 	};
@@ -200,7 +200,12 @@ const FeatureFlags: React.FC<FeatureFlagProps> = ({
 						value={filterCategory}
 						onChange={(e) =>
 							setFilterCategory(
-								e.target.value as any
+								e.target.value as
+									| 'all'
+									| 'ui'
+									| 'api'
+									| 'feature'
+									| 'experiment'
 							)
 						}
 						className={cn(
@@ -432,8 +437,7 @@ const FeatureFlags: React.FC<FeatureFlagProps> = ({
 											.slice(0, 3)
 											.map(
 												(
-													userId,
-													index
+													userId
 												) => (
 													<span
 														key={
@@ -678,7 +682,7 @@ const FeatureFlags: React.FC<FeatureFlagProps> = ({
 											...selectedFlag,
 											category: e
 												.target
-												.value as any,
+												.value as FeatureFlag['category'],
 										})
 									}
 									className={cn(
@@ -724,7 +728,7 @@ const FeatureFlags: React.FC<FeatureFlagProps> = ({
 											...selectedFlag,
 											environment: e
 												.target
-												.value as any,
+												.value as FeatureFlag['environment'],
 										})
 									}
 									className={cn(
@@ -998,7 +1002,7 @@ const FeatureFlags: React.FC<FeatureFlagProps> = ({
 												...prev,
 												category: e
 													.target
-													.value as any,
+													.value as FeatureFlag['category'],
 											})
 										)
 									}
@@ -1046,7 +1050,7 @@ const FeatureFlags: React.FC<FeatureFlagProps> = ({
 												...prev,
 												environment:
 													e.target
-														.value as any,
+														.value as FeatureFlag['environment'],
 											})
 										)
 									}

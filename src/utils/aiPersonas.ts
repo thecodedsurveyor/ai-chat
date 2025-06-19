@@ -117,14 +117,15 @@ export class PersonaManager {
 	private static readonly STORAGE_KEY = 'ai-personas';
 
 	static getAllPersonas(): AIPersona[] {
-		const customPersonas = this.getCustomPersonas();
+		const customPersonas =
+			PersonaManager.getCustomPersonas();
 		return [...defaultPersonas, ...customPersonas];
 	}
 
 	static getPersonaById(
 		id: string
 	): AIPersona | undefined {
-		return this.getAllPersonas().find(
+		return PersonaManager.getAllPersonas().find(
 			(persona) => persona.id === id
 		);
 	}
@@ -136,7 +137,7 @@ export class PersonaManager {
 	static getPersonasByCategory(
 		category: AIPersona['category']
 	): AIPersona[] {
-		return this.getAllPersonas().filter(
+		return PersonaManager.getAllPersonas().filter(
 			(persona) => persona.category === category
 		);
 	}
@@ -144,7 +145,7 @@ export class PersonaManager {
 	static getCustomPersonas(): AIPersona[] {
 		try {
 			const stored = localStorage.getItem(
-				this.STORAGE_KEY
+				PersonaManager.STORAGE_KEY
 			);
 			return stored ? JSON.parse(stored) : [];
 		} catch {
@@ -162,12 +163,13 @@ export class PersonaManager {
 			isCustom: true,
 		};
 
-		const customPersonas = this.getCustomPersonas();
+		const customPersonas =
+			PersonaManager.getCustomPersonas();
 		customPersonas.push(newPersona);
 
 		try {
 			localStorage.setItem(
-				this.STORAGE_KEY,
+				PersonaManager.STORAGE_KEY,
 				JSON.stringify(customPersonas)
 			);
 		} catch {
@@ -178,7 +180,8 @@ export class PersonaManager {
 	}
 
 	static deleteCustomPersona(id: string): boolean {
-		const customPersonas = this.getCustomPersonas();
+		const customPersonas =
+			PersonaManager.getCustomPersonas();
 		const updatedPersonas = customPersonas.filter(
 			(persona) => persona.id !== id
 		);
@@ -188,7 +191,7 @@ export class PersonaManager {
 		) {
 			try {
 				localStorage.setItem(
-					this.STORAGE_KEY,
+					PersonaManager.STORAGE_KEY,
 					JSON.stringify(updatedPersonas)
 				);
 				return true;
@@ -204,7 +207,8 @@ export class PersonaManager {
 		id: string,
 		updates: Partial<AIPersona>
 	): boolean {
-		const customPersonas = this.getCustomPersonas();
+		const customPersonas =
+			PersonaManager.getCustomPersonas();
 		const index = customPersonas.findIndex(
 			(persona) => persona.id === id
 		);
@@ -217,7 +221,7 @@ export class PersonaManager {
 
 			try {
 				localStorage.setItem(
-					this.STORAGE_KEY,
+					PersonaManager.STORAGE_KEY,
 					JSON.stringify(customPersonas)
 				);
 				return true;
@@ -227,10 +231,6 @@ export class PersonaManager {
 		}
 
 		return false;
-	}
-
-	static clearPasswordCache(): void {
-		passwordCache.clear();
 	}
 }
 

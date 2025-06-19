@@ -11,7 +11,6 @@ import type {
  */
 export class SmartMemory {
 	private static readonly MAX_MEMORY_ENTRIES = 1000;
-	private static readonly SUMMARY_THRESHOLD = 20; // Number of messages before creating summary
 	private static readonly CONTEXT_RELEVANCE_THRESHOLD = 0.3;
 
 	/**
@@ -682,7 +681,7 @@ export class SmartMemory {
 
 		contexts.forEach((context) => {
 			formatted += `${context.type.replace(
-				'_',
+				/_/g,
 				' '
 			)}: ${context.content}\n`;
 		});

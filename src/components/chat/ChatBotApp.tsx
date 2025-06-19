@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useAutoScroll } from '../../hooks/useAutoScroll';
@@ -11,6 +11,10 @@ import PWAPrompt from '../ui/PWAPrompt';
 
 // Authentication imports
 import { authService } from '../../services/authService';
+
+// Guest usage tracking
+import GuestUsageManager from '../../utils/guestUsageManager';
+import GuestLimitModal from './modals/GuestLimitModal';
 
 // New component imports
 import ChatLayout from './layout/ChatLayout';
@@ -27,31 +31,90 @@ const ChatBotApp = () => {
 	// Phase 3: Chat state from store
 	const messages = useMessages();
 
+	// Guest usage tracking state
+	const [guestLimitModalOpen, setGuestLimitModalOpen] =
+		useState(false);
+	const [guestUsageStats, setGuestUsageStats] = useState(
+		GuestUsageManager.getUsageStats()
+	);
+
 	const { scrollRef, containerRef } = useAutoScroll([
 		messages,
 	]);
 
-	// Authentication check
-	useEffect(() => {
-		const user = authService.getUser();
+	// Check guest usage limit before allowing new messages
+	const checkGuestUsageLimit = (): boolean => {
 		const isAuthenticated =
 			authService.isAuthenticated();
 
-		if (!isAuthenticated || !user) {
-			navigate('/auth');
-			return;
+		if (isAuthenticated) {
+			return true; // Authenticated users have no limit
 		}
-	}, [navigate]);
+
+		if (GuestUsageManager.hasReachedLimit()) {
+			setGuestLimitModalOpen(true);
+			return false;
+		}
+
+		return true;
+	};
+
+	// Increment guest usage when message is sent
+	const incrementGuestUsage = () => {
+		const isAuthenticated =
+			authService.isAuthenticated();
+
+		if (!isAuthenticated) {
+			const newStats =
+				GuestUsageManager.incrementUsage();
+			setGuestUsageStats(
+				GuestUsageManager.getUsageStats()
+			);
+
+			// Show modal if this was the last use
+			if (
+				newStats.count >=
+				GuestUsageManager.getMaxUses()
+			) {
+				setGuestLimitModalOpen(true);
+			}
+		}
+	};
+
+	// Update usage stats when authentication status changes
+	useEffect(() => {
+		const updateStats = () => {
+			setGuestUsageStats(
+				GuestUsageManager.getUsageStats()
+			);
+		};
+
+		// Update stats on mount and when storage changes
+		updateStats();
+		window.addEventListener('storage', updateStats);
+
+		return () => {
+			window.removeEventListener(
+				'storage',
+				updateStats
+			);
+		};
+	}, []);
 
 	const handleGoBack = async () => {
-		// Show logout message
-		showInfo(
-			'Logged Out',
-			'You have been logged out. Please log in again to access the chat.'
-		);
+		const isAuthenticated =
+			authService.isAuthenticated();
 
-		// Logout user
-		await authService.logout();
+		if (isAuthenticated) {
+			// Show logout message for authenticated users
+			showInfo(
+				'Logged Out',
+				'You have been logged out. Please log in again to access the chat.'
+			);
+
+			// Logout user
+			await authService.logout();
+		}
 
 		// Navigate to home page
 		navigate('/');
@@ -73,10 +136,8 @@ const ChatBotApp = () => {
 		}
 	};
 
-	// Don't render anything if not authenticated (will redirect)
-	if (!authService.isAuthenticated()) {
-		return null;
-	}
+	// Get user authentication status
+	const isAuthenticated = authService.isAuthenticated();
 
 	return (
 		<ToastContainer>
@@ -86,6 +147,9 @@ const ChatBotApp = () => {
 			<ChatLayout
 				onGoBack={handleGoBack}
 				getCategoryColor={getCategoryColor}
+				// Pass guest-related props to layout
+				isGuestMode={!isAuthenticated}
+				guestUsageStats={guestUsageStats}
 			>
 				{/* Document Viewer */}
 				<DocumentViewer />
@@ -101,11 +165,26 @@ const ChatBotApp = () => {
 				/>
 
 				{/* Chat Input */}
-				<ChatInput />
+				<ChatInput
+					// Pass guest usage callbacks
+					onBeforeSend={checkGuestUsageLimit}
+					onAfterSend={incrementGuestUsage}
+					isGuestMode={!isAuthenticated}
+				/>
 			</ChatLayout>
 
 			{/* All Modals */}
 			<ModalContainer />
+
+			{/* Guest Limit Modal */}
+			<GuestLimitModal
+				isOpen={guestLimitModalOpen}
+				onClose={() =>
+					setGuestLimitModalOpen(false)
+				}
+				usedCount={guestUsageStats.used}
+				maxCount={guestUsageStats.total}
+			/>
 
 			{/* PWA Prompt and Network Status */}
 			<PWAPrompt />

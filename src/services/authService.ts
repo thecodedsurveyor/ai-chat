@@ -107,6 +107,9 @@ class AuthService {
 					'user',
 					JSON.stringify(result.data.user)
 				);
+
+				// Migrate guest data to authenticated user
+				this.migrateGuestDataToUser();
 			}
 
 			return result;
@@ -150,6 +153,9 @@ class AuthService {
 					'user',
 					JSON.stringify(result.data.user)
 				);
+
+				// Migrate guest data to authenticated user
+				this.migrateGuestDataToUser();
 			}
 
 			return result;
@@ -295,6 +301,32 @@ class AuthService {
 		keysToRemove.forEach((key) =>
 			localStorage.removeItem(key)
 		);
+	}
+
+	/**
+	 * Migrate guest data to authenticated user
+	 */
+	private migrateGuestDataToUser(): void {
+		try {
+			// Import chat store dynamically to avoid circular dependency
+			import('../stores/chatStore')
+				.then(({ useChatStore }) => {
+					const chatStore =
+						useChatStore.getState();
+					chatStore.migrateGuestDataToUser();
+				})
+				.catch((error) => {
+					console.error(
+						'Failed to migrate guest data:',
+						error
+					);
+				});
+		} catch (error) {
+			console.error(
+				'Error migrating guest data:',
+				error
+			);
+		}
 	}
 
 	/**

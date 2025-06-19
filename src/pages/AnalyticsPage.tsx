@@ -254,14 +254,13 @@ const AnalyticsPage: React.FC<AnalyticsPageProps> = ({
 	// Stat card component
 	const getIconComponent = (iconName: string) => {
 		switch (iconName) {
-			case 'chat':
-				return MdChat;
 			case 'message':
 				return MdMessage;
 			case 'time':
 				return MdAccessTime;
 			case 'star':
 				return MdStar;
+			case 'chat':
 			default:
 				return MdChat;
 		}

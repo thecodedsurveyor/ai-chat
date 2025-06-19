@@ -13,11 +13,11 @@ export class ExportManager {
 		chats: Chat[],
 		options: ExportOptions
 	): Promise<void> {
-		const filteredChats = this.filterChats(
+		const filteredChats = ExportManager.filterChats(
 			chats,
 			options
 		);
-		const exportData = this.createExportData(
+		const exportData = ExportManager.createExportData(
 			filteredChats,
 			options
 		);
@@ -28,32 +28,33 @@ export class ExportManager {
 
 		switch (options.format) {
 			case 'json':
-				content = this.exportToJSON(exportData);
-				filename = `neuronflow-export-${this.getDateString()}.json`;
+				content =
+					ExportManager.exportToJSON(exportData);
+				filename = `neuronflow-export-${ExportManager.getDateString()}.json`;
 				mimeType = 'application/json';
 				break;
 			case 'txt':
-				content = this.exportToTXT(
+				content = ExportManager.exportToTXT(
 					exportData,
 					options
 				);
-				filename = `neuronflow-export-${this.getDateString()}.txt`;
+				filename = `neuronflow-export-${ExportManager.getDateString()}.txt`;
 				mimeType = 'text/plain';
 				break;
 			case 'csv':
-				content = this.exportToCSV(
+				content = ExportManager.exportToCSV(
 					exportData,
 					options
 				);
-				filename = `neuronflow-export-${this.getDateString()}.csv`;
+				filename = `neuronflow-export-${ExportManager.getDateString()}.csv`;
 				mimeType = 'text/csv';
 				break;
 			case 'markdown':
-				content = this.exportToMarkdown(
+				content = ExportManager.exportToMarkdown(
 					exportData,
 					options
 				);
-				filename = `neuronflow-export-${this.getDateString()}.md`;
+				filename = `neuronflow-export-${ExportManager.getDateString()}.md`;
 				mimeType = 'text/markdown';
 				break;
 			default:
@@ -62,7 +63,11 @@ export class ExportManager {
 				);
 		}
 
-		this.downloadFile(content, filename, mimeType);
+		ExportManager.downloadFile(
+			content,
+			filename,
+			mimeType
+		);
 	}
 
 	/**
@@ -212,24 +217,28 @@ export class ExportManager {
 		exportData.chats.forEach((chat) => {
 			chat.messages.forEach((message) => {
 				const row = [
-					this.escapeCSV(chat.id),
-					this.escapeCSV(chat.displayId),
-					this.escapeCSV(message.type),
-					this.escapeCSV(message.text),
+					ExportManager.escapeCSV(chat.id),
+					ExportManager.escapeCSV(chat.displayId),
+					ExportManager.escapeCSV(message.type),
+					ExportManager.escapeCSV(message.text),
 					options.includeTimestamps
-						? this.escapeCSV(message.timestamp)
+						? ExportManager.escapeCSV(
+								message.timestamp
+						  )
 						: '',
 				];
 
 				if (options.includeMetadata) {
 					row.push(
-						this.escapeCSV(chat.category || ''),
-						this.escapeCSV(
+						ExportManager.escapeCSV(
+							chat.category || ''
+						),
+						ExportManager.escapeCSV(
 							chat.tags
 								? chat.tags.join(';')
 								: ''
 						),
-						this.escapeCSV(
+						ExportManager.escapeCSV(
 							message.isFavorite
 								? 'Yes'
 								: 'No'
@@ -360,7 +369,7 @@ export class ExportManager {
 		options?: Partial<ExportOptions>
 	) {
 		const filteredChats = options
-			? this.filterChats(
+			? ExportManager.filterChats(
 					chats,
 					options as ExportOptions
 			  )
@@ -390,10 +399,11 @@ export class ExportManager {
 			totalChats: filteredChats.length,
 			totalMessages,
 			totalWords,
-			estimatedFileSize: this.estimateFileSize(
-				filteredChats,
-				options?.format || 'json'
-			),
+			estimatedFileSize:
+				ExportManager.estimateFileSize(
+					filteredChats,
+					options?.format || 'json'
+				),
 		};
 	}
 

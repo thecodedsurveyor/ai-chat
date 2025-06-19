@@ -119,8 +119,8 @@ const useSearchAndFilter = <
 					const dateA = new Date(aValue);
 					const dateB = new Date(bValue);
 					if (
-						!isNaN(dateA.getTime()) &&
-						!isNaN(dateB.getTime())
+						!Number.isNaN(dateA.getTime()) &&
+						!Number.isNaN(dateB.getTime())
 					) {
 						return (
 							dateB.getTime() -

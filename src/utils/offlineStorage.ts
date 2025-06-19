@@ -23,8 +23,8 @@ export class OfflineStorageManager {
 	static async initDB(): Promise<IDBDatabase> {
 		return new Promise((resolve, reject) => {
 			const request = indexedDB.open(
-				this.DB_NAME,
-				this.DB_VERSION
+				OfflineStorageManager.DB_NAME,
+				OfflineStorageManager.DB_VERSION
 			);
 
 			request.onerror = () => reject(request.error);
@@ -39,11 +39,11 @@ export class OfflineStorageManager {
 				// Create conversations store
 				if (
 					!db.objectStoreNames.contains(
-						this.CHATS_STORE
+						OfflineStorageManager.CHATS_STORE
 					)
 				) {
 					const chatStore = db.createObjectStore(
-						this.CHATS_STORE,
+						OfflineStorageManager.CHATS_STORE,
 						{
 							keyPath: 'id',
 						}
@@ -65,12 +65,15 @@ export class OfflineStorageManager {
 				// Create sync data store
 				if (
 					!db.objectStoreNames.contains(
-						this.SYNC_STORE
+						OfflineStorageManager.SYNC_STORE
 					)
 				) {
-					db.createObjectStore(this.SYNC_STORE, {
-						keyPath: 'key',
-					});
+					db.createObjectStore(
+						OfflineStorageManager.SYNC_STORE,
+						{
+							keyPath: 'key',
+						}
+					);
 				}
 			};
 		});
@@ -78,13 +81,13 @@ export class OfflineStorageManager {
 
 	// Save chat for offline access
 	static async saveChat(chat: Chat): Promise<void> {
-		const db = await this.initDB();
+		const db = await OfflineStorageManager.initDB();
 		const transaction = db.transaction(
-			[this.CHATS_STORE],
+			[OfflineStorageManager.CHATS_STORE],
 			'readwrite'
 		);
 		const store = transaction.objectStore(
-			this.CHATS_STORE
+			OfflineStorageManager.CHATS_STORE
 		);
 
 		// Mark as offline ready
@@ -117,13 +120,13 @@ export class OfflineStorageManager {
 	// Get all offline chats
 	static async getOfflineChats(): Promise<Chat[]> {
 		try {
-			const db = await this.initDB();
+			const db = await OfflineStorageManager.initDB();
 			const transaction = db.transaction(
-				[this.CHATS_STORE],
+				[OfflineStorageManager.CHATS_STORE],
 				'readonly'
 			);
 			const store = transaction.objectStore(
-				this.CHATS_STORE
+				OfflineStorageManager.CHATS_STORE
 			);
 
 			return new Promise((resolve, reject) => {
@@ -144,13 +147,13 @@ export class OfflineStorageManager {
 		chatId: string
 	): Promise<Chat | null> {
 		try {
-			const db = await this.initDB();
+			const db = await OfflineStorageManager.initDB();
 			const transaction = db.transaction(
-				[this.CHATS_STORE],
+				[OfflineStorageManager.CHATS_STORE],
 				'readonly'
 			);
 			const store = transaction.objectStore(
-				this.CHATS_STORE
+				OfflineStorageManager.CHATS_STORE
 			);
 
 			return new Promise((resolve, reject) => {
@@ -170,13 +173,13 @@ export class OfflineStorageManager {
 	static async deleteOfflineChat(
 		chatId: string
 	): Promise<void> {
-		const db = await this.initDB();
+		const db = await OfflineStorageManager.initDB();
 		const transaction = db.transaction(
-			[this.CHATS_STORE],
+			[OfflineStorageManager.CHATS_STORE],
 			'readwrite'
 		);
 		const store = transaction.objectStore(
-			this.CHATS_STORE
+			OfflineStorageManager.CHATS_STORE
 		);
 
 		await new Promise<void>((resolve, reject) => {
@@ -193,13 +196,13 @@ export class OfflineStorageManager {
 		key: string,
 		data: SyncData
 	): Promise<void> {
-		const db = await this.initDB();
+		const db = await OfflineStorageManager.initDB();
 		const transaction = db.transaction(
-			[this.SYNC_STORE],
+			[OfflineStorageManager.SYNC_STORE],
 			'readwrite'
 		);
 		const store = transaction.objectStore(
-			this.SYNC_STORE
+			OfflineStorageManager.SYNC_STORE
 		);
 
 		await new Promise<void>((resolve, reject) => {
@@ -218,13 +221,13 @@ export class OfflineStorageManager {
 		key: string
 	): Promise<SyncData | null> {
 		try {
-			const db = await this.initDB();
+			const db = await OfflineStorageManager.initDB();
 			const transaction = db.transaction(
-				[this.SYNC_STORE],
+				[OfflineStorageManager.SYNC_STORE],
 				'readonly'
 			);
 			const store = transaction.objectStore(
-				this.SYNC_STORE
+				OfflineStorageManager.SYNC_STORE
 			);
 
 			return new Promise((resolve, reject) => {
@@ -276,15 +279,15 @@ export class OfflineStorageManager {
 
 	// Clear all offline data
 	static async clearOfflineData(): Promise<void> {
-		const db = await this.initDB();
+		const db = await OfflineStorageManager.initDB();
 
 		// Clear chats
 		const chatTransaction = db.transaction(
-			[this.CHATS_STORE],
+			[OfflineStorageManager.CHATS_STORE],
 			'readwrite'
 		);
 		const chatStore = chatTransaction.objectStore(
-			this.CHATS_STORE
+			OfflineStorageManager.CHATS_STORE
 		);
 		await new Promise<void>((resolve, reject) => {
 			const request = chatStore.clear();
@@ -294,11 +297,11 @@ export class OfflineStorageManager {
 
 		// Clear sync data
 		const syncTransaction = db.transaction(
-			[this.SYNC_STORE],
+			[OfflineStorageManager.SYNC_STORE],
 			'readwrite'
 		);
 		const syncStore = syncTransaction.objectStore(
-			this.SYNC_STORE
+			OfflineStorageManager.SYNC_STORE
 		);
 		await new Promise<void>((resolve, reject) => {
 			const request = syncStore.clear();
@@ -311,7 +314,8 @@ export class OfflineStorageManager {
 
 	// Export offline data for backup
 	static async exportOfflineData(): Promise<OfflineData> {
-		const chats = await this.getOfflineChats();
+		const chats =
+			await OfflineStorageManager.getOfflineChats();
 		return {
 			chats,
 			lastSync: new Date().toISOString(),
@@ -324,19 +328,22 @@ export class OfflineStorageManager {
 		data: OfflineData
 	): Promise<void> {
 		// Clear existing data first
-		await this.clearOfflineData();
+		await OfflineStorageManager.clearOfflineData();
 
 		// Import chats
 		for (const chat of data.chats) {
-			await this.saveChat(chat);
+			await OfflineStorageManager.saveChat(chat);
 		}
 
 		// Save import metadata
-		await this.saveSyncData('lastImport', {
-			timestamp: new Date().toISOString(),
-			chatCount: data.chats.length,
-			sourceVersion: data.version,
-		});
+		await OfflineStorageManager.saveSyncData(
+			'lastImport',
+			{
+				timestamp: new Date().toISOString(),
+				chatCount: data.chats.length,
+				sourceVersion: data.version,
+			}
+		);
 
 		// Offline data imported successfully
 	}
@@ -352,20 +359,20 @@ export class NetworkManager {
 		// Listen for network status changes
 		window.addEventListener('online', () => {
 			// Network: Back online
-			this.notifyListeners(true);
-			this.requestSync();
+			NetworkManager.notifyListeners(true);
+			NetworkManager.requestSync();
 		});
 
 		window.addEventListener('offline', () => {
 			// Network: Gone offline
-			this.notifyListeners(false);
+			NetworkManager.notifyListeners(false);
 		});
 	}
 
 	static addListener(
 		callback: (isOnline: boolean) => void
 	) {
-		this.listeners.add(callback);
+		NetworkManager.listeners.add(callback);
 		// Immediately notify of current status
 		callback(navigator.onLine);
 	}
@@ -373,11 +380,11 @@ export class NetworkManager {
 	static removeListener(
 		callback: (isOnline: boolean) => void
 	) {
-		this.listeners.delete(callback);
+		NetworkManager.listeners.delete(callback);
 	}
 
 	private static notifyListeners(isOnline: boolean) {
-		this.listeners.forEach((callback) =>
+		NetworkManager.listeners.forEach((callback) =>
 			callback(isOnline)
 		);
 	}
