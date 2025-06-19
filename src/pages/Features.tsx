@@ -93,6 +93,20 @@ const Features = () => {
 				],
 			},
 			{
+				icon: (
+					<Clock className='w-6 h-6 text-green-500' />
+				),
+				title: 'Daily Reset Guest Mode',
+				description:
+					'Experience the app with 10 free messages that automatically reset every day at midnight.',
+				highlights: [
+					'10 daily messages',
+					'Automatic midnight reset',
+					'No signup required',
+					'Fresh start daily',
+				],
+			},
+			{
 				icon: <Bot className='w-6 h-6' />,
 				title: 'Model Selection',
 				description:
@@ -330,6 +344,18 @@ const Features = () => {
 			},
 		],
 		advanced: [
+			{
+				icon: <Shield className='w-6 h-6' />,
+				title: 'Complete Privacy Protection',
+				description:
+					'Advanced user data isolation ensures your conversations stay completely private with encrypted, user-specific storage.',
+				highlights: [
+					'User-specific storage keys',
+					'Complete data isolation',
+					'Automatic guest cleanup',
+					'Secure migration system',
+				],
+			},
 			{
 				icon: <Shield className='w-6 h-6' />,
 				title: 'Data Privacy & Security',

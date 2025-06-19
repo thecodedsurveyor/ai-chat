@@ -184,40 +184,52 @@ const LandingPage = () => {
 
 	const features = [
 		{
-			icon: '🤖',
-			title: 'Smart AI Assistant',
+			icon: '🔄',
+			title: 'Daily Reset Guest Mode',
 			description:
-				'Engage with 15+ advanced AI models including GPT-4, Claude, and Gemini for intelligent conversations and expert assistance.',
+				'Start fresh every day! Get 10 free AI messages that automatically reset at midnight - no signup required.',
+			highlight: 'NEW',
+			color: 'from-green-400 to-emerald-600',
+		},
+		{
+			icon: '🛡️',
+			title: 'Complete Privacy Protection',
+			description:
+				'Advanced user data isolation ensures your conversations stay private with encrypted, user-specific storage.',
+			highlight: 'ENHANCED',
+			color: 'from-blue-500 to-indigo-600',
+		},
+		{
+			icon: '🤖',
+			title: '15+ Advanced AI Models',
+			description:
+				'Access GPT-4, Claude, Gemini, Llama, and more with seamless switching and specialized capabilities.',
+			highlight: 'FEATURED',
+			color: 'from-purple-500 to-pink-600',
 		},
 		{
 			icon: '💾',
-			title: 'Smart Memory',
+			title: 'Smart Memory System',
 			description:
-				'AI remembers your preferences, conversation context, and learning patterns for truly personalized interactions.',
-		},
-		{
-			icon: '🔍',
-			title: 'Advanced Search',
-			description:
-				'Find any conversation, message, or topic instantly with powerful search capabilities and smart filtering.',
+				'AI remembers your preferences, conversation context, and learning patterns for personalized interactions.',
+			highlight: 'INTELLIGENT',
+			color: 'from-orange-500 to-red-600',
 		},
 		{
 			icon: '📱',
-			title: 'PWA Support',
+			title: 'Progressive Web App',
 			description:
-				'Install as a native app on any device with full offline capabilities, push notifications, and seamless sync.',
+				'Install as a native app with 100% offline functionality, push notifications, and seamless device sync.',
+			highlight: 'PWA',
+			color: 'from-teal-500 to-cyan-600',
 		},
 		{
 			icon: '🎨',
-			title: 'Beautiful Themes',
+			title: 'Modern UI Design',
 			description:
-				'Personalize your experience with 6 stunning color schemes, custom fonts, and adaptive layout options.',
-		},
-		{
-			icon: '⚡',
-			title: 'Quick Responses',
-			description:
-				'Access intelligent templates, conversation starters, and quick responses for enhanced productivity.',
+				'Beautiful, accessible interface with 6 stunning themes, smooth animations, and intuitive interactions.',
+			highlight: 'REDESIGNED',
+			color: 'from-pink-500 to-rose-600',
 		},
 	];
 
@@ -724,7 +736,7 @@ const LandingPage = () => {
 						{features.map((feature, index) => (
 							<motion.div
 								key={index}
-								className={`feature-card p-8 rounded-3xl backdrop-blur-lg border transition-all duration-300 hover:scale-105 hover:-translate-y-2 group ${
+								className={`feature-card p-8 rounded-3xl backdrop-blur-lg border transition-all duration-300 hover:scale-105 hover:-translate-y-2 group relative overflow-hidden ${
 									isDark
 										? 'bg-chat-secondary/30 border-chat-accent/20 hover:bg-chat-secondary/50 hover:border-chat-orange/40 hover:shadow-2xl hover:shadow-chat-orange/10'
 										: 'bg-white/70 border-chat-purple/30 hover:bg-white hover:shadow-2xl hover:border-chat-pink/50 hover:shadow-chat-pink/10'
@@ -743,6 +755,15 @@ const LandingPage = () => {
 								}}
 								viewport={{ once: true }}
 							>
+								{/* Feature Highlight Badge */}
+								{feature.highlight && (
+									<div
+										className={`absolute top-4 right-4 px-3 py-1.5 rounded-full text-xs font-bold text-white bg-gradient-to-r ${feature.color} shadow-lg z-10 animate-pulse`}
+									>
+										{feature.highlight}
+									</div>
+								)}
+
 								<div className='text-6xl mb-6 transform group-hover:scale-110 transition-transform duration-300'>
 									{feature.icon}
 								</div>
@@ -764,6 +785,11 @@ const LandingPage = () => {
 								>
 									{feature.description}
 								</p>
+
+								{/* Enhanced Hover Effect with Feature Color */}
+								<div
+									className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-5 rounded-3xl transition-opacity duration-500 pointer-events-none`}
+								/>
 							</motion.div>
 						))}
 					</div>
