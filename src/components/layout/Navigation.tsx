@@ -12,6 +12,8 @@ const Navigation = () => {
 	const [isScrolled, setIsScrolled] = useState(false);
 	const [isMobileMenuOpen, setIsMobileMenuOpen] =
 		useState(false);
+	const [showAdminLink, setShowAdminLink] =
+		useState(false);
 	const location = useLocation();
 	const navigate = useNavigate();
 	const { toggleTheme, isDark } = useTheme();
@@ -26,6 +28,27 @@ const Navigation = () => {
 			window.removeEventListener(
 				'scroll',
 				handleScroll
+			);
+	}, []);
+
+	// Admin access with Ctrl+Shift+A
+	useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+				e.preventDefault();
+				setShowAdminLink(true);
+				setTimeout(
+					() => setShowAdminLink(false),
+					5000
+				); // Hide after 5 seconds
+			}
+		};
+
+		window.addEventListener('keydown', handleKeyDown);
+		return () =>
+			window.removeEventListener(
+				'keydown',
+				handleKeyDown
 			);
 	}, []);
 
@@ -179,6 +202,45 @@ const Navigation = () => {
 									)}
 								</div>
 							))}
+
+							{/* Admin Link (Hidden) */}
+							{showAdminLink && (
+								<motion.div
+									initial={{
+										opacity: 0,
+										scale: 0.8,
+									}}
+									animate={{
+										opacity: 1,
+										scale: 1,
+									}}
+									exit={{
+										opacity: 0,
+										scale: 0.8,
+									}}
+									className='relative'
+								>
+									<Link
+										to='/admin'
+										className='relative font-exo font-medium text-red-500 hover:text-red-400 transition-colors'
+										title='Admin Dashboard (Ctrl+Shift+A)'
+									>
+										Admin
+										<motion.div
+											className='absolute -bottom-1 left-0 right-0 h-0.5 bg-red-500'
+											initial={{
+												scaleX: 0,
+											}}
+											animate={{
+												scaleX: 1,
+											}}
+											transition={{
+												duration: 0.3,
+											}}
+										/>
+									</Link>
+								</motion.div>
+							)}
 						</div>
 
 						{/* Theme Toggle & CTA Button */}

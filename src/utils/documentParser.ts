@@ -81,7 +81,6 @@ export async function parseDocumentWithMetadata(
 
 		return document;
 	} catch (error) {
-		console.error('Document parsing error:', error);
 		throw error;
 	}
 }
@@ -164,7 +163,6 @@ async function parsePDF(
 			pageCount,
 		};
 	} catch (error) {
-		console.error('PDF parsing error:', error);
 		if (error instanceof Error) {
 			if (error.message.includes('Invalid PDF')) {
 				throw new Error(
@@ -204,7 +202,6 @@ async function parseDocx(file: File): Promise<string> {
 
 		return cleanText;
 	} catch (error) {
-		console.error('DOCX parsing error:', error);
 		if (
 			error instanceof Error &&
 			error.message.includes('not a valid zip file')

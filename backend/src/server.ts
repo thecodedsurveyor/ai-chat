@@ -4,10 +4,7 @@ import config from './config/environment';
 const PORT = config.PORT || 3003;
 
 const server = app.listen(PORT, () => {
-	console.log(`🚀 Server running on port ${PORT}`);
-	console.log(`📊 Environment: ${config.NODE_ENV}`);
-	console.log(`🌐 Frontend URL: ${config.FRONTEND_URL}`);
-	console.log(`💾 Database: Connected to MongoDB`);
+	// Server started successfully
 });
 
 // Graceful shutdown

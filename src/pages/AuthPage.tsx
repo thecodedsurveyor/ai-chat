@@ -309,7 +309,7 @@ const AuthPage = () => {
 				}
 			}
 		} catch (error) {
-			console.error('Auth error:', error);
+			// Auth error occurred
 			showError(
 				'Error',
 				'An unexpected error occurred'

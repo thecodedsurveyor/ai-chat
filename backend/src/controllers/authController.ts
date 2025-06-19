@@ -133,6 +133,15 @@ export const login = async (
 			return;
 		}
 
+		// Check if user has a password
+		if (!user.password) {
+			res.status(401).json({
+				success: false,
+				message: 'Invalid email or password',
+			});
+			return;
+		}
+
 		// Validate password
 		const isValidPassword =
 			await PasswordUtils.comparePassword(
@@ -383,6 +392,16 @@ export const changePassword = async (
 			res.status(404).json({
 				success: false,
 				message: 'User not found',
+			});
+			return;
+		}
+
+		// Check if user has a password
+		if (!user.password) {
+			res.status(400).json({
+				success: false,
+				message:
+					'Cannot change password for this account',
 			});
 			return;
 		}

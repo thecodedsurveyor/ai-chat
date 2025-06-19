@@ -6,6 +6,7 @@ import {
 	Settings,
 	LogOut,
 	BarChart3,
+	ChevronDown,
 } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -16,6 +17,7 @@ const UserProfile: React.FC = () => {
 	const { showSuccess } = useToast();
 	const navigate = useNavigate();
 	const [isOpen, setIsOpen] = useState(false);
+	const [isHovered, setIsHovered] = useState(false);
 	const dropdownRef = useRef<HTMLDivElement>(null);
 
 	const user = authService.getUser();
@@ -53,8 +55,8 @@ const UserProfile: React.FC = () => {
 				'You have been successfully logged out'
 			);
 			navigate('/auth');
-		} catch (error) {
-			console.error('Logout error:', error);
+		} catch {
+			// Logout error occurred
 		}
 		setIsOpen(false);
 	};
@@ -87,23 +89,23 @@ const UserProfile: React.FC = () => {
 		)}`.toUpperCase();
 	};
 
-	const renderAvatar = (size: 'small' | 'large') => {
+	const renderAvatar = (
+		size: 'small' | 'medium' | 'large'
+	) => {
 		const sizeClasses =
 			size === 'small'
 				? 'w-10 h-10 text-sm'
-				: 'w-12 h-12 text-lg';
+				: size === 'medium'
+				? 'w-12 h-12 text-base'
+				: 'w-14 h-14 text-lg';
 
 		if (user.avatar) {
 			return (
 				<img
 					src={user.avatar}
 					alt={`${user.firstName} ${user.lastName}`}
-					className={`${sizeClasses} rounded-full object-cover border-2 border-white/20`}
+					className={`${sizeClasses} rounded-full object-cover border-2 border-white/20 shadow-lg`}
 					onError={(e) => {
-						console.error(
-							'Avatar failed to load:',
-							e
-						);
 						// Hide the image and let the fallback div show
 						e.currentTarget.style.display =
 							'none';
@@ -114,7 +116,7 @@ const UserProfile: React.FC = () => {
 
 		return (
 			<div
-				className={`${sizeClasses} rounded-full flex items-center justify-center font-semibold ${
+				className={`${sizeClasses} rounded-full flex items-center justify-center font-semibold shadow-lg ${
 					isDark
 						? 'bg-gradient-to-r from-chat-pink to-chat-purple text-white'
 						: 'bg-gradient-to-r from-blue-500 to-purple-500 text-white'
@@ -127,26 +129,96 @@ const UserProfile: React.FC = () => {
 
 	return (
 		<div className='relative' ref={dropdownRef}>
-			{/* Profile Button - Only Avatar */}
+			{/* Enhanced Profile Button with Settings Indicator */}
 			<button
 				onClick={() => setIsOpen(!isOpen)}
-				className={`p-1 rounded-full transition-all duration-200 hover:scale-105 ${
+				onMouseEnter={() => setIsHovered(true)}
+				onMouseLeave={() => setIsHovered(false)}
+				className={`relative flex items-center gap-2 p-2 pr-3 rounded-full transition-all duration-300 group ${
 					isDark
-						? 'hover:bg-white/10'
-						: 'hover:bg-gray-100'
+						? 'hover:bg-white/10 hover:shadow-lg'
+						: 'hover:bg-gray-100 hover:shadow-lg'
 				} ${
 					isOpen
 						? isDark
-							? 'bg-white/10'
-							: 'bg-gray-100'
+							? 'bg-white/10 shadow-lg'
+							: 'bg-gray-100 shadow-lg'
 						: ''
 				}`}
-				title={`${user.firstName} ${user.lastName}`}
+				title={`${user.firstName} ${user.lastName} - Click for settings`}
 			>
-				{renderAvatar('small')}
+				{/* Avatar with enhanced visual feedback */}
+				<div className='relative'>
+					{renderAvatar('medium')}
+
+					{/* Settings indicator - subtle ring */}
+					<div
+						className={`absolute -inset-0.5 rounded-full transition-all duration-300 ${
+							isHovered || isOpen
+								? 'bg-gradient-to-r from-chat-pink to-chat-purple opacity-50'
+								: 'bg-transparent'
+						}`}
+					/>
+
+					{/* Settings icon indicator */}
+					<div
+						className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center transition-all duration-300 ${
+							isDark
+								? 'bg-chat-secondary border-2 border-chat-primary'
+								: 'bg-white border-2 border-gray-200'
+						} shadow-lg ${
+							isHovered || isOpen
+								? 'scale-110'
+								: 'scale-100'
+						}`}
+					>
+						<Settings
+							className={`w-3 h-3 transition-colors ${
+								isDark
+									? 'text-chat-accent'
+									: 'text-gray-600'
+							}`}
+						/>
+					</div>
+				</div>
+
+				{/* Name and dropdown indicator (hidden on mobile to save space) */}
+				<div className='hidden sm:flex items-center gap-1'>
+					<span
+						className={`text-sm font-medium transition-colors ${
+							isDark
+								? 'text-white'
+								: 'text-gray-800'
+						}`}
+					>
+						{user.firstName}
+					</span>
+					<ChevronDown
+						className={`w-4 h-4 transition-transform duration-300 ${
+							isOpen
+								? 'rotate-180'
+								: 'rotate-0'
+						} ${
+							isDark
+								? 'text-chat-accent'
+								: 'text-gray-500'
+						}`}
+					/>
+				</div>
+
+				{/* Static gradient background */}
+				{!isOpen && (
+					<div
+						className={`absolute inset-0 rounded-full opacity-20 ${
+							isDark
+								? 'bg-gradient-to-r from-chat-pink to-chat-purple'
+								: 'bg-gradient-to-r from-blue-500 to-purple-500'
+						}`}
+					/>
+				)}
 			</button>
 
-			{/* Dropdown Menu */}
+			{/* Enhanced Dropdown Menu */}
 			<AnimatePresence>
 				{isOpen && (
 					<motion.div
@@ -166,15 +238,15 @@ const UserProfile: React.FC = () => {
 							scale: 0.95,
 						}}
 						transition={{ duration: 0.2 }}
-						className={`absolute right-0 mt-2 w-64 rounded-xl shadow-2xl border z-50 ${
+						className={`absolute right-0 mt-3 w-72 rounded-xl shadow-2xl border backdrop-blur-sm z-40 ${
 							isDark
-								? 'bg-chat-secondary border-white/10'
-								: 'bg-white border-gray-200'
+								? 'bg-chat-secondary/95 border-white/10'
+								: 'bg-white/95 border-gray-200'
 						}`}
 					>
-						{/* User Info Header */}
+						{/* Enhanced User Info Header */}
 						<div
-							className={`px-4 py-3 border-b ${
+							className={`px-4 py-4 border-b ${
 								isDark
 									? 'border-white/10'
 									: 'border-gray-100'
@@ -182,9 +254,9 @@ const UserProfile: React.FC = () => {
 						>
 							<div className='flex items-center gap-3'>
 								{renderAvatar('large')}
-								<div>
+								<div className='flex-1'>
 									<div
-										className={`font-semibold ${
+										className={`font-semibold text-base ${
 											isDark
 												? 'text-white'
 												: 'text-gray-800'
@@ -193,46 +265,118 @@ const UserProfile: React.FC = () => {
 										{user.firstName}{' '}
 										{user.lastName}
 									</div>
+									<div
+										className={`text-sm opacity-75 ${
+											isDark
+												? 'text-chat-accent'
+												: 'text-gray-600'
+										}`}
+									>
+										{user.email}
+									</div>
 								</div>
 							</div>
 						</div>
 
-						{/* Menu Items */}
+						{/* Enhanced Menu Items */}
 						<div className='py-2'>
 							<button
 								onClick={handleProfile}
-								className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
+								className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all duration-200 hover:scale-[1.02] ${
 									isDark
 										? 'hover:bg-white/5 text-gray-300 hover:text-white'
 										: 'hover:bg-gray-50 text-gray-700 hover:text-gray-900'
 								}`}
 							>
-								<User className='w-5 h-5' />
-								<span>My Profile</span>
+								<div
+									className={`p-2 rounded-lg ${
+										isDark
+											? 'bg-blue-500/20 text-blue-400'
+											: 'bg-blue-50 text-blue-600'
+									}`}
+								>
+									<User className='w-5 h-5' />
+								</div>
+								<div>
+									<div className='font-medium'>
+										My Profile
+									</div>
+									<div
+										className={`text-xs opacity-75 ${
+											isDark
+												? 'text-gray-400'
+												: 'text-gray-500'
+										}`}
+									>
+										Manage your account
+									</div>
+								</div>
 							</button>
 
 							<button
 								onClick={handleSettings}
-								className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
+								className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all duration-200 hover:scale-[1.02] ${
 									isDark
 										? 'hover:bg-white/5 text-gray-300 hover:text-white'
 										: 'hover:bg-gray-50 text-gray-700 hover:text-gray-900'
 								}`}
 							>
-								<Settings className='w-5 h-5' />
-								<span>Settings</span>
+								<div
+									className={`p-2 rounded-lg ${
+										isDark
+											? 'bg-purple-500/20 text-purple-400'
+											: 'bg-purple-50 text-purple-600'
+									}`}
+								>
+									<Settings className='w-5 h-5' />
+								</div>
+								<div>
+									<div className='font-medium'>
+										Settings
+									</div>
+									<div
+										className={`text-xs opacity-75 ${
+											isDark
+												? 'text-gray-400'
+												: 'text-gray-500'
+										}`}
+									>
+										App preferences
+									</div>
+								</div>
 							</button>
 
 							<button
 								onClick={handleAnalytics}
-								className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
+								className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all duration-200 hover:scale-[1.02] ${
 									isDark
 										? 'hover:bg-white/5 text-gray-300 hover:text-white'
 										: 'hover:bg-gray-50 text-gray-700 hover:text-gray-900'
 								}`}
 							>
-								<BarChart3 className='w-5 h-5' />
-								<span>Analytics</span>
+								<div
+									className={`p-2 rounded-lg ${
+										isDark
+											? 'bg-green-500/20 text-green-400'
+											: 'bg-green-50 text-green-600'
+									}`}
+								>
+									<BarChart3 className='w-5 h-5' />
+								</div>
+								<div>
+									<div className='font-medium'>
+										Analytics
+									</div>
+									<div
+										className={`text-xs opacity-75 ${
+											isDark
+												? 'text-gray-400'
+												: 'text-gray-500'
+										}`}
+									>
+										Usage insights
+									</div>
+								</div>
 							</button>
 
 							<div
@@ -245,14 +389,35 @@ const UserProfile: React.FC = () => {
 
 							<button
 								onClick={handleLogout}
-								className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
+								className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all duration-200 hover:scale-[1.02] ${
 									isDark
 										? 'hover:bg-red-500/10 text-red-400 hover:text-red-300'
 										: 'hover:bg-red-50 text-red-600 hover:text-red-700'
 								}`}
 							>
-								<LogOut className='w-5 h-5' />
-								<span>Sign Out</span>
+								<div
+									className={`p-2 rounded-lg ${
+										isDark
+											? 'bg-red-500/20 text-red-400'
+											: 'bg-red-50 text-red-600'
+									}`}
+								>
+									<LogOut className='w-5 h-5' />
+								</div>
+								<div>
+									<div className='font-medium'>
+										Sign Out
+									</div>
+									<div
+										className={`text-xs opacity-75 ${
+											isDark
+												? 'text-gray-400'
+												: 'text-gray-500'
+										}`}
+									>
+										End your session
+									</div>
+								</div>
 							</button>
 						</div>
 					</motion.div>

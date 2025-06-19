@@ -1,19 +1,22 @@
 import { Response, NextFunction } from 'express';
 import { JWTUtils } from '../utils/jwt';
+import { PrismaClient } from '@prisma/client';
 import {
 	AuthenticatedRequest,
 	ApiResponse,
 	HttpStatusCode,
 } from '../types';
 
+const prisma = new PrismaClient();
+
 /**
- * Authentication middleware to verify JWT tokens
+ * Authentication middleware to verify JWT tokens and check user existence
  */
-export const authenticateToken = (
+export const authenticateToken = async (
 	req: AuthenticatedRequest,
 	res: Response<ApiResponse>,
 	next: NextFunction
-): void => {
+): Promise<void> => {
 	try {
 		const authHeader = req.headers.authorization;
 		const token =
@@ -30,9 +33,30 @@ export const authenticateToken = (
 
 		// Verify the token
 		const decoded = JWTUtils.verifyAccessToken(token);
+
+		// Check if user still exists in database
+		const user = await prisma.user.findUnique({
+			where: { id: decoded.userId },
+			select: {
+				id: true,
+				email: true,
+				isVerified: true,
+			},
+		});
+
+		if (!user) {
+			res.status(HttpStatusCode.UNAUTHORIZED).json({
+				success: false,
+				message: 'User account no longer exists',
+				error: 'User not found',
+			});
+			return;
+		}
+
 		req.user = decoded;
 		next();
-	} catch {
+	} catch (error) {
+		console.error('Auth middleware error:', error);
 		res.status(HttpStatusCode.FORBIDDEN).json({
 			success: false,
 			message: 'Invalid or expired token',
@@ -44,11 +68,11 @@ export const authenticateToken = (
 /**
  * Optional authentication middleware - doesn't fail if no token
  */
-export const optionalAuth = (
+export const optionalAuth = async (
 	req: AuthenticatedRequest,
 	res: Response,
 	next: NextFunction
-): void => {
+): Promise<void> => {
 	try {
 		const authHeader = req.headers.authorization;
 		const token =
@@ -57,11 +81,24 @@ export const optionalAuth = (
 		if (token) {
 			const decoded =
 				JWTUtils.verifyAccessToken(token);
-			req.user = decoded;
+
+			// Check if user still exists in database
+			const user = await prisma.user.findUnique({
+				where: { id: decoded.userId },
+				select: {
+					id: true,
+					email: true,
+					isVerified: true,
+				},
+			});
+
+			if (user) {
+				req.user = decoded;
+			}
 		}
 		next();
 	} catch {
-		// Continue without authentication if token is invalid
+		// Continue without authentication if token is invalid or user doesn't exist
 		next();
 	}
 };

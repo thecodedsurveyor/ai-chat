@@ -1,1 +1,2 @@
-user_input = input("prompt: ")
+# userinput.py
+user_input = input("prompt: ") 

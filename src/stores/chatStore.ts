@@ -392,7 +392,7 @@ export const useChatStore = create<ChatState>()(
 							}
 						);
 					} catch (error) {
-						console.error('Error:', error);
+						// Error occurred during streaming
 
 						// Create error message for user
 						const errorMessage: Message = {

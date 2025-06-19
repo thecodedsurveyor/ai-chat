@@ -261,11 +261,14 @@ class AuthService {
 			this.clearAllUserData();
 
 			// Call global chat data cleanup if available
+			const globalWindow = window as unknown as {
+				clearChatData?: () => void;
+			};
 			if (
-				typeof (window as any).clearChatData ===
+				typeof globalWindow.clearChatData ===
 				'function'
 			) {
-				(window as any).clearChatData();
+				globalWindow.clearChatData();
 			}
 
 			// Trigger storage event to notify other components
@@ -374,11 +377,37 @@ class AuthService {
 	}
 
 	isAuthenticated(): boolean {
-		return !!this.token;
+		// Check instance token first, then fallback to localStorage
+		if (this.token) {
+			return true;
+		}
+
+		// Fallback: check localStorage directly in case instance isn't updated
+		const storedToken =
+			localStorage.getItem('authToken');
+		if (storedToken) {
+			this.token = storedToken; // Update instance
+			return true;
+		}
+
+		return false;
 	}
 
 	getToken(): string | null {
-		return this.token;
+		// Check instance token first, then fallback to localStorage
+		if (this.token) {
+			return this.token;
+		}
+
+		// Fallback: check localStorage directly
+		const storedToken =
+			localStorage.getItem('authToken');
+		if (storedToken) {
+			this.token = storedToken; // Update instance
+			return storedToken;
+		}
+
+		return null;
 	}
 
 	getUser(): User | null {
@@ -457,6 +486,20 @@ class AuthService {
 					},
 				}
 			);
+
+			// If 401 (user not found/deleted), logout immediately
+			if (response.status === 401) {
+				const errorData = await response.json();
+				if (errorData.error === 'User not found') {
+					await this.logout();
+					window.location.reload(); // Force reload to clear any cached state
+					return {
+						success: false,
+						message:
+							'Your account has been deleted. Please register again.',
+					};
+				}
+			}
 
 			// If 403, try to refresh token and retry
 			if (response.status === 403) {
@@ -705,6 +748,74 @@ class AuthService {
 				message: 'Network error. Please try again.',
 			};
 		}
+	}
+
+	/**
+	 * Global method to check if a response indicates the user was deleted
+	 * and handle it appropriately. Can be used by other services.
+	 */
+	async handleAuthResponse(
+		response: Response
+	): Promise<Response> {
+		if (response.status === 401) {
+			try {
+				const clone = response.clone();
+				const errorData = await clone.json();
+				if (
+					errorData.error === 'User not found' ||
+					errorData.message ===
+						'User account no longer exists'
+				) {
+					await this.logout();
+					window.location.reload();
+				}
+			} catch {
+				// If we can't parse the response, just proceed
+			}
+		}
+		return response;
+	}
+
+	/**
+	 * Enhanced fetch wrapper that automatically handles deleted user scenarios
+	 */
+	async authenticatedFetch(
+		url: string,
+		options: RequestInit = {}
+	): Promise<Response> {
+		const headers = {
+			'Content-Type': 'application/json',
+			...options.headers,
+			Authorization: `Bearer ${this.token}`,
+		};
+
+		let response = await fetch(url, {
+			...options,
+			headers,
+		});
+
+		// Handle user deleted scenario
+		response = await this.handleAuthResponse(response);
+
+		// Handle token refresh for 403 responses
+		if (response.status === 403) {
+			const refreshed =
+				await this.refreshAccessToken();
+			if (refreshed) {
+				response = await fetch(url, {
+					...options,
+					headers: {
+						...headers,
+						Authorization: `Bearer ${this.token}`,
+					},
+				});
+				response = await this.handleAuthResponse(
+					response
+				);
+			}
+		}
+
+		return response;
 	}
 }
 

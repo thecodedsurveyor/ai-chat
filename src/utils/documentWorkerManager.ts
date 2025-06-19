@@ -68,14 +68,6 @@ class DocumentWorkerManager {
 					errorData.error ===
 						'DOCX_MAIN_THREAD_REQUIRED'
 				) {
-					console.log(
-						`Falling back to main thread for ${
-							errorData.error ===
-							'PDF_MAIN_THREAD_REQUIRED'
-								? 'PDF'
-								: 'DOCX'
-						} processing`
-					);
 					// Fall back to main thread processing
 					this.handleMainThreadFallback();
 				} else {
@@ -85,15 +77,11 @@ class DocumentWorkerManager {
 			}
 
 			default:
-				console.warn(
-					'Unknown worker message type:',
-					type
-				);
+			// Unknown worker message type - silently ignore
 		}
 	}
 
 	private handleWorkerError(error: ErrorEvent) {
-		console.error('Worker error:', error);
 		this.callbacks.onError?.({
 			error: error.message || 'Worker error occurred',
 		});

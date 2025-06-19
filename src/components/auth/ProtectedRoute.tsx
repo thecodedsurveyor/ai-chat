@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../../services/authService';
 import { showToast } from '../../utils/toast';
@@ -17,19 +17,23 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 	const isAuthenticated = authService.isAuthenticated();
 	const user = authService.getUser();
 
-	// If not authenticated and haven't redirected yet, redirect
-	if (!isAuthenticated || !user) {
-		if (!hasRedirected.current) {
+	// Use useEffect for navigation to avoid render-time side effects
+	useEffect(() => {
+		if (
+			(!isAuthenticated || !user) &&
+			!hasRedirected.current
+		) {
 			hasRedirected.current = true;
-			// Use setTimeout to avoid updating during render
-			setTimeout(() => {
-				showToast(
-					'error',
-					'You need to log in to access the chat. Please log in to continue.'
-				);
-				navigate('/auth');
-			}, 0);
+			showToast(
+				'error',
+				'You need to log in to access the chat. Please log in to continue.'
+			);
+			navigate('/auth');
 		}
+	}, [isAuthenticated, user, navigate]);
+
+	// If not authenticated, return null while useEffect handles navigation
+	if (!isAuthenticated || !user) {
 		return null;
 	}
 

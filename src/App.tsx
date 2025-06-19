@@ -40,21 +40,11 @@ import ScrollToTop from './components/ui/ScrollToTop';
 import BackToTop from './components/ui/BackToTop';
 import { useChats } from './stores/chatStore';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import AdminDashboard from './components/admin/AdminDashboard';
+import { useEffect } from 'react';
+import SessionManager from './utils/sessionManager';
 
 const queryClient = new QueryClient();
-
-// Simple test component to help diagnose issues
-const TestPage = () => (
-	<div className='p-10 text-center'>
-		<h1 className='text-2xl font-bold mb-4'>
-			Test Page Working
-		</h1>
-		<p>
-			If you can see this, basic routing is working
-			correctly.
-		</p>
-	</div>
-);
 
 // Wrapper component to provide chats data to AnalyticsPage
 const AnalyticsPageWrapper = () => {
@@ -68,6 +58,11 @@ const AnalyticsPageWrapper = () => {
 };
 
 const App = () => {
+	// Initialize session monitoring when app starts
+	useEffect(() => {
+		SessionManager.initSessionMonitoring();
+	}, []);
+
 	return (
 		<QueryClientProvider client={queryClient}>
 			<ThemeProvider>
@@ -76,12 +71,6 @@ const App = () => {
 						<Router>
 							<ScrollToTop />
 							<Routes>
-								{/* Test route */}
-								<Route
-									path='/test'
-									element={<TestPage />}
-								/>
-
 								{/* Auth page route */}
 								<Route
 									path='/auth'
@@ -184,6 +173,18 @@ const App = () => {
 									path='/analytics'
 									element={
 										<AnalyticsPageWrapper />
+									}
+								/>
+								{/* Admin Dashboard route */}
+								<Route
+									path='/admin'
+									element={
+										<AdminDashboard
+											isVisible={true}
+											onClose={() =>
+												window.history.back()
+											}
+										/>
 									}
 								/>
 								{/* New footer pages */}

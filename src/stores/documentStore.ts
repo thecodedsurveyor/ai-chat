@@ -128,10 +128,7 @@ const loadCacheFromStorage = (): DocumentCache => {
 			return cleanCache;
 		}
 	} catch (error) {
-		console.warn(
-			'Failed to load document cache:',
-			error
-		);
+		// Failed to load document cache - silently ignore
 	}
 	return {};
 };
@@ -143,10 +140,7 @@ const saveCacheToStorage = (cache: DocumentCache) => {
 			JSON.stringify(cache)
 		);
 	} catch (error) {
-		console.warn(
-			'Failed to save document cache:',
-			error
-		);
+		// Failed to save document cache - silently ignore
 	}
 };
 

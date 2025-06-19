@@ -85,13 +85,13 @@ const PWAPrompt: React.FC = () => {
 
 	return (
 		<>
-			{/* Network Status Indicator */}
+			{/* Network Status Indicator - Repositioned to avoid profile conflict */}
 			<div
 				className={cn(
-					'fixed top-4 right-4 z-50 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-300',
+					'fixed top-20 right-4 z-30 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-300',
 					isOnline
-						? 'bg-green-500 text-white'
-						: 'bg-red-500 text-white shadow-lg'
+						? 'bg-green-500 text-white shadow-md'
+						: 'bg-red-500 text-white shadow-lg animate-pulse'
 				)}
 			>
 				<div className='flex items-center gap-2'>
@@ -112,10 +112,10 @@ const PWAPrompt: React.FC = () => {
 				<div className='fixed bottom-4 left-4 right-4 z-50 max-w-sm mx-auto'>
 					<div
 						className={cn(
-							'p-4 rounded-lg shadow-lg border',
+							'p-4 rounded-lg shadow-lg border backdrop-blur-sm',
 							isDark
-								? 'bg-chat-primary border-chat-accent/30 text-white'
-								: 'bg-white border-gray-200 text-gray-900'
+								? 'bg-chat-primary/95 border-chat-accent/30 text-white'
+								: 'bg-white/95 border-gray-200 text-gray-900'
 						)}
 					>
 						<div className='flex items-start gap-3'>
