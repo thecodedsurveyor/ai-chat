@@ -184,6 +184,7 @@ const ChatBotApp = () => {
 				}
 				usedCount={guestUsageStats.used}
 				maxCount={guestUsageStats.total}
+				resetsAt={guestUsageStats.resetsAt}
 			/>
 
 			{/* PWA Prompt and Network Status */}

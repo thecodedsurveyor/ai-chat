@@ -1,6 +1,11 @@
 /**
  * Guest Usage Manager
  * Tracks and manages usage limits for non-authenticated users
+ *
+ * Features:
+ * - Daily reset: Usage count resets at midnight local time
+ * - 10 free messages per day for guest users
+ * - Automatic cleanup and migration when users sign up
  */
 
 const GUEST_USAGE_KEY = 'neuronflow_guest_usage';
@@ -10,9 +15,26 @@ export interface GuestUsage {
 	count: number;
 	firstUse: string;
 	lastUse: string;
+	lastResetDate: string; // Track the last reset date for daily resets
 }
 
 export class GuestUsageManager {
+	/**
+	 * Get today's date string (YYYY-MM-DD format)
+	 */
+	static getTodayDateString(): string {
+		return new Date().toISOString().split('T')[0];
+	}
+
+	/**
+	 * Check if usage should be reset (new day)
+	 */
+	static shouldResetUsage(usage: GuestUsage): boolean {
+		const today =
+			GuestUsageManager.getTodayDateString();
+		return usage.lastResetDate !== today;
+	}
+
 	/**
 	 * Get current guest usage from localStorage
 	 */
@@ -31,10 +53,13 @@ export class GuestUsageManager {
 		}
 
 		// Return default usage
+		const now = new Date().toISOString();
 		return {
 			count: 0,
-			firstUse: new Date().toISOString(),
-			lastUse: new Date().toISOString(),
+			firstUse: now,
+			lastUse: now,
+			lastResetDate:
+				GuestUsageManager.getTodayDateString(),
 		};
 	}
 
@@ -59,14 +84,27 @@ export class GuestUsageManager {
 	 * Increment usage count
 	 */
 	static incrementUsage(): GuestUsage {
-		const usage = GuestUsageManager.getUsage();
+		let usage = GuestUsageManager.getUsage();
 		const now = new Date().toISOString();
+		const today =
+			GuestUsageManager.getTodayDateString();
+
+		// Reset usage if it's a new day
+		if (GuestUsageManager.shouldResetUsage(usage)) {
+			usage = {
+				count: 0,
+				firstUse: now,
+				lastUse: now,
+				lastResetDate: today,
+			};
+		}
 
 		const updatedUsage: GuestUsage = {
 			count: usage.count + 1,
 			firstUse:
 				usage.count === 0 ? now : usage.firstUse,
 			lastUse: now,
+			lastResetDate: today,
 		};
 
 		GuestUsageManager.saveUsage(updatedUsage);
@@ -77,7 +115,14 @@ export class GuestUsageManager {
 	 * Check if guest has reached usage limit
 	 */
 	static hasReachedLimit(): boolean {
-		const usage = GuestUsageManager.getUsage();
+		let usage = GuestUsageManager.getUsage();
+
+		// Reset usage if it's a new day
+		if (GuestUsageManager.shouldResetUsage(usage)) {
+			GuestUsageManager.resetUsageForNewDay();
+			usage = GuestUsageManager.getUsage();
+		}
+
 		return usage.count >= MAX_GUEST_USES;
 	}
 
@@ -85,8 +130,33 @@ export class GuestUsageManager {
 	 * Get remaining uses for guest
 	 */
 	static getRemainingUses(): number {
-		const usage = GuestUsageManager.getUsage();
+		let usage = GuestUsageManager.getUsage();
+
+		// Reset usage if it's a new day
+		if (GuestUsageManager.shouldResetUsage(usage)) {
+			GuestUsageManager.resetUsageForNewDay();
+			usage = GuestUsageManager.getUsage();
+		}
+
 		return Math.max(0, MAX_GUEST_USES - usage.count);
+	}
+
+	/**
+	 * Reset guest usage for a new day
+	 */
+	static resetUsageForNewDay(): void {
+		const now = new Date().toISOString();
+		const today =
+			GuestUsageManager.getTodayDateString();
+
+		const resetUsage: GuestUsage = {
+			count: 0,
+			firstUse: now,
+			lastUse: now,
+			lastResetDate: today,
+		};
+
+		GuestUsageManager.saveUsage(resetUsage);
 	}
 
 	/**
@@ -118,19 +188,36 @@ export class GuestUsageManager {
 		remaining: number;
 		total: number;
 		percentage: number;
+		resetsAt: string;
 	} {
-		const usage = GuestUsageManager.getUsage();
+		let usage = GuestUsageManager.getUsage();
+
+		// Reset usage if it's a new day
+		if (GuestUsageManager.shouldResetUsage(usage)) {
+			GuestUsageManager.resetUsageForNewDay();
+			usage = GuestUsageManager.getUsage();
+		}
+
 		const used = usage.count;
-		const remaining =
-			GuestUsageManager.getRemainingUses();
+		const remaining = Math.max(
+			0,
+			MAX_GUEST_USES - usage.count
+		);
 		const total = MAX_GUEST_USES;
 		const percentage = Math.round((used / total) * 100);
+
+		// Calculate when the usage resets (next midnight)
+		const tomorrow = new Date();
+		tomorrow.setDate(tomorrow.getDate() + 1);
+		tomorrow.setHours(0, 0, 0, 0);
+		const resetsAt = tomorrow.toISOString();
 
 		return {
 			used,
 			remaining,
 			total,
 			percentage,
+			resetsAt,
 		};
 	}
 }

@@ -20,6 +20,7 @@ interface ChatHeaderProps {
 		remaining: number;
 		total: number;
 		percentage: number;
+		resetsAt: string;
 	};
 }
 
@@ -174,7 +175,10 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 									: 'bg-white border-blue-200 hover:bg-blue-50'
 							)}
 							onClick={handleGuestSignUp}
-							title='Click to sign up for unlimited messages'
+							title={`${
+								guestUsageStats?.remaining ||
+								0
+							} messages left today. Resets at midnight! Click to sign up for unlimited messages.`}
 						>
 							<div className='p-1 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 flex-shrink-0'>
 								<Sparkles className='w-3 h-3 text-white' />

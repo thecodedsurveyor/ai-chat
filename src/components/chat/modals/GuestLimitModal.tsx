@@ -7,6 +7,7 @@ interface GuestLimitModalProps {
 	onClose: () => void;
 	usedCount: number;
 	maxCount: number;
+	resetsAt?: string;
 }
 
 const GuestLimitModal: React.FC<GuestLimitModalProps> = ({
@@ -14,6 +15,7 @@ const GuestLimitModal: React.FC<GuestLimitModalProps> = ({
 	onClose,
 	usedCount,
 	maxCount,
+	resetsAt,
 }) => {
 	const navigate = useNavigate();
 
@@ -57,15 +59,31 @@ const GuestLimitModal: React.FC<GuestLimitModalProps> = ({
 					</h2>
 
 					{/* Description */}
-					<p className='text-gray-600 dark:text-gray-300 mb-6 leading-relaxed'>
+					<p className='text-gray-600 dark:text-gray-300 mb-4 leading-relaxed'>
 						You've used all{' '}
 						<span className='font-semibold text-blue-600 dark:text-blue-400'>
 							{maxCount} free messages
-						</span>
-						. Join our community to unlock
-						unlimited conversations and premium
-						features!
+						</span>{' '}
+						for today.
+						{resetsAt && (
+							<>
+								<br />
+								<span className='text-sm text-green-600 dark:text-green-400 font-medium'>
+									Your free messages reset
+									at midnight! 🌙
+								</span>
+							</>
+						)}
 					</p>
+
+					<div className='bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-6'>
+						<p className='text-sm text-blue-700 dark:text-blue-300'>
+							💡 <strong>Good news!</strong>{' '}
+							You'll get {maxCount} fresh
+							messages tomorrow, or sign up
+							now for unlimited access!
+						</p>
+					</div>
 
 					{/* Usage stats */}
 					<div className='bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 mb-6'>
