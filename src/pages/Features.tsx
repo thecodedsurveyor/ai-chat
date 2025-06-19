@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import {
 	Bot,
 	Zap,
@@ -93,29 +92,15 @@ const Features = () => {
 				],
 			},
 			{
-				icon: (
-					<Clock className='w-6 h-6 text-green-500' />
-				),
-				title: 'Daily Reset Guest Mode',
-				description:
-					'Experience the app with 10 free messages that automatically reset every day at midnight.',
-				highlights: [
-					'10 daily messages',
-					'Automatic midnight reset',
-					'No signup required',
-					'Fresh start daily',
-				],
-			},
-			{
 				icon: <Bot className='w-6 h-6' />,
-				title: 'Model Selection',
+				title: 'Multiple AI Models',
 				description:
-					'Choose from 15+ AI models with different capabilities and specializations.',
+					'Choose from 5 powerful AI models with different capabilities and specializations.',
 				highlights: [
 					'OpenAI GPT models',
 					'Google Gemini',
-					'Meta Llama',
-					'Qwen models',
+					'Claude models',
+					'Model switching',
 				],
 			},
 			{
@@ -346,18 +331,6 @@ const Features = () => {
 		advanced: [
 			{
 				icon: <Shield className='w-6 h-6' />,
-				title: 'Complete Privacy Protection',
-				description:
-					'Advanced user data isolation ensures your conversations stay completely private with encrypted, user-specific storage.',
-				highlights: [
-					'User-specific storage keys',
-					'Complete data isolation',
-					'Automatic guest cleanup',
-					'Secure migration system',
-				],
-			},
-			{
-				icon: <Shield className='w-6 h-6' />,
 				title: 'Data Privacy & Security',
 				description:
 					'Local storage with encryption and privacy-first design.',
@@ -409,7 +382,6 @@ const Features = () => {
 
 	const FeatureCard = ({
 		feature,
-		index,
 	}: {
 		feature: {
 			icon: React.ReactNode;
@@ -417,16 +389,9 @@ const Features = () => {
 			description: string;
 			highlights: string[];
 		};
-		index: number;
 	}) => (
-		<motion.div
-			initial={{ opacity: 0, y: 20 }}
-			animate={{ opacity: 1, y: 0 }}
-			transition={{
-				duration: 0.5,
-				delay: index * 0.1,
-			}}
-			className={`p-6 rounded-xl border-2 transition-all duration-300 hover:scale-105 ${
+		<div
+			className={`p-6 rounded-xl border-2 ${
 				isDark
 					? 'bg-chat-secondary/30 border-chat-accent/20 hover:border-chat-pink/50'
 					: 'bg-white border-gray-200 shadow-lg hover:shadow-xl hover:border-chat-pink/50'
@@ -481,7 +446,7 @@ const Features = () => {
 					</div>
 				</div>
 			</div>
-		</motion.div>
+		</div>
 	);
 
 	return (
@@ -501,12 +466,7 @@ const Features = () => {
 				}`}
 			>
 				<div className='max-w-7xl mx-auto px-6'>
-					<motion.div
-						className='text-center'
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.6 }}
-					>
+					<div className='text-center'>
 						<div className='flex items-center justify-center gap-3 mb-6'>
 							<div className='p-3 rounded-xl bg-gradient-to-r from-chat-pink to-chat-purple'>
 								<Zap className='w-8 h-8 text-white' />
@@ -534,7 +494,7 @@ const Features = () => {
 							user-friendly conversational AI
 							platform.
 						</p>
-					</motion.div>
+					</div>
 				</div>
 			</section>
 
@@ -552,7 +512,7 @@ const Features = () => {
 											category.id
 										)
 									}
-									className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
+									className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium ${
 										activeCategory ===
 										category.id
 											? 'bg-gradient-to-r from-chat-pink to-chat-purple text-white shadow-lg'
@@ -578,7 +538,6 @@ const Features = () => {
 							<FeatureCard
 								key={`${activeCategory}-${index}`}
 								feature={feature}
-								index={index}
 							/>
 						))}
 					</div>
@@ -594,11 +553,7 @@ const Features = () => {
 				}`}
 			>
 				<div className='max-w-4xl mx-auto px-6 text-center'>
-					<motion.div
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.6 }}
-					>
+					<div>
 						<h2
 							className={`text-3xl font-exo font-bold mb-4 ${
 								isDark
@@ -624,7 +579,7 @@ const Features = () => {
 						<div className='grid grid-cols-2 md:grid-cols-4 gap-8'>
 							{[
 								{
-									number: '15+',
+									number: '5',
 									label: 'AI Models',
 								},
 								{
@@ -640,20 +595,8 @@ const Features = () => {
 									label: 'Offline Reading',
 								},
 							].map((stat, index) => (
-								<motion.div
+								<div
 									key={index}
-									initial={{
-										opacity: 0,
-										scale: 0.5,
-									}}
-									animate={{
-										opacity: 1,
-										scale: 1,
-									}}
-									transition={{
-										duration: 0.5,
-										delay: index * 0.1,
-									}}
 									className='text-center'
 								>
 									<div
@@ -670,21 +613,17 @@ const Features = () => {
 									>
 										{stat.label}
 									</div>
-								</motion.div>
+								</div>
 							))}
 						</div>
-					</motion.div>
+					</div>
 				</div>
 			</section>
 
 			{/* CTA Section */}
 			<section className='py-16'>
 				<div className='max-w-4xl mx-auto px-6 text-center'>
-					<motion.div
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.6 }}
-					>
+					<div>
 						<h2
 							className={`text-3xl font-exo font-bold mb-4 ${
 								isDark
@@ -707,32 +646,28 @@ const Features = () => {
 							platform.
 						</p>
 						<div className='flex flex-col sm:flex-row gap-4 justify-center'>
-							<motion.button
-								className='bg-gradient-to-r from-chat-pink to-chat-purple px-8 py-3 rounded-xl font-exo font-semibold text-white shadow-lg hover:shadow-chat-pink/25 transition-all duration-300'
-								whileHover={{ scale: 1.05 }}
-								whileTap={{ scale: 0.95 }}
+							<button
+								className='bg-gradient-to-r from-chat-pink to-chat-purple px-8 py-3 rounded-xl font-exo font-semibold text-white shadow-lg'
 								onClick={() =>
 									navigate('/chat')
 								}
 							>
 								Start Chatting Now
-							</motion.button>
-							<motion.button
-								className={`px-8 py-3 rounded-xl font-exo font-semibold border-2 transition-all duration-300 ${
+							</button>
+							<button
+								className={`px-8 py-3 rounded-xl font-exo font-semibold border-2 ${
 									isDark
 										? 'text-chat-accent border-chat-accent hover:bg-chat-accent hover:text-chat-primary'
 										: 'text-gray-700 border-gray-300 hover:bg-gray-100 hover:border-gray-400'
 								}`}
-								whileHover={{ scale: 1.05 }}
-								whileTap={{ scale: 0.95 }}
 								onClick={() =>
 									navigate('/about')
 								}
 							>
 								Learn More
-							</motion.button>
+							</button>
 						</div>
-					</motion.div>
+					</div>
 				</div>
 			</section>
 		</div>

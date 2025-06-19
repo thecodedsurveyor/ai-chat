@@ -47,7 +47,7 @@ const LandingPage = () => {
 	const faqs = [
 		{
 			question: 'How many AI models are available?',
-			answer: 'We support 15+ advanced AI models including GPT-4, Claude, Gemini, Llama, and more. You can switch between them seamlessly.',
+			answer: 'We support 5 powerful AI models including GPT-4, Claude, and Gemini. You can switch between them seamlessly for different tasks.',
 		},
 		{
 			question: 'Is my data safe and private?',
@@ -184,28 +184,28 @@ const LandingPage = () => {
 
 	const features = [
 		{
-			icon: '🔄',
-			title: 'Daily Reset Guest Mode',
+			icon: '🤖',
+			title: '5 Powerful AI Models',
 			description:
-				'Start fresh every day! Get 10 free AI messages that automatically reset at midnight - no signup required.',
-			highlight: 'NEW',
-			color: 'from-green-400 to-emerald-600',
+				'Access multiple AI models including GPT-4, Claude, and Gemini with seamless switching for different tasks.',
+			highlight: 'FEATURED',
+			color: 'from-purple-500 to-pink-600',
 		},
 		{
-			icon: '🛡️',
-			title: 'Complete Privacy Protection',
+			icon: '👤',
+			title: 'AI Personas & Templates',
 			description:
-				'Advanced user data isolation ensures your conversations stay private with encrypted, user-specific storage.',
-			highlight: 'ENHANCED',
+				'Choose from specialized AI personalities and conversation templates for creative, educational, or professional assistance.',
+			highlight: 'SMART',
 			color: 'from-blue-500 to-indigo-600',
 		},
 		{
-			icon: '🤖',
-			title: '15+ Advanced AI Models',
+			icon: '🔗',
+			title: 'Share Conversations',
 			description:
-				'Access GPT-4, Claude, Gemini, Llama, and more with seamless switching and specialized capabilities.',
-			highlight: 'FEATURED',
-			color: 'from-purple-500 to-pink-600',
+				'Generate shareable links to your conversations and export chat history for collaboration and backup.',
+			highlight: 'SOCIAL',
+			color: 'from-green-500 to-emerald-600',
 		},
 		{
 			icon: '💾',
@@ -224,12 +224,12 @@ const LandingPage = () => {
 			color: 'from-teal-500 to-cyan-600',
 		},
 		{
-			icon: '🎨',
-			title: 'Modern UI Design',
+			icon: '📄',
+			title: 'Document Analysis',
 			description:
-				'Beautiful, accessible interface with 6 stunning themes, smooth animations, and intuitive interactions.',
-			highlight: 'REDESIGNED',
-			color: 'from-pink-500 to-rose-600',
+				'Upload PDFs and Word documents for AI-powered analysis, summarization, and intelligent Q&A conversations.',
+			highlight: 'SMART',
+			color: 'from-blue-500 to-indigo-600',
 		},
 	];
 
@@ -350,7 +350,7 @@ const LandingPage = () => {
 						</span>
 						, and{' '}
 						<span className='font-semibold text-chat-orange'>
-							beautiful customizable themes
+							document analysis features
 						</span>{' '}
 						that adapt to your workflow.
 					</p>
@@ -758,7 +758,7 @@ const LandingPage = () => {
 								{/* Feature Highlight Badge */}
 								{feature.highlight && (
 									<div
-										className={`absolute top-4 right-4 px-3 py-1.5 rounded-full text-xs font-bold text-white bg-gradient-to-r ${feature.color} shadow-lg z-10 animate-pulse`}
+										className={`absolute top-4 right-4 px-3 py-1.5 rounded-full text-xs font-bold text-white bg-gradient-to-r ${feature.color} shadow-lg z-10`}
 									>
 										{feature.highlight}
 									</div>
@@ -992,7 +992,7 @@ const LandingPage = () => {
 							</span>{' '}
 							and{' '}
 							<span className='font-semibold'>
-								15+ AI models
+								5 AI models
 							</span>
 							.
 						</p>
