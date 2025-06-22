@@ -164,17 +164,6 @@ const AuthPage = () => {
 			setShowPasswordRequirements(
 				!allRequirementsMet(validation)
 			);
-
-			// When in register mode, auto-fill confirm password field if all requirements are met
-			if (
-				authMode === 'register' &&
-				allRequirementsMet(validation)
-			) {
-				setFormData((prev) => ({
-					...prev,
-					confirmPassword: value,
-				}));
-			}
 		}
 	};
 
@@ -941,8 +930,7 @@ const AuthPage = () => {
 																				...prev,
 																				password:
 																					strongPassword,
-																				confirmPassword:
-																					strongPassword,
+																				// Don't auto-fill confirmPassword - user must type it
 																			})
 																		);
 																		const validation =
