@@ -662,7 +662,7 @@ const CookiePolicy = () => {
 								Contact Support
 							</motion.button>
 							<motion.a
-								href='mailto:privacy@aichat.com'
+								href='mailto:privacy@neuronflow.com'
 								className={`px-8 py-3 rounded-xl font-exo font-semibold border-2 transition-all duration-300 ${
 									isDark
 										? 'text-chat-accent border-chat-accent hover:bg-chat-accent hover:text-chat-primary'

@@ -571,69 +571,66 @@ const VoiceControls: React.FC<VoiceControlsProps> = ({
 				)}
 			</motion.button>
 
-			{/* Text-to-Speech Button */}
-			<motion.button
-				onClick={
-					isSpeaking
-						? stopSpeaking
-						: () =>
-								lastMessage &&
-								speak(lastMessage)
-				}
-				disabled={!lastMessage}
-				className={cn(
-					'flex items-center justify-center rounded-xl transition-all duration-300',
-					// Responsive sizing based on className
-					className?.includes('gap-1')
-						? 'w-8 h-8' // Mobile size
-						: 'w-10 h-10', // Desktop size
-					isSpeaking
-						? 'bg-gradient-to-r from-chat-orange to-chat-pink text-white shadow-lg shadow-chat-orange/25'
-						: isDark
-						? 'bg-chat-secondary text-chat-accent hover:text-chat-orange hover:bg-chat-secondary/80 disabled:opacity-50'
-						: 'bg-gray-100 text-gray-600 hover:text-chat-orange hover:bg-gray-200 disabled:opacity-50'
-				)}
-				whileHover={{
-					scale: lastMessage ? 1.05 : 1,
-				}}
-				whileTap={{
-					scale: lastMessage ? 0.95 : 1,
-				}}
-				title={
-					isSpeaking
-						? 'Stop speech'
-						: 'Read last message aloud'
-				}
-			>
-				{isSpeaking ? (
-					<motion.div
-						animate={{
-							scale: [1, 1.1, 1],
-						}}
-						transition={{
-							duration: 1,
-							repeat: Infinity,
-							ease: 'easeInOut',
-						}}
-					>
-						<MdStop
+			{/* Text-to-Speech Button - Only show if lastMessage is provided */}
+			{lastMessage && (
+				<motion.button
+					onClick={
+						isSpeaking
+							? stopSpeaking
+							: () => speak(lastMessage)
+					}
+					className={cn(
+						'flex items-center justify-center rounded-xl transition-all duration-300',
+						// Responsive sizing based on className
+						className?.includes('gap-1')
+							? 'w-8 h-8' // Mobile size
+							: 'w-10 h-10', // Desktop size
+						isSpeaking
+							? 'bg-gradient-to-r from-chat-orange to-chat-pink text-white shadow-lg shadow-chat-orange/25'
+							: isDark
+							? 'bg-chat-secondary text-chat-accent hover:text-chat-orange hover:bg-chat-secondary/80'
+							: 'bg-gray-100 text-gray-600 hover:text-chat-orange hover:bg-gray-200'
+					)}
+					whileHover={{ scale: 1.05 }}
+					whileTap={{ scale: 0.95 }}
+					title={
+						isSpeaking
+							? 'Stop speech'
+							: 'Read last message aloud'
+					}
+				>
+					{isSpeaking ? (
+						<motion.div
+							animate={{
+								scale: [1, 1.1, 1],
+							}}
+							transition={{
+								duration: 1,
+								repeat: Infinity,
+								ease: 'easeInOut',
+							}}
+						>
+							<MdStop
+								className={cn(
+									className?.includes(
+										'gap-1'
+									)
+										? 'text-lg' // Mobile size
+										: 'text-xl' // Desktop size
+								)}
+							/>
+						</motion.div>
+					) : (
+						<MdVolumeUp
 							className={cn(
 								className?.includes('gap-1')
 									? 'text-lg' // Mobile size
 									: 'text-xl' // Desktop size
 							)}
 						/>
-					</motion.div>
-				) : (
-					<MdVolumeUp
-						className={cn(
-							className?.includes('gap-1')
-								? 'text-lg' // Mobile size
-								: 'text-xl' // Desktop size
-						)}
-					/>
-				)}
-			</motion.button>
+					)}
+				</motion.button>
+			)}
 
 			{/* Audio Visualizer - Hide on mobile when space is limited */}
 			{isListening &&

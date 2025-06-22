@@ -9,8 +9,10 @@ import {
 	Clock,
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 const Contact = () => {
+	usePageTitle('Contact – NeuronFlow');
 	const [formData, setFormData] = useState({
 		name: '',
 		email: '',
@@ -22,11 +24,25 @@ const Contact = () => {
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		// Handle form submission here
-		// Form submitted - handle form data here
-		alert(
-			"Thank you for your message! We'll get back to you soon."
+		// Create mailto link with form data
+		const subject = encodeURIComponent(
+			`Contact Form: ${
+				formData.subject || 'General Inquiry'
+			}`
 		);
+		const body = encodeURIComponent(`
+Name: ${formData.name}
+Email: ${formData.email}
+Subject: ${formData.subject}
+
+Message:
+${formData.message}
+		`);
+
+		// Open email client with pre-filled data
+		window.location.href = `mailto:hello@neuronflow.com?subject=${subject}&body=${body}`;
+
+		// Clear form after submission
 		setFormData({
 			name: '',
 			email: '',
@@ -50,7 +66,7 @@ const Contact = () => {
 		{
 			icon: <Mail className='w-6 h-6' />,
 			title: 'Email Us',
-			content: 'hello@aichat.com',
+			content: 'hello@neuronflow.com',
 			description: 'Send us an email anytime!',
 		},
 		{

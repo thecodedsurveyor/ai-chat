@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from '../contexts/ThemeContext';
+import { usePageTitle } from '../hooks/usePageTitle';
 import {
 	MapPin,
 	Clock,
@@ -14,6 +15,7 @@ import {
 
 const Careers = () => {
 	const { isDark } = useTheme();
+	usePageTitle('Careers – NeuronFlow');
 
 	const jobs = [
 		{
@@ -446,6 +448,30 @@ const Careers = () => {
 										whileTap={{
 											scale: 0.95,
 										}}
+										onClick={() => {
+											const subject =
+												encodeURIComponent(
+													`Application for ${job.title} Position`
+												);
+											const body =
+												encodeURIComponent(`
+Dear NeuronFlow Hiring Team,
+
+I am interested in applying for the ${job.title} position in the ${job.department} department.
+
+Position Details:
+- Title: ${job.title}
+- Department: ${job.department} 
+- Location: ${job.location}
+- Type: ${job.type}
+
+Please find my resume attached. I look forward to hearing from you.
+
+Best regards,
+[Your Name]
+											`);
+											window.location.href = `mailto:careers@neuronflow.com?subject=${subject}&body=${body}`;
+										}}
 									>
 										Apply Now
 										<ArrowRight className='w-4 h-4' />
@@ -494,6 +520,24 @@ const Careers = () => {
 							className='bg-gradient-to-r from-chat-pink to-chat-purple px-8 py-4 rounded-xl font-exo font-semibold text-white shadow-lg hover:shadow-xl transition-all duration-300'
 							whileHover={{ scale: 1.05 }}
 							whileTap={{ scale: 0.95 }}
+							onClick={() => {
+								const subject =
+									encodeURIComponent(
+										'General Application - Resume Submission'
+									);
+								const body =
+									encodeURIComponent(`
+Dear NeuronFlow Hiring Team,
+
+I am interested in joining your team at NeuronFlow. While I don't see a specific role that matches my background, I believe my skills and passion for AI technology would be valuable to your organization.
+
+Please find my resume attached. I would welcome the opportunity to discuss how I can contribute to your mission of building the future of AI conversations.
+
+Best regards,
+[Your Name]
+								`);
+								window.location.href = `mailto:careers@neuronflow.com?subject=${subject}&body=${body}`;
+							}}
 						>
 							Send Resume
 						</motion.button>

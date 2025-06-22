@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Bot, User, Sparkles } from 'lucide-react';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { cn } from '../../../utils/classNames';
@@ -34,23 +34,6 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 	const navigate = useNavigate();
 	const chats = useChats();
 	const activeChat = useActiveChat();
-	const [isMobile, setIsMobile] = useState(false);
-
-	// Check if screen is mobile size
-	useEffect(() => {
-		const checkMobile = () => {
-			setIsMobile(window.innerWidth < 640);
-		};
-
-		checkMobile();
-		window.addEventListener('resize', checkMobile);
-
-		return () =>
-			window.removeEventListener(
-				'resize',
-				checkMobile
-			);
-	}, []);
 
 	const messageCount =
 		chats.find((c) => c.id === activeChat)?.messages
@@ -89,19 +72,17 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 					<div className='p-1.5 rounded-xl bg-gradient-to-r from-chat-pink to-chat-purple flex-shrink-0'>
 						<Bot className='w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white' />
 					</div>
-					{/* Logo text - only show on larger screens */}
-					{!isMobile && (
-						<h1
-							className={cn(
-								'font-exo text-lg sm:text-xl md:text-3xl font-bold truncate',
-								isDark
-									? 'text-white'
-									: 'text-chat-light-text'
-							)}
-						>
-							NeuronFlow
-						</h1>
-					)}
+					{/* Logo text - hidden on mobile, visible on desktop */}
+					<h1
+						className={cn(
+							'hidden md:block font-exo text-lg sm:text-xl md:text-3xl font-bold truncate',
+							isDark
+								? 'text-white'
+								: 'text-chat-light-text'
+						)}
+					>
+						NeuronFlow
+					</h1>
 				</button>
 			</div>
 

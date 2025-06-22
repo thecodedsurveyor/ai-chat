@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
-import rateLimit from 'express-rate-limit';
 
 import config from './config/environment';
 import authRoutes from './routes/authRoutes';
@@ -14,6 +13,7 @@ import {
 	securityHeaders,
 } from './middleware/errorHandler';
 import { sanitizeInputs } from './middleware/validation';
+import { generalRateLimiter } from './middleware/rateLimiter';
 
 const app = express();
 
@@ -132,47 +132,8 @@ app.use(
 	})
 );
 
-// Enhanced rate limiting with different limits for different endpoints
-const createRateLimiter = (
-	windowMs: number,
-	max: number,
-	message: string
-) => {
-	return rateLimit({
-		windowMs,
-		max,
-		message: {
-			success: false,
-			message,
-			error: 'RATE_LIMIT_EXCEEDED',
-		},
-		standardHeaders: true,
-		legacyHeaders: false,
-		skip: (req) => {
-			// Skip rate limiting for health checks
-			return (
-				req.path === '/health' ||
-				req.path === '/api/health'
-			);
-		},
-	});
-};
-
-// General rate limiter
-const generalLimiter = createRateLimiter(
-	config.RATE_LIMIT_WINDOW_MS,
-	config.RATE_LIMIT_MAX_REQUESTS,
-	'Too many requests from this IP, please try again later.'
-);
-
-// Stricter rate limiter for auth endpoints
-const authLimiter = createRateLimiter(
-	15 * 60 * 1000, // 15 minutes
-	5, // Only 5 attempts per 15 minutes
-	'Too many authentication attempts, please try again later.'
-);
-
-app.use(generalLimiter);
+// Apply general rate limiting using Redis-based persistent rate limiter
+app.use(generalRateLimiter);
 
 // Body parsing middleware with size limits
 app.use(
@@ -180,7 +141,11 @@ app.use(
 		limit: '2mb',
 		verify: (req, res, buf) => {
 			// Store raw body for webhook verification if needed
-			(req as any).rawBody = buf;
+			(
+				req as Express.Request & {
+					rawBody?: Buffer;
+				}
+			).rawBody = buf;
 		},
 	})
 );
@@ -215,8 +180,8 @@ app.get('/api/health', (req, res) => {
 
 // Note: Static file serving removed - now using Cloudinary for image storage
 
-// API routes with specific rate limiting
-app.use('/api/auth', authLimiter, authRoutes);
+// API routes (rate limiting is now handled per route)
+app.use('/api/auth', authRoutes);
 app.use('/api/conversations', conversationRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/admin', adminRoutes);

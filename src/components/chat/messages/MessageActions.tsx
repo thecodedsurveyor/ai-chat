@@ -1,4 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import {
+	useState,
+	useEffect,
+	useRef,
+	useCallback,
+} from 'react';
 import { useTheme } from '../../../contexts/ThemeContext';
 import {
 	showToast,
@@ -11,12 +16,11 @@ import type {
 } from '../../../types';
 import {
 	BiTrash,
-	BiX,
 	BiCheck,
 	BiCopy,
-	BiEdit,
 	BiStar,
 } from 'react-icons/bi';
+import { MdVolumeUp, MdStop } from 'react-icons/md';
 
 type MessageActionsProps = {
 	message: Message;
@@ -25,30 +29,78 @@ type MessageActionsProps = {
 		messageId: string,
 		newText?: string
 	) => void;
-	isVisible: boolean;
-	onClose: () => void;
+	isVisible?: boolean; // Made optional, defaults to true for AI messages
+	onClose?: () => void; // Made optional since we'll auto-show for AI messages
+	alwaysVisible?: boolean; // New prop to always show buttons
 };
 
 const MessageActions = ({
 	message,
 	onAction,
-	isVisible,
+	isVisible = true,
 	onClose,
+	alwaysVisible = false,
 }: MessageActionsProps) => {
-	const [isEditing, setIsEditing] = useState(false);
-	const [editText, setEditText] = useState(message.text);
 	const [showDeleteConfirm, setShowDeleteConfirm] =
 		useState(false);
 	const [copyFeedback, setCopyFeedback] = useState(false);
+	const [isSpeaking, setIsSpeaking] = useState(false);
 	const { isDark } = useTheme();
 	const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-	const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(
-		null
-	);
+	const synthRef = useRef<SpeechSynthesis | null>(null);
 
-	// Auto-close after 3 seconds unless hovering
+	// Initialize speech synthesis
 	useEffect(() => {
-		if (isVisible && !isEditing && !showDeleteConfirm) {
+		if (
+			typeof window !== 'undefined' &&
+			'speechSynthesis' in window
+		) {
+			synthRef.current = window.speechSynthesis;
+		}
+	}, []);
+
+	// Speak text function
+	const speak = useCallback((text: string) => {
+		if (!synthRef.current || !text.trim()) return;
+
+		synthRef.current.cancel();
+
+		const cleanText = text
+			.replace(/[*_`~]/g, '')
+			.replace(/https?:\/\/[^\s]+/g, 'link')
+			.replace(/\n+/g, '. ');
+
+		const utterance = new SpeechSynthesisUtterance(
+			cleanText
+		);
+		utterance.rate = 1;
+		utterance.pitch = 1;
+		utterance.volume = 0.8;
+		utterance.lang = 'en-US';
+
+		utterance.onstart = () => setIsSpeaking(true);
+		utterance.onend = () => setIsSpeaking(false);
+		utterance.onerror = () => setIsSpeaking(false);
+
+		synthRef.current.speak(utterance);
+	}, []);
+
+	// Stop speaking function
+	const stopSpeaking = useCallback(() => {
+		if (synthRef.current) {
+			synthRef.current.cancel();
+			setIsSpeaking(false);
+		}
+	}, []);
+
+	// Auto-close after 3 seconds unless hovering (only if not always visible)
+	useEffect(() => {
+		if (
+			isVisible &&
+			!showDeleteConfirm &&
+			!alwaysVisible &&
+			onClose
+		) {
 			timeoutRef.current = setTimeout(() => {
 				onClose();
 			}, 3000);
@@ -59,24 +111,12 @@ const MessageActions = ({
 				clearTimeout(timeoutRef.current);
 			}
 		};
-	}, [isVisible, isEditing, showDeleteConfirm, onClose]);
-
-	const handleMouseEnter = () => {
-		// Clear any pending close timeout when hovering
-		if (timeoutRef.current) {
-			clearTimeout(timeoutRef.current);
-		}
-		if (hoverTimeoutRef.current) {
-			clearTimeout(hoverTimeoutRef.current);
-		}
-	};
-
-	const handleMouseLeave = () => {
-		// Set 3-second delay before closing when leaving hover
-		hoverTimeoutRef.current = setTimeout(() => {
-			onClose();
-		}, 3000);
-	};
+	}, [
+		isVisible,
+		showDeleteConfirm,
+		alwaysVisible,
+		onClose,
+	]);
 
 	const handleCopy = async () => {
 		try {
@@ -97,24 +137,6 @@ const MessageActions = ({
 		}
 	};
 
-	const handleEdit = () => {
-		setIsEditing(true);
-		setEditText(message.text);
-	};
-
-	const handleSaveEdit = () => {
-		const trimmedText = editText.trim();
-		if (trimmedText && trimmedText !== message.text) {
-			onAction('edit', message.id, trimmedText);
-		}
-		setIsEditing(false);
-	};
-
-	const handleCancelEdit = () => {
-		setIsEditing(false);
-		setEditText(message.text);
-	};
-
 	const handleDeleteConfirm = () => {
 		onAction('delete', message.id);
 		setShowDeleteConfirm(false);
@@ -132,7 +154,10 @@ const MessageActions = ({
 		);
 	};
 
-	if (!isVisible) return null;
+	// Always show buttons for all message types by default
+	const shouldShow = true;
+
+	if (!shouldShow) return null;
 
 	// Delete confirmation overlay
 	if (showDeleteConfirm) {
@@ -207,89 +232,25 @@ const MessageActions = ({
 		);
 	}
 
-	// Edit mode
-	if (isEditing) {
-		return (
-			<div
-				className={`absolute top-full mt-2 p-4 rounded-xl shadow-lg border-2 z-20 w-80 max-w-full ${
-					message.type === 'prompt'
-						? 'right-0 mr-4' // User messages - position from right
-						: 'left-0 ml-4' // AI messages - position from left
-				} ${
-					isDark
-						? 'bg-chat-secondary border-chat-accent/30'
-						: 'bg-white border-gray-200'
-				}`}
-			>
-				<div className='space-y-3'>
-					<textarea
-						value={editText}
-						onChange={(e) =>
-							setEditText(e.target.value)
-						}
-						className={`w-full p-3 rounded-lg border-2 resize-none min-h-[100px] max-h-[200px] focus:outline-none transition-all text-sm md:text-base ${
-							isDark
-								? 'bg-chat-primary text-white border-chat-accent/30 focus:border-chat-pink'
-								: 'bg-gray-50 text-gray-800 border-gray-300 focus:border-chat-pink'
-						}`}
-						placeholder='Edit your message...'
-						autoFocus
-					/>
-					<div className='flex gap-2 justify-end'>
-						<button
-							onClick={handleCancelEdit}
-							className={`p-3 rounded-lg transition-all text-lg ${
-								isDark
-									? 'text-chat-accent hover:bg-chat-accent/20 hover:text-white'
-									: 'text-gray-600 hover:bg-gray-100 hover:text-gray-800'
-							}`}
-							title='Cancel'
-						>
-							<BiX />
-						</button>
-						<button
-							onClick={handleSaveEdit}
-							disabled={
-								!editText.trim() ||
-								editText.trim() ===
-									message.text
-							}
-							className='p-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all text-lg disabled:opacity-50 disabled:cursor-not-allowed'
-							title='Save Changes'
-						>
-							<BiCheck />
-						</button>
-					</div>
-				</div>
-			</div>
-		);
-	}
-
 	// Action buttons
 	return (
 		<div
-			className={`absolute top-full mt-2 flex items-center gap-1 p-2 rounded-xl shadow-lg border-2 z-10 ${
+			className={`flex items-center gap-1 ${
 				message.type === 'prompt'
-					? 'right-0 mr-4' // User messages - position from right with margin
-					: 'left-0 ml-4' // AI messages - position from left with margin
-			} ${
-				isDark
-					? 'bg-chat-secondary border-chat-accent/30'
-					: 'bg-white border-gray-200'
+					? 'justify-end' // User messages - align right
+					: 'justify-start' // AI messages - align left
 			}`}
-			onMouseEnter={handleMouseEnter}
-			onMouseLeave={handleMouseLeave}
 		>
 			{/* Copy with feedback */}
 			<div className='relative'>
 				<button
 					onClick={handleCopy}
-					className={`p-2 rounded-lg transition-all ${
+					className={`p-2 transition-all ${
 						copyFeedback
 							? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'
 							: isDark
-							? 'text-chat-accent hover:bg-chat-accent/20 hover:text-white'
-							: 'text-gray-600 hover:bg-gray-100 hover:text-gray-800'
+							? 'text-white/80 hover:text-white'
+							: 'text-gray-600/80 hover:text-gray-800'
 					}`}
 					title={
 						copyFeedback
@@ -310,30 +271,44 @@ const MessageActions = ({
 				)}
 			</div>
 
-			{/* Edit (only for user messages) */}
-			{message.type === 'prompt' && (
+			{/* Read Last Message (only for AI responses) */}
+			{message.type === 'response' && (
 				<button
-					onClick={handleEdit}
-					className={`p-2 rounded-lg transition-all ${
-						isDark
-							? 'text-chat-accent hover:bg-chat-accent/20 hover:text-white'
-							: 'text-gray-600 hover:bg-gray-100 hover:text-gray-800'
+					onClick={
+						isSpeaking
+							? stopSpeaking
+							: () => speak(message.text)
+					}
+					className={`p-2 transition-all ${
+						isSpeaking
+							? 'text-chat-orange hover:text-chat-pink'
+							: isDark
+							? 'text-white/80 hover:text-white'
+							: 'text-gray-600/80 hover:text-gray-800'
 					}`}
-					title='Edit message'
+					title={
+						isSpeaking
+							? 'Stop speaking'
+							: 'Read message aloud'
+					}
 				>
-					<BiEdit className='text-lg' />
+					{isSpeaking ? (
+						<MdStop className='text-lg' />
+					) : (
+						<MdVolumeUp className='text-lg' />
+					)}
 				</button>
 			)}
 
 			{/* Favorite */}
 			<button
 				onClick={handleFavorite}
-				className={`p-2 rounded-lg transition-all ${
+				className={`p-2 transition-all ${
 					message.isFavorite
 						? 'text-yellow-500 hover:text-yellow-600'
 						: isDark
-						? 'text-chat-accent hover:bg-chat-accent/20 hover:text-white'
-						: 'text-gray-600 hover:bg-gray-100 hover:text-gray-800'
+						? 'text-white/80 hover:text-white'
+						: 'text-gray-600/80 hover:text-gray-800'
 				}`}
 				title={
 					message.isFavorite
@@ -353,10 +328,10 @@ const MessageActions = ({
 			{/* Delete */}
 			<button
 				onClick={() => setShowDeleteConfirm(true)}
-				className={`p-2 rounded-lg transition-all ${
+				className={`p-2 transition-all ${
 					isDark
-						? 'text-chat-accent hover:bg-red-500/20 hover:text-red-400'
-						: 'text-gray-600 hover:bg-red-50 hover:text-red-600'
+						? 'text-white/80 hover:text-red-400'
+						: 'text-gray-600/80 hover:text-red-600'
 				}`}
 				title='Delete message'
 			>
@@ -367,3 +342,27 @@ const MessageActions = ({
 };
 
 export default MessageActions;
+
+// Wrapper component that always shows action buttons for AI responses
+export const AlwaysVisibleMessageActions: React.FC<{
+	message: Message;
+	onAction: (
+		action: MessageAction,
+		messageId: string,
+		newText?: string
+	) => void;
+}> = ({ message, onAction }) => {
+	// Only show for AI responses
+	if (message.type !== 'response') {
+		return null;
+	}
+
+	return (
+		<MessageActions
+			message={message}
+			onAction={onAction}
+			alwaysVisible={true}
+			isVisible={true}
+		/>
+	);
+};

@@ -131,7 +131,9 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
 				}
 				className={cn(
 					'flex items-center gap-2 sm:gap-3 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl border-2 transition-all duration-200',
-					'min-w-[140px] sm:min-w-[180px] shadow-md',
+					isGuestMode
+						? 'min-w-[60px] lg:min-w-[180px] shadow-md' // Guest: small on mobile/tablet, normal on large screens
+						: 'min-w-[140px] sm:min-w-[180px] shadow-md', // Auth: normal on mobile, normal on desktop
 					'focus:outline-none focus:ring-2 focus:ring-offset-2',
 					isGuestMode
 						? cn(
@@ -170,8 +172,15 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
 					<MdSmartToy className='w-3 h-3 sm:w-4 sm:h-4 text-white' />
 				</div>
 
-				{/* Model Info */}
-				<div className='flex-1 text-left min-w-0'>
+				{/* Model Info - Hidden on mobile for guest users only */}
+				<div
+					className={cn(
+						'flex-1 text-left min-w-0',
+						isGuestMode
+							? 'hidden lg:block' // Hidden on mobile/tablet, visible on large screens and above
+							: 'block' // Always visible for authenticated users
+					)}
+				>
 					<div
 						className={cn(
 							'text-xs sm:text-sm font-semibold truncate leading-tight',
@@ -210,9 +219,10 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
 				{/* Dropdown Arrow or Lock Icon */}
 				{isGuestMode ? (
 					<div className='flex items-center space-x-2'>
+						{/* Hide "Locked" text on mobile */}
 						<span
 							className={cn(
-								'text-xs font-medium',
+								'text-xs font-medium hidden sm:inline',
 								isDark
 									? 'text-slate-400'
 									: 'text-slate-500'

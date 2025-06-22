@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from '../contexts/ThemeContext';
+import { usePageTitle } from '../hooks/usePageTitle';
 import {
 	Calendar,
 	Clock,
@@ -17,6 +18,7 @@ import {
 
 const Blog = () => {
 	const { isDark } = useTheme();
+	usePageTitle('Blog – NeuronFlow');
 	const [selectedCategory, setSelectedCategory] =
 		useState('all');
 	const [searchTerm, setSearchTerm] = useState('');

@@ -25,6 +25,9 @@ interface EnvironmentConfig {
 	RATE_LIMIT_WINDOW_MS: number;
 	RATE_LIMIT_MAX_REQUESTS: number;
 
+	// Redis
+	REDIS_URL: string;
+
 	// Security
 	BCRYPT_SALT_ROUNDS: number;
 
@@ -111,9 +114,13 @@ const config: EnvironmentConfig = {
 		10
 	), // 15 minutes
 	RATE_LIMIT_MAX_REQUESTS: parseInt(
-		process.env.RATE_LIMIT_MAX_REQUESTS || '100',
+		process.env.RATE_LIMIT_MAX_REQUESTS || '1000',
 		10
-	),
+	), // Increased for development
+
+	// Redis Configuration
+	REDIS_URL:
+		process.env.REDIS_URL || 'redis://localhost:6379',
 
 	// Security - Stronger defaults
 	BCRYPT_SALT_ROUNDS: Math.max(

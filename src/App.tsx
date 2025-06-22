@@ -31,6 +31,7 @@ import {
 	HelpCenter,
 	Status,
 	Features,
+	EmailVerificationPage,
 } from './pages';
 import { ChatProvider } from './contexts/ChatContext';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -97,6 +98,14 @@ const App = () => {
 									path='/reset-password'
 									element={
 										<ResetPasswordPage />
+									}
+								/>
+
+								{/* Email verification route */}
+								<Route
+									path='/verify-email'
+									element={
+										<EmailVerificationPage />
 									}
 								/>
 

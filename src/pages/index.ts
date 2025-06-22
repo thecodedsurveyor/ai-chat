@@ -10,3 +10,4 @@ export { default as GDPR } from './GDPR';
 export { default as HelpCenter } from './HelpCenter';
 export { default as Status } from './Status';
 export { default as Features } from './Features';
+export { default as EmailVerificationPage } from './EmailVerificationPage';

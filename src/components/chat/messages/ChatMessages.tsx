@@ -1,8 +1,4 @@
-import React, {
-	useMemo,
-	useState,
-	useCallback,
-} from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { cn } from '../../../utils/classNames';
 import { MdStar, MdMemory } from 'react-icons/md';
@@ -36,31 +32,11 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
 	const isTyping = useIsTyping();
 	const { handleMessageAction } = useChatStore();
 
-	// Local state for message actions
-	const [activeMessageActions, setActiveMessageActions] =
-		useState<string | null>(null);
-
 	// Local handlers
-	const toggleMessageActions = useCallback(
-		(messageId: string) => {
-			setActiveMessageActions((prev) =>
-				prev === messageId ? null : messageId
-			);
-		},
-		[]
-	);
 
 	const handleMessageActionWrapper = useCallback(
-		(
-			action: string,
-			messageId: string,
-			data?: unknown
-		) => {
-			handleMessageAction(
-				action,
-				messageId,
-				data as string
-			);
+		(action: string, messageId: string) => {
+			handleMessageAction(action, messageId);
 		},
 		[handleMessageAction]
 	);
@@ -116,88 +92,76 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
 										: 'justify-start'
 								)}
 							>
-								<div
-									className={cn(
-										'max-w-[85%] md:max-w-[80%] rounded-3xl bg-gradient-to-r from-chat-orange to-chat-pink text-white px-3 py-2 md:px-4 md:py-3 shadow-lg border-2 border-white/20 relative',
-										isUser
-											? 'rounded-tr-none'
-											: 'rounded-tl-none'
-									)}
-									onClick={() =>
-										toggleMessageActions(
-											message.id
-										)
-									}
-								>
-									{/* Message Content with Markdown */}
-									<div className='text-base md:text-lg leading-relaxed'>
-										<MarkdownMessage
-											content={
-												message.text
-											}
-											isUser={isUser}
-										/>
-									</div>
-
-									{/* Message Footer */}
+								<div className='space-y-1'>
+									{/* Message Bubble */}
 									<div
 										className={cn(
-											'mt-3 flex items-center justify-between text-sm',
+											'rounded-3xl bg-gradient-to-r from-chat-orange to-chat-pink text-white px-3 py-2 md:px-4 md:py-3 shadow-lg border-2 border-white/20 relative',
 											isUser
-												? 'flex-row-reverse'
-												: 'flex-row'
+												? 'rounded-tr-none ml-auto'
+												: 'rounded-tl-none max-w-[85%] md:max-w-[80%]'
 										)}
 									>
-										<div className='flex items-center space-x-2'>
-											<span className='font-exo opacity-75'>
-												{
-													message.timestamp
+										{/* Message Content with Markdown */}
+										<div className='text-base md:text-lg leading-relaxed'>
+											<MarkdownMessage
+												content={
+													message.text
 												}
-											</span>
-											{message.isEdited && (
-												<span className='text-xs opacity-60 italic'>
-													(edited)
-												</span>
-											)}
-											{message.isFavorite && (
-												<MdStar className='text-yellow-300 text-sm' />
-											)}
-											{/* Add context-aware tooltip for AI responses */}
-											{!isUser && (
-												<Tooltip text='AI is context-aware.'>
-													<div className='p-1 hover:bg-white/10 rounded-full transition-colors cursor-help'>
-														<MdMemory className='text-white/70 text-xl' />
-													</div>
-												</Tooltip>
-											)}
+												isUser={
+													isUser
+												}
+											/>
 										</div>
 
-										{/* Message Status for user messages */}
-										{isUser && (
-											<MessageStatus
-												status={
-													message.status
-												}
-												className='opacity-75'
-											/>
-										)}
+										{/* Message Footer */}
+										<div
+											className={cn(
+												'mt-3 flex items-center justify-between text-sm',
+												isUser
+													? 'flex-row-reverse'
+													: 'flex-row'
+											)}
+										>
+											<div className='flex items-center space-x-2'>
+												<span className='font-exo opacity-75'>
+													{
+														message.timestamp
+													}
+												</span>
+
+												{message.isFavorite && (
+													<MdStar className='text-yellow-300 text-sm' />
+												)}
+												{/* Add context-aware tooltip for AI responses */}
+												{!isUser && (
+													<Tooltip text='AI is context-aware.'>
+														<div className='p-1 hover:bg-white/10 rounded-full transition-colors cursor-help'>
+															<MdMemory className='text-white/70 text-xl' />
+														</div>
+													</Tooltip>
+												)}
+											</div>
+
+											{/* Message Status for user messages */}
+											{isUser && (
+												<MessageStatus
+													status={
+														message.status
+													}
+													className='opacity-75'
+												/>
+											)}
+										</div>
 									</div>
 
-									{/* Message Actions */}
+									{/* Message Actions - Now below the message */}
 									<MessageActions
 										message={message}
 										onAction={
 											handleMessageActionWrapper
 										}
-										isVisible={
-											activeMessageActions ===
-											message.id
-										}
-										onClose={() =>
-											toggleMessageActions(
-												''
-											)
-										}
+										isVisible={true}
 									/>
 								</div>
 							</div>
@@ -205,14 +169,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
 				  })}
 
 			{/* Enhanced Typing Indicator */}
-			<EnhancedTypingIndicator
-				isVisible={isTyping}
-				isStreaming={
-					messages.length > 0 &&
-					messages[messages.length - 1]?.text ===
-						''
-				}
-			/>
+			<EnhancedTypingIndicator isVisible={isTyping} />
 
 			<div ref={scrollRef} />
 		</div>

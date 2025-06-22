@@ -23,10 +23,13 @@ export interface User {
 export interface AuthResponse {
 	success: boolean;
 	message: string;
+	error?: string;
 	data?: {
 		user: User;
-		accessToken: string;
-		refreshToken: string;
+		accessToken?: string;
+		refreshToken?: string;
+		requiresVerification?: boolean;
+		email?: string;
 	};
 }
 
@@ -91,7 +94,14 @@ class AuthService {
 			const result: AuthResponse =
 				await response.json();
 
-			if (result.success && result.data) {
+			// Only set tokens if they exist (user is immediately verified)
+			// With email verification, registration won't return tokens
+			if (
+				result.success &&
+				result.data &&
+				result.data.accessToken &&
+				result.data.refreshToken
+			) {
 				this.token = result.data.accessToken;
 				this.refreshToken =
 					result.data.refreshToken;
@@ -137,7 +147,12 @@ class AuthService {
 			const result: AuthResponse =
 				await response.json();
 
-			if (result.success && result.data) {
+			if (
+				result.success &&
+				result.data &&
+				result.data.accessToken &&
+				result.data.refreshToken
+			) {
 				this.token = result.data.accessToken;
 				this.refreshToken =
 					result.data.refreshToken;
@@ -773,6 +788,85 @@ class AuthService {
 					body: JSON.stringify({ email }),
 				}
 			);
+			return await response.json();
+		} catch {
+			return {
+				success: false,
+				message: 'Network error. Please try again.',
+			};
+		}
+	}
+
+	async verifyEmail(
+		token: string,
+		email: string
+	): Promise<AuthResponse> {
+		try {
+			const response = await fetch(
+				`${API_BASE_URL}/auth/verify-email`,
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({ token, email }),
+				}
+			);
+
+			const result: AuthResponse =
+				await response.json();
+
+			// If verification is successful, store tokens and user data
+			if (
+				result.success &&
+				result.data &&
+				result.data.accessToken &&
+				result.data.refreshToken
+			) {
+				this.token = result.data.accessToken;
+				this.refreshToken =
+					result.data.refreshToken;
+				localStorage.setItem(
+					'authToken',
+					this.token
+				);
+				localStorage.setItem(
+					'refreshToken',
+					this.refreshToken
+				);
+				localStorage.setItem(
+					'user',
+					JSON.stringify(result.data.user)
+				);
+
+				// Migrate guest data to authenticated user
+				this.migrateGuestDataToUser();
+			}
+
+			return result;
+		} catch {
+			return {
+				success: false,
+				message: 'Network error. Please try again.',
+			};
+		}
+	}
+
+	async resendVerificationEmail(
+		email: string
+	): Promise<AuthResponse> {
+		try {
+			const response = await fetch(
+				`${API_BASE_URL}/auth/resend-verification`,
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({ email }),
+				}
+			);
+
 			return await response.json();
 		} catch {
 			return {

@@ -4,7 +4,6 @@ import {
 	Zap,
 	Shield,
 	Palette,
-	Mic,
 	BarChart3,
 	Search,
 	Star,
@@ -23,6 +22,7 @@ import {
 	Filter,
 	Tag,
 	Check,
+	Code,
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import {
@@ -125,6 +125,18 @@ const Features = () => {
 					'Delivered confirmation',
 					'Error handling',
 					'Typing indicators',
+				],
+			},
+			{
+				icon: <Code className='w-6 h-6' />,
+				title: 'Code Syntax Highlighting',
+				description:
+					'Beautiful syntax highlighting for code blocks with smart language detection and copy functionality.',
+				highlights: [
+					'15+ languages supported',
+					'Smart auto-detection',
+					'Copy code button',
+					'Terminal-style design',
 				],
 			},
 		],
@@ -315,18 +327,7 @@ const Features = () => {
 					'Screen reader support',
 				],
 			},
-			{
-				icon: <Mic className='w-6 h-6' />,
-				title: 'Voice Navigation',
-				description:
-					'Control the app using voice commands with customizable wake words.',
-				highlights: [
-					'8 voice commands',
-					'Custom wake word',
-					'Multi-language',
-					'Action confirmation',
-				],
-			},
+
 			{
 				icon: <Volume2 className='w-6 h-6' />,
 				title: 'Voice Input & Output',

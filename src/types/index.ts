@@ -61,8 +61,7 @@ export type Message = {
 	timestamp: string;
 	status?: MessageStatus;
 	isFavorite?: boolean;
-	isEdited?: boolean;
-	originalText?: string;
+
 	responseTime?: number; // AI response time in milliseconds
 	wordCount?: number; // Number of words in message
 	// Fields for enhanced features

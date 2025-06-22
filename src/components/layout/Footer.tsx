@@ -15,6 +15,27 @@ const Footer = () => {
 	const currentYear = new Date().getFullYear();
 	const { isDark } = useTheme();
 
+	const handleNewsletterSubmit = (
+		e: React.FormEvent<HTMLFormElement>
+	) => {
+		e.preventDefault();
+		const formData = new FormData(e.currentTarget);
+		const email = formData.get('email') as string;
+
+		const subject = encodeURIComponent(
+			'Newsletter Subscription'
+		);
+		const body = encodeURIComponent(`
+Please add this email to the NeuronFlow newsletter:
+
+Email: ${email}
+
+Thank you!
+		`);
+
+		window.location.href = `mailto:newsletter@neuronflow.com?subject=${subject}&body=${body}`;
+	};
+
 	const footerLinks = {
 		product: [
 			{ name: 'Features', path: '/features' },
@@ -42,17 +63,17 @@ const Footer = () => {
 		{
 			name: 'Twitter',
 			icon: Twitter,
-			url: 'https://twitter.com',
+			url: 'https://twitter.com/neuronflow',
 		},
 		{
 			name: 'LinkedIn',
 			icon: Linkedin,
-			url: 'https://linkedin.com',
+			url: 'https://linkedin.com/company/neuronflow',
 		},
 		{
 			name: 'GitHub',
 			icon: Github,
-			url: 'https://github.com',
+			url: 'https://github.com/neuronflow',
 		},
 	];
 
@@ -297,10 +318,17 @@ const Footer = () => {
 							Get the latest news and updates
 							about our NeuronFlow features.
 						</p>
-						<form className='flex flex-col sm:flex-row gap-4'>
+						<form
+							className='flex flex-col sm:flex-row gap-4'
+							onSubmit={
+								handleNewsletterSubmit
+							}
+						>
 							<input
 								type='email'
+								name='email'
 								placeholder='Enter your email'
+								required
 								className={`flex-1 px-6 py-3 rounded-xl border-2 transition-all duration-300 focus:outline-none focus:border-chat-pink focus:scale-[1.02] ${
 									isDark
 										? 'bg-chat-primary border-chat-accent/30 text-white placeholder:text-chat-accent/60 hover:border-chat-orange/40'

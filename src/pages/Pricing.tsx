@@ -1,13 +1,13 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
+import { usePageTitle } from '../hooks/usePageTitle';
 import {
 	Check,
 	X,
 	Star,
 	Zap,
-	Crown,
-	MessageCircle,
 	BarChart3,
 	Shield,
 	Headphones,
@@ -16,6 +16,8 @@ import {
 
 const Pricing = () => {
 	const { isDark } = useTheme();
+	const navigate = useNavigate();
+	usePageTitle('Pricing – NeuronFlow');
 
 	const plans = [
 		{
@@ -23,91 +25,10 @@ const Pricing = () => {
 			price: '$0',
 			period: 'forever',
 			description:
-				'Perfect for getting started with AI conversations',
-			icon: <MessageCircle className='w-6 h-6' />,
-			color: 'from-gray-500 to-gray-600',
-			popular: false,
-			features: [
-				{
-					name: '100 messages per month',
-					included: true,
-				},
-				{ name: 'Basic AI models', included: true },
-				{
-					name: 'Standard response time',
-					included: true,
-				},
-				{ name: 'Web access only', included: true },
-				{
-					name: 'Community support',
-					included: true,
-				},
-				{
-					name: 'Advanced AI models',
-					included: false,
-				},
-				{
-					name: 'Priority support',
-					included: false,
-				},
-				{ name: 'API access', included: false },
-				{
-					name: 'Custom integrations',
-					included: false,
-				},
-			],
-		},
-		{
-			name: 'Pro',
-			price: '$19',
-			period: 'per month',
-			description:
-				'Ideal for professionals and power users',
+				'Perfect for getting started with AI conversations - all features included',
 			icon: <Zap className='w-6 h-6' />,
-			color: 'from-blue-500 to-indigo-600',
+			color: 'from-green-500 to-emerald-600',
 			popular: true,
-			features: [
-				{
-					name: '5,000 messages per month',
-					included: true,
-				},
-				{
-					name: 'Advanced AI models',
-					included: true,
-				},
-				{
-					name: 'Priority response time',
-					included: true,
-				},
-				{
-					name: 'Mobile & web access',
-					included: true,
-				},
-				{ name: 'Email support', included: true },
-				{
-					name: 'Analytics dashboard',
-					included: true,
-				},
-				{ name: 'Custom personas', included: true },
-				{
-					name: 'API access (limited)',
-					included: true,
-				},
-				{
-					name: 'Custom integrations',
-					included: false,
-				},
-			],
-		},
-		{
-			name: 'Enterprise',
-			price: '$99',
-			period: 'per month',
-			description:
-				'For teams and organizations with advanced needs',
-			icon: <Crown className='w-6 h-6' />,
-			color: 'from-purple-500 to-pink-600',
-			popular: false,
 			features: [
 				{
 					name: 'Unlimited messages',
@@ -115,12 +36,52 @@ const Pricing = () => {
 				},
 				{ name: 'All AI models', included: true },
 				{
-					name: 'Instant response time',
+					name: 'Real-time responses',
 					included: true,
 				},
-				{ name: 'All platforms', included: true },
 				{
-					name: '24/7 priority support',
+					name: 'Web & mobile access',
+					included: true,
+				},
+				{
+					name: 'Voice input/output',
+					included: true,
+				},
+				{
+					name: 'Code syntax highlighting',
+					included: true,
+				},
+				{
+					name: 'Multiple AI personas',
+					included: true,
+				},
+				{ name: 'Chat templates', included: true },
+				{
+					name: 'Export conversations',
+					included: true,
+				},
+				{
+					name: 'Dark/light themes',
+					included: true,
+				},
+			],
+		},
+		{
+			name: 'Premium',
+			price: 'Coming Soon',
+			period: '',
+			description:
+				'Advanced features and capabilities are in development',
+			icon: <Star className='w-6 h-6' />,
+			color: 'from-purple-500 to-pink-600',
+			popular: false,
+			features: [
+				{
+					name: 'Everything in Free',
+					included: true,
+				},
+				{
+					name: 'API access',
 					included: true,
 				},
 				{
@@ -128,12 +89,24 @@ const Pricing = () => {
 					included: true,
 				},
 				{
-					name: 'Unlimited personas',
+					name: 'Priority support',
 					included: true,
 				},
-				{ name: 'Full API access', included: true },
 				{
 					name: 'Custom integrations',
+					included: true,
+				},
+				{
+					name: 'Team collaboration',
+					included: true,
+				},
+				{
+					name: 'Advanced memory',
+					included: true,
+				},
+				{ name: 'Custom personas', included: true },
+				{
+					name: 'Workflow automation',
 					included: true,
 				},
 			],
@@ -142,26 +115,27 @@ const Pricing = () => {
 
 	const faqs = [
 		{
-			question: 'Can I change my plan at any time?',
-			answer: 'Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately, and billing is prorated.',
+			question:
+				'Is NeuronFlow really completely free?',
+			answer: 'Yes! All features are currently free including unlimited messages, all AI models, and premium capabilities. We believe AI should be accessible to everyone.',
+		},
+		{
+			question: 'What AI models can I use?',
+			answer: 'You have access to all leading AI models including GPT-4, Claude, Gemini, and more. No restrictions or limits.',
 		},
 		{
 			question:
-				'What happens if I exceed my message limit?',
-			answer: 'Free users will be prompted to upgrade. Pro users can purchase additional message packs or upgrade to Enterprise for unlimited messages.',
+				'Will you introduce paid plans in the future?',
+			answer: 'We may introduce premium features for advanced enterprise needs, but our core platform will always remain free for individual users.',
 		},
 		{
-			question: 'Do you offer refunds?',
-			answer: 'We offer a 30-day money-back guarantee for all paid plans. Contact support for assistance with refunds.',
+			question: 'Is there a message limit?',
+			answer: 'No! You can send unlimited messages and have unlimited conversations. There are no daily, monthly, or yearly limits.',
 		},
 		{
 			question:
-				'Is there a discount for annual billing?',
-			answer: 'Yes! Annual subscribers save 20% compared to monthly billing. The discount is applied automatically at checkout.',
-		},
-		{
-			question: 'What AI models are included?',
-			answer: 'Free users get access to basic models. Pro includes GPT-4 and Claude. Enterprise includes all current and future models.',
+				'How can you offer everything for free?',
+			answer: "We're building NeuronFlow as a platform to democratize AI access. We're currently funded by investors who share our vision of making AI accessible to all.",
 		},
 	];
 
@@ -237,12 +211,12 @@ const Pricing = () => {
 
 			{/* Pricing Cards */}
 			<section className='py-16 px-6'>
-				<div className='max-w-7xl mx-auto'>
-					<div className='grid grid-cols-1 md:grid-cols-3 gap-8'>
+				<div className='max-w-5xl mx-auto'>
+					<div className='grid grid-cols-1 md:grid-cols-2 gap-8 justify-items-center'>
 						{plans.map((plan, index) => (
 							<motion.div
 								key={plan.name}
-								className={`relative rounded-2xl border-2 p-8 ${
+								className={`relative rounded-2xl border-2 p-8 w-full max-w-md ${
 									plan.popular
 										? isDark
 											? 'border-chat-pink bg-chat-secondary/50'
@@ -278,7 +252,7 @@ const Pricing = () => {
 
 								<div className='text-center mb-8'>
 									<div
-										className={`inline-flex p-3 rounded-xl bg-gradient-to-r ${plan.color} mb-4`}
+										className={`inline-flex p-3 rounded-xl bg-gradient-to-r ${plan.color} mb-4 text-white`}
 									>
 										{plan.icon}
 									</div>
@@ -373,10 +347,38 @@ const Pricing = () => {
 									whileTap={{
 										scale: 0.98,
 									}}
+									onClick={() => {
+										if (
+											plan.name ===
+											'Free'
+										) {
+											navigate(
+												'/chat'
+											);
+										} else {
+											// Premium plan - contact sales
+											const subject =
+												encodeURIComponent(
+													'Premium Plan Inquiry'
+												);
+											const body =
+												encodeURIComponent(`
+Hello NeuronFlow Team,
+
+I'm interested in learning more about your upcoming Premium features.
+
+Please notify me when premium features become available.
+
+Best regards,
+[Your Name]
+											`);
+											window.location.href = `mailto:sales@neuronflow.com?subject=${subject}&body=${body}`;
+										}
+									}}
 								>
 									{plan.name === 'Free'
 										? 'Get Started'
-										: 'Choose Plan'}
+										: 'Notify Me'}
 								</motion.button>
 							</motion.div>
 						))}
@@ -568,6 +570,9 @@ const Pricing = () => {
 								className='bg-gradient-to-r from-chat-pink to-chat-purple px-8 py-4 rounded-xl font-exo font-semibold text-white shadow-lg hover:shadow-xl transition-all duration-300'
 								whileHover={{ scale: 1.05 }}
 								whileTap={{ scale: 0.95 }}
+								onClick={() =>
+									navigate('/chat')
+								}
 							>
 								Start Free Trial
 							</motion.button>
@@ -579,6 +584,29 @@ const Pricing = () => {
 								}`}
 								whileHover={{ scale: 1.05 }}
 								whileTap={{ scale: 0.95 }}
+								onClick={() => {
+									const subject =
+										encodeURIComponent(
+											'Enterprise Sales Inquiry'
+										);
+									const body =
+										encodeURIComponent(`
+Hello NeuronFlow Sales Team,
+
+I am interested in learning more about your premium features and enterprise solutions.
+
+Please contact me to discuss:
+- Advanced features and capabilities
+- Custom pricing options
+- Implementation and support
+
+Best regards,
+[Your Name]
+[Your Company]
+[Your Contact Information]
+									`);
+									window.location.href = `mailto:sales@neuronflow.com?subject=${subject}&body=${body}`;
+								}}
 							>
 								Contact Sales
 							</motion.button>

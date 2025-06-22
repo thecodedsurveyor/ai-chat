@@ -11,18 +11,20 @@ datasource db {
 }
 
 model User {
-    id                   String    @id @default(auto()) @map("_id") @db.ObjectId
-    email                String    @unique
-    firstName            String
-    lastName             String
-    password             String
-    isVerified           Boolean   @default(false)
-    avatar               String?
-    preferences          Json? // Store user preferences like theme, language, etc.
-    passwordResetToken   String? // Token for password reset
-    passwordResetExpires DateTime? // Expiration time for password reset token
-    createdAt            DateTime  @default(now())
-    updatedAt            DateTime  @updatedAt
+    id                       String    @id @default(auto()) @map("_id") @db.ObjectId
+    email                    String    @unique
+    firstName                String
+    lastName                 String
+    password                 String
+    isVerified               Boolean   @default(false)
+    avatar                   String?
+    preferences              Json? // Store user preferences like theme, language, etc.
+    passwordResetToken       String? // Token for password reset
+    passwordResetExpires     DateTime? // Expiration time for password reset token
+    emailVerificationToken   String? // Token for email verification
+    emailVerificationExpires DateTime? // Expiration time for email verification token
+    createdAt                DateTime  @default(now())
+    updatedAt                DateTime  @updatedAt
 
     // Relations
     chats         Chat[]

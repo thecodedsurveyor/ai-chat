@@ -9,6 +9,7 @@ import { Resend } from 'resend';
 import { welcomeEmailTemplate } from '../templates/welcomeEmail';
 import { passwordResetEmailTemplate } from '../templates/passwordResetEmail';
 import { passwordChangedEmailTemplate } from '../templates/passwordChangedEmail';
+import { emailVerificationTemplate } from '../templates/emailVerificationTemplate';
 
 enum EmailProvider {
 	SENDGRID = 'sendgrid',
@@ -134,6 +135,28 @@ class EmailService {
 	}
 
 	/**
+	 * Send email verification email
+	 */
+	async sendEmailVerification(
+		email: string,
+		firstName: string,
+		verificationToken: string
+	): Promise<boolean> {
+		const subject = 'Verify Your Email - NeuronFlow';
+		const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/verify-email?token=${verificationToken}&email=${encodeURIComponent(
+			email
+		)}`;
+
+		const htmlContent = emailVerificationTemplate({
+			firstName,
+			verificationUrl,
+			appName: 'NeuronFlow',
+		});
+
+		return this.sendEmail(email, subject, htmlContent);
+	}
+
+	/**
 	 * Generic email‐sending method that routes to the appropriate provider
 	 */
 	private async sendEmail(
@@ -175,7 +198,7 @@ class EmailService {
 								replyTo: this.fromEmail,
 							});
 
-						// Log success for debugging
+						// Enhanced logging for debugging
 						console.log(
 							'📧 Resend email sent successfully:',
 							{
@@ -186,6 +209,10 @@ class EmailService {
 										0,
 										50
 									) + '...',
+								from: `${this.fromName} <${this.fromEmail}>`,
+								timestamp:
+									new Date().toISOString(),
+								result: result,
 							}
 						);
 					}

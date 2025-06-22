@@ -259,12 +259,33 @@ const AuthPage = () => {
 					);
 					navigate('/chat');
 				} else {
-					showError(
-						'Login Failed',
-						getSpecificErrorMessage(
-							result.message
-						)
-					);
+					// Check if this is an email verification error
+					if (
+						result.error ===
+							'Email not verified' &&
+						result.data?.requiresVerification
+					) {
+						showError(
+							'Email Verification Required',
+							'Please check your email and click the verification link. You can also resend the verification email.'
+						);
+						// Redirect to verification page with email parameter
+						setTimeout(() => {
+							navigate(
+								`/verify-email?email=${encodeURIComponent(
+									result.data?.email ||
+										formData.email
+								)}`
+							);
+						}, 2000);
+					} else {
+						showError(
+							'Login Failed',
+							getSpecificErrorMessage(
+								result.message
+							)
+						);
+					}
 				}
 			} else if (authMode === 'forgot-password') {
 				// Validate email
@@ -310,6 +331,7 @@ const AuthPage = () => {
 			}
 		} catch (error) {
 			// Auth error occurred
+			console.error('Auth error:', error);
 			showError(
 				'Error',
 				'An unexpected error occurred'

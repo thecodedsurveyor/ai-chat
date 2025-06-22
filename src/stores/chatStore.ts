@@ -85,8 +85,7 @@ interface ChatState {
 	searchChats: (filters: SearchFilters) => void;
 	handleMessageAction: (
 		action: string,
-		messageId: string,
-		data?: string
+		messageId: string
 	) => void;
 
 	// User management
@@ -355,34 +354,16 @@ export const useChatStore = create<ChatState>()(
 							messagesWithUser.length,
 					});
 
-					// Create initial AI message for streaming
+					// Just show typing indicator first, don't add empty message yet
+					set({
+						messages: messagesWithUser,
+						isTyping: true,
+					});
+
+					// Prepare AI message ID for when streaming starts
 					const aiMessageId = (
 						Date.now() + 1
 					).toString();
-					const initialAiMessage: Message = {
-						id: aiMessageId,
-						type: 'response',
-						text: '',
-						timestamp:
-							new Date().toLocaleTimeString(
-								[],
-								{
-									hour: '2-digit',
-									minute: '2-digit',
-								}
-							),
-						status: 'delivered',
-					};
-
-					// Add empty AI message to start streaming
-					const messagesWithInitialAI = [
-						...messagesWithUser,
-						initialAiMessage,
-					];
-					set({
-						messages: messagesWithInitialAI,
-						isTyping: true,
-					});
 
 					try {
 						// Get active document if available
@@ -424,35 +405,57 @@ export const useChatStore = create<ChatState>()(
 								conversationHistory,
 								optimizedConfig,
 								(token: string) => {
-									// Stop typing indicator on first token
+									// On first token: stop typing indicator and create AI message
 									if (isFirstToken) {
 										isFirstToken =
 											false;
+										const initialAiMessage: Message =
+											{
+												id: aiMessageId,
+												type: 'response',
+												text: token,
+												timestamp:
+													new Date().toLocaleTimeString(
+														[],
+														{
+															hour: '2-digit',
+															minute: '2-digit',
+														}
+													),
+												status: 'delivered',
+											};
+
+										const currentState =
+											get();
 										set({
+											messages: [
+												...currentState.messages,
+												initialAiMessage,
+											],
 											isTyping: false,
 										});
+									} else {
+										// Update the AI message with each subsequent token
+										const currentState =
+											get();
+										const updatedMessages =
+											currentState.messages.map(
+												(msg) =>
+													msg.id ===
+													aiMessageId
+														? {
+																...msg,
+																text:
+																	msg.text +
+																	token,
+														  }
+														: msg
+											);
+										set({
+											messages:
+												updatedMessages,
+										});
 									}
-
-									// Update the AI message with each token
-									const currentState =
-										get();
-									const updatedMessages =
-										currentState.messages.map(
-											(msg) =>
-												msg.id ===
-												aiMessageId
-													? {
-															...msg,
-															text:
-																msg.text +
-																token,
-													  }
-													: msg
-										);
-									set({
-										messages:
-											updatedMessages,
-									});
 								}
 							);
 
@@ -603,8 +606,7 @@ export const useChatStore = create<ChatState>()(
 
 				handleMessageAction: (
 					action,
-					messageId,
-					data
+					messageId
 				) => {
 					const state = get();
 					if (!state.activeChat) return;
@@ -616,16 +618,7 @@ export const useChatStore = create<ChatState>()(
 									case 'copy':
 										// Copy to clipboard (would be handled in UI)
 										return msg;
-									case 'edit':
-										return {
-											...msg,
-											text:
-												data ||
-												msg.text,
-											isEdited: true,
-											originalText:
-												msg.text,
-										};
+
 									case 'delete':
 										// Mark as deleted or remove from array
 										return null;

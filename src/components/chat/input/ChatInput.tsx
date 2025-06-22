@@ -1,6 +1,5 @@
 import React, {
 	useCallback,
-	useMemo,
 	useRef,
 	useState,
 	useEffect,
@@ -20,7 +19,6 @@ import {
 import {
 	useChatStore,
 	useChats,
-	useMessages,
 } from '../../../stores/chatStore';
 // Document Store import
 import { useActiveDocument } from '../../../stores/documentStore';
@@ -31,7 +29,6 @@ import {
 	MdApps,
 	MdFace,
 	MdAdd,
-	MdPsychology,
 	MdExpandMore,
 } from 'react-icons/md';
 import type { EmojiData } from '../../../types';
@@ -58,7 +55,6 @@ const ChatInput: React.FC<ChatInputProps> = (props) => {
 	// Local state for dropdown menus
 	const [showContentTools, setShowContentTools] =
 		useState(false);
-	const [showAITools, setShowAITools] = useState(false);
 
 	// Phase 2: Input state from store
 	const inputValue = useInputValue();
@@ -77,7 +73,6 @@ const ChatInput: React.FC<ChatInputProps> = (props) => {
 	// Phase 3: Chat state from store
 	const { sendMessage, createNewChat } = useChatStore();
 	const chats = useChats();
-	const messages = useMessages();
 
 	// Document state
 	const activeDocument = useActiveDocument();
@@ -85,15 +80,7 @@ const ChatInput: React.FC<ChatInputProps> = (props) => {
 	// Get app settings
 	const appSettings = settingsManager.getSettings();
 
-	// Get last AI message for voice playback
-	const lastAIMessage = useMemo(() => {
-		const aiMessages = messages.filter(
-			(m) => m.type === 'response'
-		);
-		return aiMessages.length > 0
-			? aiMessages[aiMessages.length - 1].text
-			: undefined;
-	}, [messages]);
+	// Get last AI message for voice playback - removed since now in MessageActions
 
 	// Local handlers
 	const handleSendMessage = useCallback(() => {
@@ -118,7 +105,6 @@ const ChatInput: React.FC<ChatInputProps> = (props) => {
 		clearInput();
 		closeEmojiPicker();
 		setShowContentTools(false);
-		setShowAITools(false);
 	}, [
 		inputValue,
 		chats.length,
@@ -179,7 +165,6 @@ const ChatInput: React.FC<ChatInputProps> = (props) => {
 	const handleInputFocus = useCallback(() => {
 		closeEmojiPicker();
 		setShowContentTools(false);
-		setShowAITools(false);
 	}, [closeEmojiPicker]);
 
 	// Add click outside handler to close dropdowns
@@ -197,7 +182,6 @@ const ChatInput: React.FC<ChatInputProps> = (props) => {
 
 			// Close all dropdowns
 			setShowContentTools(false);
-			setShowAITools(false);
 			closeEmojiPicker();
 		};
 
@@ -302,51 +286,11 @@ const ChatInput: React.FC<ChatInputProps> = (props) => {
 										<MdEmojiEmotions className='text-lg' />
 										Emojis
 									</button>
-								</div>
-							</div>
-						)}
-					</div>
-
-					{/* AI & Documents Group - Mobile */}
-					<div className='relative'>
-						<button
-							type='button'
-							data-dropdown-trigger
-							onClick={() =>
-								setShowAITools(!showAITools)
-							}
-							className={`flex items-center gap-1 p-2 rounded-lg text-sm transition-colors ${
-								isDark
-									? 'text-chat-accent hover:text-chat-pink hover:bg-chat-secondary/50'
-									: 'text-chat-light-accent hover:text-chat-pink hover:bg-gray-100'
-							}`}
-							title='AI & Documents'
-						>
-							<MdPsychology className='text-lg' />
-							<MdExpandMore
-								className={`text-sm transition-transform ${
-									showAITools
-										? 'rotate-180'
-										: ''
-								}`}
-							/>
-						</button>
-
-						{showAITools && (
-							<div
-								data-dropdown-content
-								className={`absolute bottom-full left-0 mb-2 p-2 rounded-lg shadow-lg border z-20 ${
-									isDark
-										? 'bg-chat-secondary border-chat-accent/30'
-										: 'bg-white border-gray-300'
-								}`}
-							>
-								<div className='flex flex-col gap-1 min-w-max'>
 									<button
 										type='button'
 										onClick={() => {
 											togglePersonaSelector();
-											setShowAITools(
+											setShowContentTools(
 												false
 											);
 										}}
@@ -359,28 +303,14 @@ const ChatInput: React.FC<ChatInputProps> = (props) => {
 										<MdFace className='text-lg' />
 										AI Personas
 									</button>
-									<div
-										onClick={() =>
-											setShowAITools(
-												false
-											)
-										}
-										className={`flex items-center gap-2 p-2 rounded text-sm transition-colors cursor-pointer ${
-											isDark
-												? 'text-chat-accent hover:text-chat-orange hover:bg-chat-primary/50'
-												: 'text-gray-700 hover:text-chat-orange hover:bg-gray-100'
-										}`}
-									>
-										<div className='scale-75'>
-											<DocumentUpload />
-										</div>
-										<span>
-											Documents
-										</span>
-									</div>
 								</div>
 							</div>
 						)}
+					</div>
+
+					{/* Document Upload - Mobile */}
+					<div className='flex-shrink-0'>
+						<DocumentUpload />
 					</div>
 
 					{/* Voice Controls - Mobile */}
@@ -390,7 +320,6 @@ const ChatInput: React.FC<ChatInputProps> = (props) => {
 							onVoiceCommand={
 								handleVoiceCommand
 							}
-							lastMessage={lastAIMessage}
 							className='flex items-center gap-1'
 							voiceSettings={
 								appSettings.voiceSynthesis
@@ -472,51 +401,11 @@ const ChatInput: React.FC<ChatInputProps> = (props) => {
 										<MdEmojiEmotions className='text-xl' />
 										Emojis
 									</button>
-								</div>
-							</div>
-						)}
-					</div>
-
-					{/* AI & Documents Group */}
-					<div className='relative'>
-						<button
-							type='button'
-							data-dropdown-trigger
-							onClick={() =>
-								setShowAITools(!showAITools)
-							}
-							className={`flex items-center gap-1 p-2 rounded-lg text-sm transition-colors ${
-								isDark
-									? 'text-chat-accent hover:text-chat-pink hover:bg-chat-secondary/50'
-									: 'text-chat-light-accent hover:text-chat-pink hover:bg-gray-100'
-							}`}
-							title='AI & Documents'
-						>
-							<MdPsychology className='text-lg' />
-							<MdExpandMore
-								className={`text-sm transition-transform ${
-									showAITools
-										? 'rotate-180'
-										: ''
-								}`}
-							/>
-						</button>
-
-						{showAITools && (
-							<div
-								data-dropdown-content
-								className={`absolute bottom-full left-0 mb-2 p-2 rounded-lg shadow-lg border z-20 ${
-									isDark
-										? 'bg-chat-secondary border-chat-accent/30'
-										: 'bg-white border-gray-300'
-								}`}
-							>
-								<div className='flex flex-col gap-1 min-w-max'>
 									<button
 										type='button'
 										onClick={() => {
 											togglePersonaSelector();
-											setShowAITools(
+											setShowContentTools(
 												false
 											);
 										}}
@@ -529,28 +418,14 @@ const ChatInput: React.FC<ChatInputProps> = (props) => {
 										<MdFace className='text-xl' />
 										AI Personas
 									</button>
-									<div
-										onClick={() =>
-											setShowAITools(
-												false
-											)
-										}
-										className={`flex items-center gap-2 p-2 rounded text-sm transition-colors cursor-pointer ${
-											isDark
-												? 'text-chat-accent hover:text-chat-orange hover:bg-chat-primary/50'
-												: 'text-gray-700 hover:text-chat-orange hover:bg-gray-100'
-										}`}
-									>
-										<div className='scale-75'>
-											<DocumentUpload />
-										</div>
-										<span>
-											Documents
-										</span>
-									</div>
 								</div>
 							</div>
 						)}
+					</div>
+
+					{/* Document Upload - Standalone */}
+					<div className='flex-shrink-0'>
+						<DocumentUpload />
 					</div>
 
 					{/* Voice Controls - Standalone */}
@@ -560,7 +435,6 @@ const ChatInput: React.FC<ChatInputProps> = (props) => {
 							onVoiceCommand={
 								handleVoiceCommand
 							}
-							lastMessage={lastAIMessage}
 							className='flex items-center'
 							voiceSettings={
 								appSettings.voiceSynthesis

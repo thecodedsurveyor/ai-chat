@@ -14,6 +14,7 @@ interface ChatLayoutProps {
 		remaining: number;
 		total: number;
 		percentage: number;
+		resetsAt: string;
 	};
 }
 

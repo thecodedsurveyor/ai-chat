@@ -256,45 +256,28 @@ const FavoritesViewer: React.FC<FavoritesViewerProps> = ({
 												content={
 													message.text
 												}
-												className={cn(
-													'text-sm leading-relaxed',
-													isDark
-														? 'text-white'
-														: 'text-gray-800'
-												)}
+												isUser={
+													message.type ===
+													'prompt'
+												}
 											/>
 										</div>
 
 										{/* Additional Message Info */}
-										{(message.isEdited ||
-											message.wordCount) && (
+										{message.wordCount && (
 											<div className='flex items-center gap-3 mt-2 text-xs'>
-												{message.isEdited && (
-													<span
-														className={cn(
-															'italic',
-															isDark
-																? 'text-gray-400'
-																: 'text-gray-500'
-														)}
-													>
-														(edited)
-													</span>
-												)}
-												{message.wordCount && (
-													<span
-														className={cn(
-															isDark
-																? 'text-chat-accent'
-																: 'text-gray-600'
-														)}
-													>
-														{
-															message.wordCount
-														}{' '}
-														words
-													</span>
-												)}
+												<span
+													className={cn(
+														isDark
+															? 'text-chat-accent'
+															: 'text-gray-600'
+													)}
+												>
+													{
+														message.wordCount
+													}{' '}
+													words
+												</span>
 											</div>
 										)}
 									</div>

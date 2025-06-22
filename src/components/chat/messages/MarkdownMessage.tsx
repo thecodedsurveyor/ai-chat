@@ -15,6 +15,12 @@ const MarkdownMessage: React.FC<MarkdownMessageProps> = ({
 }) => {
 	const { isDark } = useTheme();
 
+	// For user messages, render as plain text to avoid unwanted paragraph breaks
+	if (isUser) {
+		return <p>{content}</p>;
+	}
+
+	// For AI messages, use full markdown rendering
 	return (
 		<div
 			className={`markdown-content ${
@@ -36,8 +42,17 @@ const MarkdownMessage: React.FC<MarkdownMessageProps> = ({
 							? match[1]
 							: '';
 
-						// Check if this is a code block (has language) vs inline code
-						if (language && className) {
+						// Check if this is a code block (multi-line) vs inline code
+						// Code blocks have className with "language-" prefix or contain newlines
+						const isCodeBlock =
+							(className &&
+								className.includes(
+									'language-'
+								)) ||
+							(typeof children === 'string' &&
+								children.includes('\n'));
+
+						if (isCodeBlock) {
 							// Use EnhancedCodeBlock for code blocks
 							return (
 								<EnhancedCodeBlock
@@ -176,7 +191,7 @@ const MarkdownMessage: React.FC<MarkdownMessageProps> = ({
 					// Paragraphs
 					p({ children }) {
 						return (
-							<p className='my-2 leading-relaxed'>
+							<p className='mb-2 last:mb-0 leading-relaxed'>
 								{children}
 							</p>
 						);

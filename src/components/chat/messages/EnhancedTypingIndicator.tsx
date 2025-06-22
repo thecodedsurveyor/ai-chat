@@ -4,12 +4,11 @@ import { BiBrain } from 'react-icons/bi';
 
 interface EnhancedTypingIndicatorProps {
 	isVisible: boolean;
-	isStreaming?: boolean;
 }
 
 const EnhancedTypingIndicator: React.FC<
 	EnhancedTypingIndicatorProps
-> = ({ isVisible, isStreaming = false }) => {
+> = ({ isVisible }) => {
 	if (!isVisible) return null;
 
 	return (
@@ -25,12 +24,8 @@ const EnhancedTypingIndicator: React.FC<
 					<div className='p-2 rounded-full bg-white/20 shadow-lg'>
 						<motion.div
 							animate={{
-								rotate: isStreaming
-									? 360
-									: 0,
-								scale: isStreaming
-									? [1, 1.1, 1]
-									: 1,
+								rotate: 360,
+								scale: [1, 1.1, 1],
 							}}
 							transition={{
 								rotate: {
@@ -49,9 +44,7 @@ const EnhancedTypingIndicator: React.FC<
 					</div>
 					<div className='flex items-center gap-1'>
 						<span className='text-sm font-medium text-white'>
-							{isStreaming
-								? 'AI is responding'
-								: 'AI is thinking'}
+							AI is thinking
 						</span>
 						<div className='flex gap-1 ml-2'>
 							{[0, 1, 2].map((i) => (
@@ -65,10 +58,7 @@ const EnhancedTypingIndicator: React.FC<
 										],
 									}}
 									transition={{
-										duration:
-											isStreaming
-												? 0.8
-												: 1.5,
+										duration: 1.5,
 										repeat: Infinity,
 										delay: i * 0.15,
 									}}
@@ -77,15 +67,6 @@ const EnhancedTypingIndicator: React.FC<
 						</div>
 					</div>
 				</div>
-
-				{isStreaming && (
-					<motion.div
-						initial={{ width: 0 }}
-						animate={{ width: '100%' }}
-						transition={{ duration: 0.5 }}
-						className='absolute bottom-0 left-0 h-1 bg-white/30 rounded-full'
-					/>
-				)}
 			</motion.div>
 		</div>
 	);

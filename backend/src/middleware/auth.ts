@@ -106,11 +106,11 @@ export const optionalAuth = async (
 /**
  * Middleware to check if user is verified
  */
-export const requireVerification = (
+export const requireVerification = async (
 	req: AuthenticatedRequest,
 	res: Response<ApiResponse>,
 	next: NextFunction
-): void => {
+): Promise<void> => {
 	if (!req.user) {
 		res.status(HttpStatusCode.UNAUTHORIZED).json({
 			success: false,
@@ -120,7 +120,31 @@ export const requireVerification = (
 		return;
 	}
 
-	// Note: In a real app, you'd check the user's verification status from the database
-	// For now, we'll assume all authenticated users are verified
-	next();
+	try {
+		// Check user's verification status from the database
+		const user = await prisma.user.findUnique({
+			where: { id: req.user.userId },
+			select: { isVerified: true },
+		});
+
+		if (!user || !user.isVerified) {
+			res.status(HttpStatusCode.FORBIDDEN).json({
+				success: false,
+				message: 'Email verification required',
+				error: 'User not verified',
+			});
+			return;
+		}
+
+		next();
+	} catch (error) {
+		console.error('Verification check error:', error);
+		res.status(
+			HttpStatusCode.INTERNAL_SERVER_ERROR
+		).json({
+			success: false,
+			message: 'Internal server error',
+			error: 'Verification check failed',
+		});
+	}
 };

@@ -66,8 +66,6 @@ export interface Message {
 	responseTime?: number;
 	wordCount?: number;
 	isFavorite?: boolean;
-	isEdited?: boolean;
-	originalText?: string;
 }
 
 export interface Chat {
