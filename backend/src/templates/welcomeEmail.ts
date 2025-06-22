@@ -250,7 +250,7 @@ export const welcomeEmailTemplate = ({
               </tr>
               <tr>
                 <td class="content-block" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; vertical-align: top; padding-bottom: 10px; padding-top: 0; color: #9CA3AF; font-size: 13px; text-align: center;" valign="top" align="center">
-                  <span style="color: #9CA3AF; font-size: 13px; text-align: center;">© 2023 ${appName}. All rights reserved.</span>
+                  <span style="color: #9CA3AF; font-size: 13px; text-align: center;">© ${new Date().getFullYear()} ${appName}. All rights reserved.</span>
                 </td>
               </tr>
             </table>
