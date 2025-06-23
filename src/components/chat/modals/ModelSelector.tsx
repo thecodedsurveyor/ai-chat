@@ -172,13 +172,13 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
 					<MdSmartToy className='w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 text-white' />
 				</div>
 
-				{/* Model Info - Hidden on mobile for guest users only */}
+				{/* Model Info - Now visible on mobile */}
 				<div
 					className={cn(
 						'flex-1 text-left min-w-0',
 						isGuestMode
-							? 'hidden lg:block' // Hidden on mobile/tablet, visible on large screens and above
-							: 'hidden sm:block' // Hidden on mobile for auth users too, visible on tablet+
+							? 'block' // Always visible for guest users
+							: 'block' // Always visible for authenticated users
 					)}
 				>
 					<div
@@ -197,7 +197,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
 					</div>
 					<div
 						className={cn(
-							'text-xs truncate',
+							'text-xs truncate hidden sm:block', // Keep provider text hidden on mobile for space
 							isGuestMode
 								? isDark
 									? 'text-slate-500 opacity-90'
