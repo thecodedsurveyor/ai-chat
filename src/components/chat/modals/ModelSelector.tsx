@@ -61,10 +61,10 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
 			: 'Unknown Model';
 	};
 
-	// Get mobile-friendly model name (removes 'FREE' text)
+	// Get mobile-friendly model name (shows only first word)
 	const getMobileModelName = () => {
 		const fullName = getCurrentModelName();
-		return fullName.replace(/\sFREE$/i, '').trim();
+		return fullName.split(' ')[0]; // Get only the first word
 	};
 
 	// Get model provider info
@@ -182,6 +182,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
 				<div
 					className={cn(
 						'flex-1 text-left min-w-0',
+						'sm:text-left text-center', // Center text on mobile, left-align on tablet+
 						isGuestMode
 							? 'block' // Always visible for guest users
 							: 'block' // Always visible for authenticated users
