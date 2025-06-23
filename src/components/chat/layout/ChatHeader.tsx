@@ -37,7 +37,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 	return (
 		<header
 			className={cn(
-				'flex items-center px-3 sm:px-4 py-6 shadow-lg relative',
+				'flex items-center px-3 sm:px-4 py-3 sm:py-4 md:py-6 shadow-lg relative',
 				isDark
 					? 'bg-chat-primary border-b-2 border-chat-accent/30'
 					: 'bg-white/90 backdrop-blur-sm border-b-2 border-chat-pink/30'
