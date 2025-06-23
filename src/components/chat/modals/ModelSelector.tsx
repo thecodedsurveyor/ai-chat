@@ -130,10 +130,10 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
 						: 'Select AI Model'
 				}
 				className={cn(
-					'flex items-center gap-1 sm:gap-2 px-1.5 py-1 sm:px-3 sm:py-2 md:px-4 md:py-2.5 rounded-lg sm:rounded-xl border border-2 transition-all duration-200',
+					'flex items-center gap-1 sm:gap-2 md:gap-3 px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2.5 rounded-lg sm:rounded-xl border-2 transition-all duration-200',
 					isGuestMode
-						? 'min-w-[45px] sm:min-w-[60px] lg:min-w-[180px] shadow-md' // Guest: very small on mobile, small on tablet, normal on large screens
-						: 'min-w-[100px] sm:min-w-[140px] md:min-w-[180px] shadow-md', // Auth: compact on mobile, normal on desktop
+						? 'min-w-[55px] sm:min-w-[60px] lg:min-w-[180px] shadow-md' // Guest: extra small on mobile, small on tablet, normal on large screens
+						: 'min-w-[120px] sm:min-w-[140px] md:min-w-[180px] shadow-md', // Auth: compact on mobile, normal on desktop
 					'focus:outline-none focus:ring-2 focus:ring-offset-2',
 					isGuestMode
 						? cn(
@@ -161,7 +161,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
 				{/* Model Icon */}
 				<div
 					className={cn(
-						'p-0.5 sm:p-1 md:p-1.5 rounded bg-gradient-to-r flex-shrink-0 shadow-sm',
+						'p-0.5 sm:p-1 md:p-1.5 rounded sm:rounded-lg bg-gradient-to-r flex-shrink-0 shadow-sm',
 						isGuestMode
 							? isDark
 								? 'bg-gradient-to-br from-slate-600 to-slate-500'
@@ -169,7 +169,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
 							: currentModelInfo.color
 					)}
 				>
-					<MdSmartToy className='w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 text-white' />
+					<MdSmartToy className='w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 text-white' />
 				</div>
 
 				{/* Model Info - Hidden on mobile for guest users only */}
@@ -178,12 +178,12 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
 						'flex-1 text-left min-w-0',
 						isGuestMode
 							? 'hidden lg:block' // Hidden on mobile/tablet, visible on large screens and above
-							: 'hidden sm:block' // Hidden on mobile, visible from small screens up for authenticated users
+							: 'hidden sm:block' // Hidden on mobile for auth users too, visible on tablet+
 					)}
 				>
 					<div
 						className={cn(
-							'text-[10px] sm:text-xs md:text-sm font-semibold truncate leading-tight',
+							'text-xs sm:text-sm font-semibold truncate leading-tight',
 							isGuestMode
 								? isDark
 									? 'text-slate-400'
@@ -197,7 +197,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
 					</div>
 					<div
 						className={cn(
-							'text-[9px] sm:text-xs truncate',
+							'text-xs truncate',
 							isGuestMode
 								? isDark
 									? 'text-slate-500 opacity-90'
@@ -219,10 +219,10 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
 				{/* Dropdown Arrow or Lock Icon */}
 				{isGuestMode ? (
 					<div className='flex items-center space-x-1 sm:space-x-2'>
-						{/* Hide "Locked" text on mobile and small screens */}
+						{/* Hide "Locked" text on mobile and tablet */}
 						<span
 							className={cn(
-								'text-[9px] sm:text-xs font-medium hidden md:inline',
+								'text-xs font-medium hidden lg:inline',
 								isDark
 									? 'text-slate-400'
 									: 'text-slate-500'
@@ -232,19 +232,19 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
 						</span>
 						<div
 							className={cn(
-								'p-0.5 sm:p-1 md:p-1.5 rounded shadow-sm',
+								'p-0.5 sm:p-1 md:p-1.5 rounded sm:rounded-lg shadow-sm',
 								isDark
 									? 'bg-gradient-to-br from-amber-600/80 to-orange-600/80'
 									: 'bg-gradient-to-br from-amber-500/90 to-orange-500/90'
 							)}
 						>
-							<MdLock className='w-2.5 h-2.5 sm:w-3 sm:h-3 text-white' />
+							<MdLock className='w-3 h-3 sm:w-3.5 sm:h-3.5 text-white' />
 						</div>
 					</div>
 				) : (
 					<MdExpandMore
 						className={cn(
-							'w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 transition-transform duration-200 flex-shrink-0',
+							'w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 transition-transform duration-200 flex-shrink-0',
 							isDark
 								? 'text-chat-accent'
 								: 'text-gray-500',
