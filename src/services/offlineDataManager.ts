@@ -408,9 +408,11 @@ class OfflineDataManager {
 			);
 
 			// Sync user profile
-			await this.syncUserProfile(
-				authServiceModule.authService
-			);
+			if (authServiceModule.authService) {
+				await this.syncUserProfile(
+					authServiceModule.authService
+				);
+			}
 
 			// Sync conversations
 			await this.syncConversations();

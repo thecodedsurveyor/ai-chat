@@ -68,7 +68,7 @@ const EnhancedCodeBlock: React.FC<
 	// Extract language from className (e.g., "language-javascript" -> "javascript")
 	const getLanguageFromClassName = () => {
 		if (className && className.includes('language-')) {
-			return className.replace('language-', '');
+			return className.replace(/language-/g, '');
 		}
 		return null;
 	};

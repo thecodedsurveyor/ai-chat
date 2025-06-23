@@ -208,17 +208,19 @@ const ChatInput: React.FC<ChatInputProps> = (props) => {
 		>
 			{/* Guest Mode Banner - Mobile Safe Position */}
 			{isGuestMode && (
-				<div
-					className={`mb-2 text-xs px-2 py-1 rounded-lg flex items-center gap-2 ${
-						isDark
-							? 'bg-yellow-600/20 text-yellow-400 border border-yellow-600/30'
-							: 'bg-yellow-100 text-yellow-700 border border-yellow-300'
-					}`}
-				>
-					🎯{' '}
-					<span className='font-medium'>
-						Guest Mode - Limited Usage
-					</span>
+				<div className='mb-2 flex justify-center'>
+					<div
+						className={`text-xs px-2 py-1 rounded-lg inline-flex items-center gap-2 ${
+							isDark
+								? 'bg-yellow-600/20 text-yellow-400 border border-yellow-600/30'
+								: 'bg-yellow-100 text-yellow-700 border border-yellow-300'
+						}`}
+					>
+						🎯{' '}
+						<span className='font-medium'>
+							Guest Mode - Limited Usage
+						</span>
+					</div>
 				</div>
 			)}
 

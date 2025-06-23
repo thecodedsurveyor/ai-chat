@@ -624,7 +624,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 								)}
 							>
 								{admin.role.replace(
-									'_',
+									/_/g,
 									' '
 								)}
 							</p>

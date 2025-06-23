@@ -63,7 +63,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
 		if (!dateString) return 'N/A';
 		try {
 			const date = new Date(dateString);
-			if (isNaN(date.getTime()))
+			if (Number.isNaN(date.getTime()))
 				return 'Invalid Date';
 			return date.toLocaleDateString('en-US', {
 				year: 'numeric',
@@ -76,7 +76,11 @@ const UserManagement: React.FC<UserManagementProps> = ({
 	};
 
 	const formatDuration = (seconds: number) => {
-		if (!seconds || isNaN(seconds) || seconds < 0)
+		if (
+			!seconds ||
+			Number.isNaN(seconds) ||
+			seconds < 0
+		)
 			return '0m';
 		const minutes = Math.floor(seconds / 60);
 		return `${minutes}m`;
