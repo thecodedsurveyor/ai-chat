@@ -653,33 +653,138 @@ html.light body {
 		padding: 1rem;
 	}
 
-	/* Global font size reduction for mobile - 80% of current */
+	/* Global font size reduction for mobile - 80% of current for body text */
 	body {
 		font-size: calc(
 			var(--font-size-base, 1rem) * 0.8
 		) !important;
 	}
 
-	/* Specific reductions for all text elements */
-	h1,
-	h2,
-	h3,
-	h4,
-	h5,
-	h6 {
-		font-size: 80% !important;
+	/* Preserve header hierarchy but slightly reduce from desktop */
+	h1 {
+		font-size: 1.8rem !important; /* was 2.25rem (text-4xl), now reduced but still prominent */
 	}
 
+	h2 {
+		font-size: 1.5rem !important; /* was 1.875rem (text-3xl), now reduced but still clear */
+	}
+
+	h3 {
+		font-size: 1.25rem !important; /* was 1.5rem (text-2xl), now reduced but visible */
+	}
+
+	h4 {
+		font-size: 1.125rem !important; /* was 1.25rem (text-xl), slight reduction */
+	}
+
+	h5 {
+		font-size: 1rem !important; /* was 1.125rem (text-lg), slight reduction */
+	}
+
+	h6 {
+		font-size: 0.875rem !important; /* was 1rem (text-base), slight reduction */
+	}
+
+	/* Special overrides for large hero text and gradient text elements */
+	.text-4xl,
+	.text-5xl,
+	.text-6xl,
+	.text-7xl,
+	.text-8xl {
+		font-size: unset !important; /* Reset the global reduction */
+	}
+
+	/* Mobile-specific sizes for large text elements */
+	.text-8xl {
+		font-size: 4rem !important; /* was 6rem, now mobile-friendly */
+	}
+
+	.text-7xl {
+		font-size: 3.5rem !important; /* was 4.5rem, now mobile-friendly */
+	}
+
+	.text-6xl {
+		font-size: 2.5rem !important; /* was 3.75rem, now mobile-friendly */
+	}
+
+	.text-5xl {
+		font-size: 2rem !important; /* was 3rem, now mobile-friendly */
+	}
+
+	.text-4xl {
+		font-size: 1.75rem !important; /* was 2.25rem, now mobile-friendly */
+	}
+
+	/* Special handling for gradient text elements */
+	.bg-gradient-to-r.bg-clip-text.text-transparent,
+	[style*='background-clip: text'],
+	[style*='WebkitBackgroundClip: text'] {
+		font-size: unset !important; /* Reset to inherit from parent */
+	}
+
+	/* Hero text specific overrides for landing page */
+	.text-6xl.md\\:text-8xl {
+		font-size: 2.5rem !important; /* Hero title on landing page */
+	}
+
+	.text-5xl.md\\:text-7xl {
+		font-size: 2rem !important; /* Section headers */
+	}
+
+	.text-4xl.md\\:text-6xl {
+		font-size: 1.75rem !important; /* Page titles */
+	}
+
+	/* Icon sizing adjustments */
+	.text-6xl svg,
+	.text-6xl .w-6 {
+		width: 2rem !important;
+		height: 2rem !important;
+	}
+
+	.w-20.h-20 {
+		width: 3rem !important;
+		height: 3rem !important;
+	}
+
+	/* Keep buttons, inputs, and other elements at 80% for better mobile UX */
 	button,
 	input,
 	textarea,
 	select {
-		font-size: 80% !important;
+		font-size: 0.8rem !important; /* 80% of base */
 	}
 
-	/* Ensure proper line height for smaller text */
+	/* Keep smaller text elements proportionally small */
+	small,
+	.text-xs,
+	.text-sm {
+		font-size: 0.7rem !important;
+	}
+
+	/* Preserve paragraph text but make it slightly smaller */
+	p,
+	span,
+	div:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6) {
+		font-size: 0.875rem !important;
+	}
+
+	/* Ensure proper line height for all text */
 	* {
-		line-height: 1.4 !important;
+		line-height: 1.5 !important;
+	}
+
+	/* Special handling for navigation and important UI elements */
+	nav,
+	.nav,
+	.navigation {
+		font-size: 0.875rem !important;
+	}
+
+	/* Chat-specific elements */
+	.chat-title,
+	.chat-header {
+		font-size: 1.125rem !important;
 	}
 }
 
