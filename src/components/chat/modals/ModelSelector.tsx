@@ -61,6 +61,12 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
 			: 'Unknown Model';
 	};
 
+	// Get mobile-friendly model name (removes 'FREE' text)
+	const getMobileModelName = () => {
+		const fullName = getCurrentModelName();
+		return fullName.replace(/\sFREE$/i, '').trim();
+	};
+
 	// Get model provider info
 	const getModelInfo = (modelKey: string) => {
 		if (modelKey.includes('DEEPSEEK')) {
@@ -193,7 +199,13 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
 								: 'text-gray-800'
 						)}
 					>
-						{getCurrentModelName()}
+						{/* Show mobile-friendly name on small screens, full name on larger screens */}
+						<span className='sm:hidden'>
+							{getMobileModelName()}
+						</span>
+						<span className='hidden sm:inline'>
+							{getCurrentModelName()}
+						</span>
 					</div>
 					<div
 						className={cn(
