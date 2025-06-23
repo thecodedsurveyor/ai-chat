@@ -311,8 +311,8 @@ const LandingPage = () => {
 					</motion.div>
 
 					{/* Animated Gradient Text */}
-					<motion.h1
-						className={`text-6xl md:text-8xl font-exo font-bold mb-6 ${
+					<motion.h2
+						className={`text-3xl md:text-5xl font-exo font-bold mb-6 ${
 							isDark
 								? 'text-white'
 								: 'text-gray-800'
@@ -331,7 +331,7 @@ const LandingPage = () => {
 							NeuronFlow
 						</span>
 						Revolution
-					</motion.h1>
+					</motion.h2>
 
 					<p
 						className={`text-xl leading-relaxed mb-10 max-w-4xl mx-auto ${

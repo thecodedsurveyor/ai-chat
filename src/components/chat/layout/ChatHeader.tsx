@@ -1,13 +1,9 @@
 import React from 'react';
-import { Bot, User, Sparkles } from 'lucide-react';
+import { Bot, Sparkles } from 'lucide-react';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { cn } from '../../../utils/classNames';
-import { MdMenu, MdMessage } from 'react-icons/md';
-import {
-	useUIStore,
-	useChats,
-	useActiveChat,
-} from '../../../stores';
+import { MdMenu } from 'react-icons/md';
+import { useUIStore, useActiveChat } from '../../../stores';
 import ModelSelector from '../modals/ModelSelector';
 import UserProfile from '../../ui/UserProfile';
 import { useNavigate } from 'react-router-dom';
@@ -32,12 +28,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 	const { isDark } = useTheme();
 	const { toggleChatList } = useUIStore();
 	const navigate = useNavigate();
-	const chats = useChats();
 	const activeChat = useActiveChat();
-
-	const messageCount =
-		chats.find((c) => c.id === activeChat)?.messages
-			.length || 0;
 
 	const handleGuestSignUp = () => {
 		navigate('/auth?mode=signup');
@@ -84,137 +75,68 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 						NeuronFlow
 					</h1>
 				</button>
+
+				{/* Guest Usage Indicator - Moved to left section */}
+				{isGuestMode && (
+					<div
+						className={cn(
+							'flex items-center gap-2 px-3 py-2 rounded-xl border-2 shadow-sm',
+							'transition-all duration-200 hover:shadow-md cursor-pointer',
+							isDark
+								? 'bg-chat-secondary border-chat-accent/30 hover:bg-chat-accent/10'
+								: 'bg-white border-blue-200 hover:bg-blue-50'
+						)}
+						onClick={handleGuestSignUp}
+						title={`${
+							guestUsageStats?.remaining || 0
+						} messages left today. Resets at midnight! Click to sign up for unlimited messages.`}
+					>
+						<div className='p-1 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 flex-shrink-0'>
+							<Sparkles className='w-3 h-3 text-white' />
+						</div>
+						<div className='text-left min-w-0'>
+							<div
+								className={cn(
+									'text-xs font-bold leading-tight',
+									isDark
+										? 'text-white'
+										: 'text-gray-800'
+								)}
+							>
+								{guestUsageStats?.remaining ||
+									0}{' '}
+								left
+							</div>
+							<div
+								className={cn(
+									'text-xs opacity-75',
+									isDark
+										? 'text-chat-accent'
+										: 'text-blue-600'
+								)}
+							>
+								Guest mode
+							</div>
+						</div>
+					</div>
+				)}
 			</div>
 
 			{/* Center Section - Model Selector (properly centered) */}
 			<div className='flex-1 flex items-center justify-center'>
 				{activeChat && (
-					<div className='flex items-center gap-2 sm:gap-3'>
-						{/* Message Counter - Hidden on small screens */}
-						<div
-							className={cn(
-								'hidden md:flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl border-2 shadow-md',
-								'transition-all duration-200 hover:shadow-lg',
-								'min-w-[100px] sm:min-w-[120px]',
-								isDark
-									? 'bg-chat-secondary border-chat-accent/30'
-									: 'bg-white border-gray-300'
-							)}
-						>
-							<div
-								className={cn(
-									'p-1 sm:p-1.5 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 flex-shrink-0 shadow-sm'
-								)}
-							>
-								<MdMessage className='w-3 h-3 sm:w-4 sm:h-4 text-white' />
-							</div>
-							<div className='text-left min-w-0 flex-1'>
-								<div
-									className={cn(
-										'text-xs sm:text-sm font-bold leading-tight',
-										isDark
-											? 'text-white'
-											: 'text-gray-800'
-									)}
-								>
-									{messageCount}
-								</div>
-								<div
-									className={cn(
-										'text-xs opacity-75 truncate',
-										isDark
-											? 'text-chat-accent'
-											: 'text-gray-600'
-									)}
-								>
-									{messageCount === 1
-										? 'message'
-										: 'messages'}
-								</div>
-							</div>
-						</div>
-
-						{/* Model Selector */}
+					<>
+						{/* Model Selector - Centered */}
 						<ModelSelector
 							isGuestMode={isGuestMode}
 						/>
-					</div>
+					</>
 				)}
 			</div>
 
-			{/* Right Section - User Profile or Guest Indicator */}
+			{/* Right Section - User Profile (only for authenticated users) */}
 			<div className='flex items-center justify-end min-w-0 gap-3'>
-				{isGuestMode ? (
-					<>
-						{/* Guest Usage Indicator */}
-						<div
-							className={cn(
-								'flex items-center gap-2 px-3 py-2 rounded-xl border-2 shadow-sm',
-								'transition-all duration-200 hover:shadow-md cursor-pointer',
-								isDark
-									? 'bg-chat-secondary border-chat-accent/30 hover:bg-chat-accent/10'
-									: 'bg-white border-blue-200 hover:bg-blue-50'
-							)}
-							onClick={handleGuestSignUp}
-							title={`${
-								guestUsageStats?.remaining ||
-								0
-							} messages left today. Resets at midnight! Click to sign up for unlimited messages.`}
-						>
-							<div className='p-1 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 flex-shrink-0'>
-								<Sparkles className='w-3 h-3 text-white' />
-							</div>
-							<div className='text-left min-w-0'>
-								<div
-									className={cn(
-										'text-xs font-bold leading-tight',
-										isDark
-											? 'text-white'
-											: 'text-gray-800'
-									)}
-								>
-									{guestUsageStats?.remaining ||
-										0}{' '}
-									left
-								</div>
-								<div
-									className={cn(
-										'text-xs opacity-75',
-										isDark
-											? 'text-chat-accent'
-											: 'text-blue-600'
-									)}
-								>
-									Guest mode
-								</div>
-							</div>
-						</div>
-
-						{/* Guest Profile Icon */}
-						<div
-							className={cn(
-								'p-2 rounded-xl border-2 shadow-sm cursor-pointer',
-								'transition-all duration-200 hover:shadow-md',
-								isDark
-									? 'bg-chat-secondary border-chat-accent/30 hover:bg-chat-accent/10'
-									: 'bg-white border-gray-200 hover:bg-gray-50'
-							)}
-							onClick={handleGuestSignUp}
-							title='Sign up to unlock all features'
-						>
-							<User
-								className={cn(
-									'w-5 h-5',
-									isDark
-										? 'text-chat-accent'
-										: 'text-gray-600'
-								)}
-							/>
-						</div>
-					</>
-				) : (
-					<UserProfile />
-				)}
+				{!isGuestMode && <UserProfile />}
 			</div>
 		</header>
 	);
