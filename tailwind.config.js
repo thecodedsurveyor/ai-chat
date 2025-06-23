@@ -7,6 +7,29 @@ export default {
 			screens: {
 				xs: '475px',
 			},
+			fontSize: {
+				// Add responsive font sizes for mobile
+				'xs-mobile': [
+					'0.6rem',
+					{ lineHeight: '1.2' },
+				],
+				'sm-mobile': [
+					'0.7rem',
+					{ lineHeight: '1.3' },
+				],
+				'base-mobile': [
+					'0.8rem',
+					{ lineHeight: '1.4' },
+				],
+				'lg-mobile': [
+					'0.9rem',
+					{ lineHeight: '1.4' },
+				],
+				'xl-mobile': [
+					'1rem',
+					{ lineHeight: '1.4' },
+				],
+			},
 			colors: {
 				chat: {
 					// Dark mode (default)

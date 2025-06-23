@@ -98,6 +98,7 @@ export default defineConfig({
 	server: {
 		port: 5173,
 		strictPort: false, // Allow fallback to another port if 5173 is in use
+		host: '0.0.0.0',
 		hmr: {
 			clientPort: 5173,
 			protocol: 'ws',
