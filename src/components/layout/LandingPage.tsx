@@ -17,7 +17,10 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
-import WaterEffect from '../ui/WaterEffect';
+import { lazy, Suspense } from 'react';
+
+// Lazy load heavy components
+const WaterEffect = lazy(() => import('../ui/WaterEffect'));
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -31,6 +34,7 @@ const LandingPage = () => {
 		number | null
 	>(null);
 	const [faqSearch, setFaqSearch] = useState('');
+	const [heroLoaded, setHeroLoaded] = useState(false);
 
 	const handleTryAI = () => {
 		navigate('/chat');
@@ -71,90 +75,118 @@ const LandingPage = () => {
 		},
 	];
 
-	// Animated counters
+	// Optimized animated counters - lazy load when section is visible
 	useEffect(() => {
-		const userTarget = 12847;
-		const convTarget = 534291;
+		let userInterval: NodeJS.Timeout;
+		let convInterval: NodeJS.Timeout;
 
-		const userInterval = setInterval(() => {
-			setUserCount((prev) => {
-				const increment = Math.ceil(
-					(userTarget - prev) / 50
-				);
-				return prev + increment >= userTarget
-					? userTarget
-					: prev + increment;
-			});
-		}, 50);
+		// Delay counter animation to improve initial load
+		const counterTimeoutId = setTimeout(() => {
+			const userTarget = 12847;
+			const convTarget = 534291;
 
-		const convInterval = setInterval(() => {
-			setConversationCount((prev) => {
-				const increment = Math.ceil(
-					(convTarget - prev) / 60
-				);
-				return prev + increment >= convTarget
-					? convTarget
-					: prev + increment;
-			});
-		}, 30);
+			userInterval = setInterval(() => {
+				setUserCount((prev) => {
+					const increment = Math.ceil(
+						(userTarget - prev) / 30
+					);
+					return prev + increment >= userTarget
+						? userTarget
+						: prev + increment;
+				});
+			}, 80);
+
+			convInterval = setInterval(() => {
+				setConversationCount((prev) => {
+					const increment = Math.ceil(
+						(convTarget - prev) / 40
+					);
+					return prev + increment >= convTarget
+						? convTarget
+						: prev + increment;
+				});
+			}, 60);
+		}, 1000); // Delay by 1 second to improve initial load
 
 		return () => {
-			clearInterval(userInterval);
-			clearInterval(convInterval);
+			clearTimeout(counterTimeoutId);
+			if (userInterval) clearInterval(userInterval);
+			if (convInterval) clearInterval(convInterval);
 		};
 	}, []);
 
-	// Mouse tracking for particle interactions
+	// Optimized mouse tracking with throttling for better performance
 	useEffect(() => {
+		let rafId: number;
+		let lastTime = 0;
+
 		const handleMouseMove = (e: MouseEvent) => {
-			// Mouse tracking for interactive particles
-			const x = e.clientX;
-			const y = e.clientY;
+			const now = performance.now();
+			// Throttle to 60fps maximum
+			if (now - lastTime < 16) return;
+			lastTime = now;
 
-			// Update particle positions based on mouse
-			const particles = document.querySelectorAll(
-				'.interactive-particle'
-			);
-			particles.forEach((particle) => {
-				const rect =
-					particle.getBoundingClientRect();
-				const centerX = rect.left + rect.width / 2;
-				const centerY = rect.top + rect.height / 2;
+			if (rafId) cancelAnimationFrame(rafId);
 
-				const deltaX = (x - centerX) / 50;
-				const deltaY = (y - centerY) / 50;
+			rafId = requestAnimationFrame(() => {
+				const particles = document.querySelectorAll(
+					'.interactive-particle'
+				);
+				// Limit to first 8 particles for performance
+				Array.from(particles)
+					.slice(0, 8)
+					.forEach((particle) => {
+						const rect =
+							particle.getBoundingClientRect();
+						const centerX =
+							rect.left + rect.width / 2;
+						const centerY =
+							rect.top + rect.height / 2;
 
-				(
-					particle as HTMLElement
-				).style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+						const deltaX =
+							(e.clientX - centerX) / 80; // Reduced sensitivity
+						const deltaY =
+							(e.clientY - centerY) / 80;
+
+						(
+							particle as HTMLElement
+						).style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+					});
 			});
 		};
+
 		window.addEventListener(
 			'mousemove',
-			handleMouseMove
+			handleMouseMove,
+			{ passive: true }
 		);
-		return () =>
+		return () => {
 			window.removeEventListener(
 				'mousemove',
 				handleMouseMove
 			);
+			if (rafId) cancelAnimationFrame(rafId);
+		};
 	}, []);
 
 	useEffect(() => {
-		// Hero animations with enhanced timing
-		if (heroRef.current) {
-			gsap.fromTo(
-				heroRef.current.children,
-				{ y: 100, opacity: 0 },
-				{
-					y: 0,
-					opacity: 1,
-					duration: 1.2,
-					stagger: 0.15,
-					ease: 'power3.out',
-				}
-			);
-		}
+		// Optimized hero animations - simplified and faster
+		const timeoutId = setTimeout(() => {
+			setHeroLoaded(true);
+			if (heroRef.current) {
+				gsap.fromTo(
+					heroRef.current.children,
+					{ y: 60, opacity: 0 },
+					{
+						y: 0,
+						opacity: 1,
+						duration: 0.8,
+						stagger: 0.1,
+						ease: 'power2.out',
+					}
+				);
+			}
+		}, 200); // Small delay to ensure DOM is ready
 
 		// Features scroll animation with smoother entrance
 		if (featuresRef.current) {
@@ -162,13 +194,13 @@ const LandingPage = () => {
 				featuresRef.current.querySelectorAll(
 					'.feature-card'
 				),
-				{ y: 80, opacity: 0, scale: 0.95 },
+				{ y: 60, opacity: 0, scale: 0.98 },
 				{
 					y: 0,
 					opacity: 1,
 					scale: 1,
-					duration: 0.9,
-					stagger: 0.15,
+					duration: 0.7,
+					stagger: 0.1,
 					ease: 'power2.out',
 					scrollTrigger: {
 						trigger: featuresRef.current,
@@ -180,6 +212,8 @@ const LandingPage = () => {
 				}
 			);
 		}
+
+		return () => clearTimeout(timeoutId);
 	}, []);
 
 	const features = [
@@ -253,39 +287,43 @@ const LandingPage = () => {
 		>
 			{/* Hero Section */}
 			<section className='relative min-h-screen flex items-center justify-center px-6 overflow-hidden'>
-				{/* Background Water Effect */}
+				{/* Background Water Effect - Lazy loaded for performance */}
 				<div className='absolute inset-0 z-0'>
-					<WaterEffect />
+					<Suspense
+						fallback={
+							<div className='absolute inset-0 bg-gradient-to-br from-blue-50/20 to-purple-50/20' />
+						}
+					>
+						<WaterEffect />
+					</Suspense>
 				</div>
 
-				{/* Interactive Particles */}
+				{/* Optimized Interactive Particles - Reduced count for performance */}
 				<div className='absolute inset-0 pointer-events-none'>
-					{Array.from({ length: 15 }, (_, i) => (
+					{Array.from({ length: 8 }, (_, i) => (
 						<motion.div
 							key={i}
 							className={`absolute w-2 h-2 rounded-full interactive-particle ${
 								isDark
-									? 'bg-white/20'
-									: 'bg-purple-400/30'
+									? 'bg-white/15'
+									: 'bg-purple-400/25'
 							}`}
 							style={{
-								left: `${
-									Math.random() * 100
-								}%`,
+								left: `${15 + i * 12}%`,
 								top: `${
-									Math.random() * 100
+									20 + Math.random() * 60
 								}%`,
 							}}
 							animate={{
-								y: [0, -25, 0],
-								opacity: [0.4, 0.9, 0.4],
-								scale: [1, 1.2, 1],
+								y: [0, -20, 0],
+								opacity: [0.3, 0.7, 0.3],
+								scale: [1, 1.1, 1],
 							}}
 							transition={{
-								duration: 4 + i * 0.5,
+								duration: 3 + i * 0.3,
 								repeat: Infinity,
 								ease: 'easeInOut',
-								delay: i * 0.2,
+								delay: i * 0.15,
 							}}
 						/>
 					))}
@@ -310,21 +348,31 @@ const LandingPage = () => {
 						</div>
 					</motion.div>
 
-					{/* Animated Gradient Text */}
+					{/* Optimized Gradient Text - Reduced animation complexity */}
 					<motion.h2
-						className={`text-3xl md:text-5xl font-exo font-bold mb-6 ${
-							isDark
-								? 'text-white'
-								: 'text-gray-800'
-						}`}
+						className={`text-3xl md:text-5xl font-exo font-bold mb-6`}
 						style={{
-							background: `linear-gradient(45deg, #f59e0b, #ec4899, #8b5cf6, #06b6d4)`,
-							backgroundSize: '400% 400%',
+							background: `linear-gradient(45deg, #f59e0b, #ec4899, #8b5cf6)`,
 							WebkitBackgroundClip: 'text',
 							backgroundClip: 'text',
 							color: 'transparent',
-							animation:
-								'gradient 3s ease infinite',
+						}}
+						animate={
+							heroLoaded
+								? {
+										backgroundPosition:
+											[
+												'0% 0%',
+												'100% 100%',
+												'0% 0%',
+											],
+								  }
+								: {}
+						}
+						transition={{
+							duration: 6,
+							repeat: Infinity,
+							ease: 'linear',
 						}}
 					>
 						<span className='block'>
@@ -391,14 +439,13 @@ const LandingPage = () => {
 					</div>
 				</div>
 
-				{/* Enhanced Floating elements */}
+				{/* Simplified Floating elements - Reduced complexity for performance */}
 				<div className='absolute inset-0 pointer-events-none'>
 					<motion.div
-						className='absolute top-20 left-10 w-4 h-4 bg-chat-pink/40 rounded-full shadow-lg'
+						className='absolute top-20 left-10 w-3 h-3 bg-chat-pink/30 rounded-full'
 						animate={{
-							y: [0, -25, 0],
-							opacity: [0.4, 0.9, 0.4],
-							scale: [1, 1.2, 1],
+							y: [0, -20, 0],
+							opacity: [0.3, 0.6, 0.3],
 						}}
 						transition={{
 							duration: 4,
@@ -407,64 +454,29 @@ const LandingPage = () => {
 						}}
 					/>
 					<motion.div
-						className='absolute top-40 right-20 w-6 h-6 bg-chat-purple/40 rounded-full shadow-lg'
+						className='absolute top-40 right-20 w-4 h-4 bg-chat-purple/30 rounded-full'
 						animate={{
-							y: [0, 35, 0],
-							x: [0, -15, 0],
-							opacity: [0.5, 1, 0.5],
-							scale: [1, 1.3, 1],
+							y: [0, 25, 0],
+							opacity: [0.4, 0.7, 0.4],
 						}}
 						transition={{
-							duration: 6,
+							duration: 5,
 							repeat: Infinity,
 							ease: 'easeInOut',
 							delay: 1,
 						}}
 					/>
 					<motion.div
-						className='absolute bottom-40 left-20 w-3 h-3 bg-chat-orange/50 rounded-full shadow-lg'
+						className='absolute bottom-40 left-20 w-2 h-2 bg-chat-orange/40 rounded-full'
 						animate={{
-							y: [0, -20, 0],
-							x: [0, 20, 0],
-							opacity: [0.3, 0.8, 0.3],
-							scale: [1, 1.4, 1],
+							y: [0, -15, 0],
+							opacity: [0.2, 0.5, 0.2],
 						}}
 						transition={{
-							duration: 5,
+							duration: 3,
 							repeat: Infinity,
 							ease: 'easeInOut',
 							delay: 2,
-						}}
-					/>
-					{/* Additional floating elements */}
-					<motion.div
-						className='absolute top-60 left-1/2 w-2 h-2 bg-chat-cyan/40 rounded-full shadow-lg'
-						animate={{
-							y: [0, -30, 0],
-							x: [0, 25, 0],
-							opacity: [0.2, 0.7, 0.2],
-							scale: [1, 1.5, 1],
-						}}
-						transition={{
-							duration: 7,
-							repeat: Infinity,
-							ease: 'easeInOut',
-							delay: 3,
-						}}
-					/>
-					<motion.div
-						className='absolute bottom-60 right-1/4 w-5 h-5 bg-chat-green/30 rounded-full shadow-lg'
-						animate={{
-							y: [0, 25, 0],
-							x: [0, -20, 0],
-							opacity: [0.3, 0.8, 0.3],
-							scale: [1, 1.2, 1],
-						}}
-						transition={{
-							duration: 5.5,
-							repeat: Infinity,
-							ease: 'easeInOut',
-							delay: 1.5,
 						}}
 					/>
 				</div>

@@ -4,13 +4,14 @@
 	"description": "Backend API for NeuronFlow with authentication and chat management",
 	"main": "dist/server.js",
 	"scripts": {
-		"build": "tsc",
+		"build": "prisma generate && tsc",
 		"start": "node dist/server.js",
 		"dev": "nodemon src/server.ts",
 		"prisma:generate": "prisma generate",
 		"prisma:push": "prisma db push",
 		"prisma:migrate": "prisma migrate dev",
 		"prisma:studio": "prisma studio",
+		"postinstall": "prisma generate",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"keywords": [

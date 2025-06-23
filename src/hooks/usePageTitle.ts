@@ -20,11 +20,11 @@ const defaultConfig: TitleConfig = {
 
 // Simple title mappings for different pages
 const pageTitles: Record<string, string> = {
-	'/': 'Your Conversations',
-	'/chat': 'NeuronFlow Assistant',
-	'/auth': 'Sign in or Create an Account',
-	'/login': 'Sign in to NeuronFlow',
-	'/signup': 'Create Your NeuronFlow Account',
+	'/': 'NeuronFlow - Conversational AI for the Future',
+	'/chat': 'Chat Assistant',
+	'/auth': 'Authentication',
+	'/login': 'Sign In',
+	'/signup': 'Create Account',
 	'/about': 'About NeuronFlow – Our Mission & Team',
 	'/contact': 'Contact Support – NeuronFlow',
 	'/terms': 'Terms of Service – NeuronFlow',
@@ -42,17 +42,17 @@ const pageTitles: Record<string, string> = {
 	'/support': 'Support – NeuronFlow',
 	'/status': 'System Status – NeuronFlow',
 	'/community': 'Community – NeuronFlow',
-	'/analytics': 'Analytics Dashboard – NeuronFlow',
-	'/dashboard': 'User Dashboard – NeuronFlow',
-	'/profile': 'Your Profile – NeuronFlow',
-	'/settings': 'Settings & Preferences – NeuronFlow',
+	'/analytics': 'Analytics Dashboard',
+	'/dashboard': 'User Dashboard',
+	'/profile': 'Profile Settings',
+	'/settings': 'Account Settings',
 	'/features': 'Features Overview – NeuronFlow',
-	'/forgot-password': 'Reset Your Password – NeuronFlow',
-	'/reset-password': 'Reset Your Password – NeuronFlow',
-	'/verify-email': 'Verify Your Email – NeuronFlow',
-	'/change-password': 'Change Your Password – NeuronFlow',
-	'/deactivate-account':
-		'Deactivate Account – NeuronFlow',
+	'/forgot-password': 'Reset Password',
+	'/reset-password': 'Reset Password',
+	'/verify-email': 'Verify Email Address',
+	'/change-password': 'Change Password',
+	'/deactivate-account': 'Account Deactivation',
+	'/admin': 'Admin Dashboard',
 };
 
 // Get simple title based on pathname
@@ -61,19 +61,22 @@ const getSimpleTitle = (pathname: string): string => {
 		return pageTitles[pathname];
 	}
 	if (pathname.startsWith('/chat')) {
-		return 'NeuronFlow Assistant';
+		return 'Chat Assistant';
 	}
 	if (pathname.startsWith('/settings')) {
-		return 'Settings & Preferences – NeuronFlow';
+		return 'Account Settings';
 	}
 	if (pathname.startsWith('/profile')) {
-		return 'Your Profile – NeuronFlow';
+		return 'Profile Settings';
 	}
 	if (pathname.startsWith('/analytics')) {
-		return 'Analytics Dashboard – NeuronFlow';
+		return 'Analytics Dashboard';
 	}
 	if (pathname.startsWith('/conversation/')) {
-		return 'Conversation – NeuronFlow';
+		return 'Conversation';
+	}
+	if (pathname.startsWith('/admin')) {
+		return 'Admin Dashboard';
 	}
 	return 'NeuronFlow';
 };

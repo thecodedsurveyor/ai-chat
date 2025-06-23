@@ -858,11 +858,7 @@ const FeatureFlags: React.FC<FeatureFlagProps> = ({
 										rolloutPercentage:
 											selectedFlag.rolloutPercentage,
 									};
-									console.log(
-										'🔧 FeatureFlags edit button clicked:',
-										selectedFlag.id,
-										editData
-									);
+
 									onEditFlag(
 										selectedFlag.id,
 										editData

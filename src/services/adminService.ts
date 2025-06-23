@@ -429,12 +429,6 @@ class AdminService {
 		updates: Partial<FeatureFlag>
 	): Promise<boolean> {
 		try {
-			console.log(
-				'🔄 Updating feature flag:',
-				flagId,
-				updates
-			);
-
 			const response = await fetch(
 				`${API_BASE_URL}/flags/${flagId}`,
 				{
@@ -448,7 +442,6 @@ class AdminService {
 			);
 
 			const data = await response.json();
-			console.log('📊 Update response:', data);
 
 			return data.success;
 		} catch (error) {

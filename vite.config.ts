@@ -95,6 +95,25 @@ export default defineConfig({
 			},
 		}),
 	],
+	build: {
+		rollupOptions: {
+			output: {
+				manualChunks: {
+					vendor: [
+						'react',
+						'react-dom',
+						'react-router-dom',
+					],
+					ui: ['framer-motion', 'lucide-react'],
+					utils: [
+						'clsx',
+						'browser-image-compression',
+					],
+				},
+			},
+		},
+		chunkSizeWarningLimit: 1000,
+	},
 	server: {
 		port: 5173,
 		strictPort: false, // Allow fallback to another port if 5173 is in use

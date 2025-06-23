@@ -38,26 +38,16 @@ class RateLimitService {
 			});
 
 			this.redis.on('connect', () => {
-				console.log(
-					'🔗 Redis connected for persistent rate limiting'
-				);
 				this.isConnected = true;
 			});
 
 			this.redis.on('disconnect', () => {
-				console.warn(
-					'⚠️  Redis disconnected, falling back to memory-based rate limiting'
-				);
 				this.isConnected = false;
 			});
 
 			// Try to connect
 			await this.redis.connect();
-		} catch (error) {
-			console.warn(
-				'⚠️  Redis initialization failed, using memory-based rate limiting:',
-				error
-			);
+		} catch {
 			this.isConnected = false;
 			this.redis = null;
 		}
@@ -232,9 +222,6 @@ class RateLimitService {
 		if (this.redis && this.isConnected) {
 			try {
 				await this.redis.disconnect();
-				console.log(
-					'🔌 Redis disconnected gracefully'
-				);
 			} catch (error) {
 				console.error(
 					'Error disconnecting from Redis:',

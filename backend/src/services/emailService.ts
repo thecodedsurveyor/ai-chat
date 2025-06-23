@@ -38,9 +38,6 @@ class EmailService {
 			this.provider = EmailProvider.SENDGRID;
 			sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 			this.sendgrid = sgMail;
-			console.log(
-				'📧 Email Service initialized with SendGrid'
-			);
 		} else if (
 			providerEnv === EmailProvider.RESEND &&
 			process.env.RESEND_API_KEY
@@ -49,14 +46,8 @@ class EmailService {
 			this.resend = new Resend(
 				process.env.RESEND_API_KEY
 			);
-			console.log(
-				'📧 Email Service initialized with Resend'
-			);
 		} else {
 			this.provider = EmailProvider.MOCK;
-			console.log(
-				'📧 Email Service initialized in mock mode (no valid API key found)'
-			);
 		}
 
 		// 2) Read the "from" address and friendly name from .env
@@ -189,48 +180,18 @@ class EmailService {
 					if (this.resend) {
 						// Resend requires verified domain for 'from' field
 						// Use simple format: "Name <email@domain.com>"
-						const result =
-							await this.resend.emails.send({
-								from: `${this.fromName} <${this.fromEmail}>`,
-								to: [to],
-								subject,
-								html,
-								replyTo: this.fromEmail,
-							});
-
-						// Enhanced logging for debugging
-						console.log(
-							'📧 Resend email sent successfully:',
-							{
-								id: result.data?.id,
-								to,
-								subject:
-									subject.substring(
-										0,
-										50
-									) + '...',
-								from: `${this.fromName} <${this.fromEmail}>`,
-								timestamp:
-									new Date().toISOString(),
-								result: result,
-							}
-						);
+						await this.resend.emails.send({
+							from: `${this.fromName} <${this.fromEmail}>`,
+							to: [to],
+							subject,
+							html,
+							replyTo: this.fromEmail,
+						});
 					}
 					break;
 
 				case EmailProvider.MOCK:
-					// In mock mode, just log what would have been sent
-					console.log(
-						'📧 [MOCK] Email would be sent:',
-						{
-							to,
-							from: formattedFrom,
-							subject,
-							htmlSnippet:
-								html.substring(0, 100) +
-								'…',
-						}
-					);
+					// In mock mode, email would be sent
 					break;
 			}
 

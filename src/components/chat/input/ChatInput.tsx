@@ -200,7 +200,7 @@ const ChatInput: React.FC<ChatInputProps> = (props) => {
 	return (
 		<form
 			onSubmit={handleSubmit}
-			className={`relative p-2 sm:p-4 shadow-2xl ${
+			className={`relative p-2 sm:p-4 pb-4 sm:pb-6 mb-4 sm:mb-0 shadow-2xl ${
 				isDark
 					? 'bg-gradient-to-r from-chat-secondary to-chat-primary border-t-2 border-chat-accent/30'
 					: 'bg-white/95 backdrop-blur-sm border-t-2 border-chat-pink/40'
@@ -218,7 +218,7 @@ const ChatInput: React.FC<ChatInputProps> = (props) => {
 					>
 						🎯{' '}
 						<span className='font-medium'>
-							Guest Mode - Limited Usage
+							Guest Mode
 						</span>
 					</div>
 				</div>
@@ -397,10 +397,10 @@ const ChatInput: React.FC<ChatInputProps> = (props) => {
 			</div>
 
 			{/* Mobile Layout - Completely Redesigned */}
-			<div className='md:hidden space-y-2'>
+			<div className='md:hidden space-y-3 mx-2'>
 				{/* Input Row with Send Button */}
 				<div
-					className={`flex items-center gap-2 rounded-2xl p-2 shadow-inner backdrop-blur-sm ${
+					className={`flex items-center gap-3 rounded-3xl p-3 shadow-lg backdrop-blur-sm ${
 						isDark
 							? 'bg-chat-primary border-2 border-chat-pink/30 hover:border-chat-orange/40'
 							: 'bg-white border-2 border-chat-purple/40 hover:border-chat-pink/50'
@@ -419,14 +419,14 @@ const ChatInput: React.FC<ChatInputProps> = (props) => {
 									? `Ask about "${activeDocument.name}"...`
 									: 'Type your message here...'
 							}
-							className={`w-full text-sm py-3 px-3 rounded-xl border-2 transition-all duration-300 focus:outline-none focus:ring-0 ${
+							className={`w-full text-base py-4 px-4 rounded-2xl border-0 transition-all duration-300 focus:outline-none focus:ring-0 ${
 								activeDocument
 									? isDark
-										? 'bg-chat-pink/10 text-white placeholder:text-chat-pink/80 border-chat-pink/50 focus:border-chat-pink hover:border-chat-pink/70'
-										: 'bg-chat-purple/10 text-gray-800 placeholder:text-chat-purple/80 border-chat-purple/50 focus:border-chat-purple hover:border-chat-purple/70'
+										? 'bg-chat-pink/10 text-white placeholder:text-chat-pink/80'
+										: 'bg-chat-purple/10 text-gray-800 placeholder:text-chat-purple/80'
 									: isDark
-									? 'bg-chat-secondary/50 text-white placeholder:text-chat-accent/60 border-chat-accent/30 focus:border-chat-pink hover:border-chat-orange/40'
-									: 'bg-gray-50 text-gray-800 placeholder:text-gray-500 border-chat-purple/30 focus:border-chat-pink hover:border-chat-purple/50'
+									? 'bg-chat-secondary/70 text-white placeholder:text-chat-accent/60'
+									: 'bg-gray-100/80 text-gray-800 placeholder:text-gray-500'
 							}`}
 						/>
 					</div>
@@ -434,19 +434,19 @@ const ChatInput: React.FC<ChatInputProps> = (props) => {
 					{/* Send Button */}
 					<button
 						type='submit'
-						className={`flex-shrink-0 p-3 rounded-full transition-all hover:scale-105 ${
+						className={`flex-shrink-0 p-4 rounded-full transition-all hover:scale-105 shadow-md ${
 							isDark
 								? 'bg-chat-pink text-white hover:bg-chat-orange'
 								: 'bg-chat-purple text-white hover:bg-chat-pink'
 						}`}
 						title='Send message'
 					>
-						<MdSend className='text-lg' />
+						<MdSend className='text-xl' />
 					</button>
 				</div>
 
 				{/* Tools Row - Underneath Input */}
-				<div className='flex items-center justify-center gap-1 px-2'>
+				<div className='flex items-center justify-center gap-3 px-2 py-2 rounded-2xl bg-opacity-50 backdrop-blur-sm'>
 					{/* Content Tools Group - Mobile */}
 					<div className='relative'>
 						<button

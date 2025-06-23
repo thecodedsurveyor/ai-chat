@@ -5,22 +5,16 @@ import rateLimitService from './services/rateLimitService';
 const PORT = config.PORT || 3003;
 
 const server = app.listen(PORT, () => {
-	console.log(`🚀 Server running on port ${PORT}`);
-	console.log(
-		`📊 Rate limiting: ${rateLimitService.getStatus().client}`
-	);
+	// Server started on port ${PORT}
 });
 
 // Graceful shutdown
 const gracefulShutdown = async () => {
-	console.log('Shutting down gracefully...');
-
 	// Close Redis connection
 	await rateLimitService.disconnect();
 
 	// Close HTTP server
 	server.close(() => {
-		console.log('✅ Server shut down complete');
 		process.exit(0);
 	});
 };

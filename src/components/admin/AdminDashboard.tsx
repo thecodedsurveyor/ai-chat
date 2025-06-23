@@ -358,11 +358,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 		updates: Partial<FeatureFlag>
 	) => {
 		try {
-			console.log(
-				'🎯 AdminDashboard handleEditFlag called:',
-				flagId,
-				updates
-			);
 			setLoading(true);
 			const success =
 				await adminService.updateFeatureFlag(
@@ -370,16 +365,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 					updates
 				);
 
-			console.log('✅ Edit flag success:', success);
-
 			if (success) {
 				// Reload feature flags to get updated data
 				const updatedFlags =
 					await adminService.getFeatureFlags();
-				console.log(
-					'🔄 Reloaded flags:',
-					updatedFlags
-				);
 				setFeatureFlags(updatedFlags);
 			}
 		} catch (error) {

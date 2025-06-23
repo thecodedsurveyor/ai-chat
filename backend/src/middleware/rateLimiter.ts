@@ -83,9 +83,6 @@ export function createRateLimiter(
 					if (shouldSkip) {
 						// Note: In a more sophisticated implementation,
 						// you might decrement the counter here
-						console.log(
-							`Skipping rate limit for status ${statusCode}`
-						);
 					}
 
 					return originalSend.call(this, data);
