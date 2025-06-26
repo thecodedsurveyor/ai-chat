@@ -232,7 +232,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 	const handleLogout = async () => {
 		await adminService.logout();
 		setAdmin(null);
-		onClose();
+		// Don't call onClose() - stay on admin page but show login screen
+		// onClose();
 	};
 
 	const handleUserAction = async (

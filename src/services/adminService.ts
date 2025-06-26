@@ -35,6 +35,48 @@ class AdminService {
 		email: string,
 		password: string
 	): Promise<AdminAuthResponse> {
+		// Get admin credentials from environment variables only
+		const ADMIN_CREDENTIALS = {
+			email: import.meta.env.VITE_ADMIN_EMAIL,
+			password: import.meta.env.VITE_ADMIN_PASSWORD,
+			admin: {
+				id: 'admin-1',
+				email: import.meta.env.VITE_ADMIN_EMAIL,
+				firstName: 'System',
+				lastName: 'Administrator',
+				role: 'super_admin' as const,
+				createdAt: new Date().toISOString(),
+				lastLogin: new Date().toISOString(),
+				isActive: true,
+			},
+		};
+
+		// Check admin credentials (environment variables only)
+		if (
+			ADMIN_CREDENTIALS.email &&
+			ADMIN_CREDENTIALS.password &&
+			email === ADMIN_CREDENTIALS.email &&
+			password === ADMIN_CREDENTIALS.password
+		) {
+			const mockToken = 'admin-token-' + Date.now();
+			this.adminToken = mockToken;
+			localStorage.setItem('adminToken', mockToken);
+			localStorage.setItem(
+				'adminUser',
+				JSON.stringify(ADMIN_CREDENTIALS.admin)
+			);
+
+			return {
+				success: true,
+				message: 'Login successful',
+				data: {
+					admin: ADMIN_CREDENTIALS.admin,
+					accessToken: mockToken,
+				},
+			};
+		}
+
+		// Fallback to backend if hardcoded credentials don't match
 		try {
 			const response = await fetch(
 				`${API_BASE_URL}/login`,
@@ -78,9 +120,11 @@ class AdminService {
 			};
 		} catch (error) {
 			console.error('Admin login error:', error);
+			// If backend fails and no env credentials match, show error
 			return {
 				success: false,
-				message: 'Login failed. Please try again.',
+				message:
+					'Login failed. Please check your credentials or configure VITE_ADMIN_EMAIL and VITE_ADMIN_PASSWORD in your .env file.',
 			};
 		}
 	}

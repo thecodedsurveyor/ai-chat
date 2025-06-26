@@ -109,7 +109,7 @@ const AdminAuth: React.FC<AdminAuthProps> = ({
 					</p>
 				</div>
 
-				{/* Test Credentials Info */}
+				{/* Quick Login Helper */}
 				<div
 					className={cn(
 						'mb-6 p-4 rounded-lg border-l-4',
@@ -119,21 +119,79 @@ const AdminAuth: React.FC<AdminAuthProps> = ({
 					)}
 				>
 					<h3 className='font-semibold text-sm mb-2'>
-						Test Admin Credentials:
+						🚀 Quick Admin Login
 					</h3>
-					<div className='text-xs space-y-1'>
-						<div>
-							Email:{' '}
-							<code className='font-mono'>
-								admin@neuronflow.ai
-							</code>
-						</div>
-						<div>
-							Password:{' '}
-							<code className='font-mono'>
-								admin123!
-							</code>
-						</div>
+					<div className='text-xs space-y-2'>
+						<p>
+							Use the button below to
+							automatically login with admin
+							credentials.
+						</p>
+						<button
+							type='button'
+							onClick={async () => {
+								// Auto-login using environment credentials
+								const adminEmail =
+									import.meta.env
+										.VITE_ADMIN_EMAIL;
+								const adminPassword =
+									import.meta.env
+										.VITE_ADMIN_PASSWORD;
+
+								if (
+									!adminEmail ||
+									!adminPassword
+								) {
+									setError(
+										'Admin credentials not configured. Please set VITE_ADMIN_EMAIL and VITE_ADMIN_PASSWORD in your .env file.'
+									);
+									return;
+								}
+
+								setIsLoading(true);
+								setError('');
+
+								try {
+									const result =
+										await adminService.login(
+											adminEmail,
+											adminPassword
+										);
+
+									if (
+										result.success &&
+										result.data
+									) {
+										onLoginSuccess(
+											result.data
+												.admin
+										);
+									} else {
+										setError(
+											result.message ||
+												'Auto-login failed'
+										);
+									}
+								} catch {
+									setError(
+										'An unexpected error occurred'
+									);
+								} finally {
+									setIsLoading(false);
+								}
+							}}
+							disabled={isLoading}
+							className={cn(
+								'px-3 py-2 text-sm rounded-md transition-colors font-medium',
+								isDark
+									? 'bg-blue-700 hover:bg-blue-600 text-white disabled:opacity-50'
+									: 'bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50'
+							)}
+						>
+							{isLoading
+								? 'Logging in...'
+								: 'Quick Admin Login'}
+						</button>
 					</div>
 				</div>
 
