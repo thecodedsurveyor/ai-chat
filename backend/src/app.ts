@@ -106,12 +106,20 @@ app.use(
 				`https://${configUrl.host}`,
 			];
 
+			// Allow all Vercel deployments for neuronflow project
+			const isVercelDomain =
+				origin &&
+				origin.includes('neuronflow') &&
+				origin.includes('vercel.app');
+
 			if (
 				allowedOrigins.indexOf(origin) !== -1 ||
-				config.NODE_ENV !== 'production'
+				config.NODE_ENV !== 'production' ||
+				isVercelDomain
 			) {
 				callback(null, true);
 			} else {
+				console.log('CORS blocked origin:', origin);
 				callback(new Error('Not allowed by CORS'));
 			}
 		},
@@ -131,6 +139,9 @@ app.use(
 		maxAge: 86400, // Cache preflight for 24 hours
 	})
 );
+
+// Handle preflight requests explicitly
+app.options('*', cors());
 
 // Apply general rate limiting using Redis-based persistent rate limiter
 app.use(generalRateLimiter);
