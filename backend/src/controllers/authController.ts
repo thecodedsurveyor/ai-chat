@@ -48,28 +48,27 @@ export const register = async (
 		const hashedPassword =
 			await PasswordUtils.hashPassword(password);
 
-		// Generate email verification token
-		const verificationToken =
-			generateEmailVerificationToken();
-		const hashedVerificationToken =
-			await hashEmailVerificationToken(
-				verificationToken
-			);
-		const verificationExpires =
-			generateEmailVerificationExpiration();
+		// DISABLED: Generate email verification token (will re-enable later)
+		// const verificationToken =
+		// 	generateEmailVerificationToken();
+		// const hashedVerificationToken =
+		// 	await hashEmailVerificationToken(
+		// 		verificationToken
+		// 	);
+		// const verificationExpires =
+		// 	generateEmailVerificationExpiration();
 
-		// Create user with email verification required
+		// Create user with email verification DISABLED (auto-verified)
 		const user = await prisma.user.create({
 			data: {
 				email,
 				password: hashedPassword,
 				firstName,
 				lastName,
-				isVerified: false, // User starts unverified
-				emailVerificationToken:
-					hashedVerificationToken,
-				emailVerificationExpires:
-					verificationExpires,
+				isVerified: true, // Auto-verify users for now
+				// DISABLED: Email verification fields
+				// emailVerificationToken: hashedVerificationToken,
+				// emailVerificationExpires: verificationExpires,
 			},
 			select: {
 				id: true,
@@ -82,29 +81,42 @@ export const register = async (
 			},
 		});
 
-		// Send email verification email (not welcome email yet)
-		setImmediate(() => {
-			emailService
-				.sendEmailVerification(
-					email,
-					firstName,
-					verificationToken
-				)
-				.catch((error) =>
-					console.error(
-						'Email verification failed:',
-						error
-					)
-				);
+		// DISABLED: Send email verification email (will re-enable later)
+		// setImmediate(() => {
+		// 	emailService
+		// 		.sendEmailVerification(
+		// 			email,
+		// 			firstName,
+		// 			verificationToken
+		// 		)
+		// 		.catch((error) =>
+		// 			console.error(
+		// 				'Email verification failed:',
+		// 				error
+		// 			)
+		// 		);
+		// });
+
+		// Generate JWT tokens immediately (auto-login)
+		const accessToken = JWTUtils.generateAccessToken({
+			userId: user.id,
+			email: user.email,
+		});
+
+		const refreshToken = JWTUtils.generateRefreshToken({
+			userId: user.id,
+			email: user.email,
 		});
 
 		res.status(201).json({
 			success: true,
 			message:
-				'Registration successful. Please check your email to verify your account.',
+				'Registration successful! You are now logged in.',
 			data: {
 				user,
-				requiresVerification: true,
+				accessToken,
+				refreshToken,
+				requiresVerification: false, // No verification needed
 			},
 		});
 	} catch (error) {
@@ -169,20 +181,20 @@ export const login = async (
 			return;
 		}
 
-		// Check if user is verified
-		if (!user.isVerified) {
-			res.status(403).json({
-				success: false,
-				message:
-					'Please verify your email before logging in',
-				error: 'Email not verified',
-				data: {
-					email: user.email,
-					requiresVerification: true,
-				},
-			});
-			return;
-		}
+		// DISABLED: Check if user is verified (will re-enable later)
+		// if (!user.isVerified) {
+		// 	res.status(403).json({
+		// 		success: false,
+		// 		message:
+		// 			'Please verify your email before logging in',
+		// 		error: 'Email not verified',
+		// 		data: {
+		// 			email: user.email,
+		// 			requiresVerification: true,
+		// 		},
+		// 	});
+		// 	return;
+		// }
 
 		// Generate JWT tokens
 		const accessToken = JWTUtils.generateAccessToken({
@@ -632,9 +644,6 @@ export const requestPasswordReset = async (
 	}
 };
 
-/**
- * Reset password using token
- */
 /**
  * Get email service status (for debugging)
  */
