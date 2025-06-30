@@ -6,8 +6,9 @@ import type {
 	FeatureFlag,
 	AdminAnalytics,
 } from '../types/admin';
+import { API_BASE_URL } from '../config';
 
-const API_BASE_URL = 'http://localhost:3001/api/admin';
+const ADMIN_API_BASE_URL = `${API_BASE_URL}/admin`;
 
 // Helper function to get auth headers
 const getAuthHeaders = () => {
@@ -79,7 +80,7 @@ class AdminService {
 		// Fallback to backend if hardcoded credentials don't match
 		try {
 			const response = await fetch(
-				`${API_BASE_URL}/login`,
+				`${ADMIN_API_BASE_URL}/login`,
 				{
 					method: 'POST',
 					headers: getAuthHeaders(),
@@ -148,7 +149,7 @@ class AdminService {
 	async getAllUsers(): Promise<UserAnalytics[]> {
 		try {
 			const response = await fetch(
-				`${API_BASE_URL}/users`,
+				`${ADMIN_API_BASE_URL}/users`,
 				{
 					method: 'GET',
 					headers: getAuthHeaders(),
@@ -287,7 +288,7 @@ class AdminService {
 	): Promise<boolean> {
 		try {
 			const response = await fetch(
-				`${API_BASE_URL}/users/${userId}/action`,
+				`${ADMIN_API_BASE_URL}/users/${userId}/action`,
 				{
 					method: 'POST',
 					headers: getAuthHeaders(),
@@ -310,7 +311,7 @@ class AdminService {
 	async getSystemHealth(): Promise<SystemHealth> {
 		try {
 			const response = await fetch(
-				`${API_BASE_URL}/health`,
+				`${ADMIN_API_BASE_URL}/health`,
 				{
 					method: 'GET',
 					headers: getAuthHeaders(),
@@ -400,7 +401,7 @@ class AdminService {
 	async getFeatureFlags(): Promise<FeatureFlag[]> {
 		try {
 			const response = await fetch(
-				`${API_BASE_URL}/flags`,
+				`${ADMIN_API_BASE_URL}/flags`,
 				{
 					method: 'GET',
 					headers: getAuthHeaders(),
@@ -474,7 +475,7 @@ class AdminService {
 	): Promise<boolean> {
 		try {
 			const response = await fetch(
-				`${API_BASE_URL}/flags/${flagId}`,
+				`${ADMIN_API_BASE_URL}/flags/${flagId}`,
 				{
 					method: 'PUT',
 					headers: {
@@ -502,7 +503,7 @@ class AdminService {
 	): Promise<boolean> {
 		try {
 			const response = await fetch(
-				`${API_BASE_URL}/flags/${flagId}`,
+				`${ADMIN_API_BASE_URL}/flags/${flagId}`,
 				{
 					method: 'DELETE',
 					headers: getAuthHeaders(),
@@ -528,7 +529,7 @@ class AdminService {
 	): Promise<boolean> {
 		try {
 			const response = await fetch(
-				`${API_BASE_URL}/flags`,
+				`${ADMIN_API_BASE_URL}/flags`,
 				{
 					method: 'POST',
 					headers: {
@@ -554,7 +555,7 @@ class AdminService {
 	async getAdminAnalytics(): Promise<AdminAnalytics> {
 		try {
 			const response = await fetch(
-				`${API_BASE_URL}/analytics`,
+				`${ADMIN_API_BASE_URL}/analytics`,
 				{
 					method: 'GET',
 					headers: getAuthHeaders(),

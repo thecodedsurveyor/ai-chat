@@ -1,7 +1,15 @@
 // API base URL for backend
 export const API_BASE_URL =
 	import.meta.env.VITE_API_BASE_URL ||
-	'http://localhost:3001/api';
+	'https://neuronflow-production.up.railway.app/api';
+
+// OpenRouter API key
+export const OPENROUTER_API_KEY =
+	import.meta.env.VITE_OPENROUTER_API_KEY || '';
+
+// App name
+export const APP_NAME =
+	import.meta.env.VITE_APP_NAME || 'NeuronFlow';
 
 // Chat model settings
 export const CHAT_MODELS = {

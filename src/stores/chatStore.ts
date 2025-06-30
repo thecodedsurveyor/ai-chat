@@ -91,6 +91,8 @@ interface ChatState {
 	// User management
 	clearAllData: () => void;
 	migrateGuestDataToUser: () => void;
+	loadChatsFromBackend: () => void;
+	loadMessagesForChat: (chatId: string) => void;
 }
 
 export const useChatStore = create<ChatState>()(
@@ -133,15 +135,9 @@ export const useChatStore = create<ChatState>()(
 					})),
 				setActiveChat: (chatId) => {
 					set({ activeChat: chatId });
-					// Load messages for the active chat
-					const state = get();
-					const chat = state.chats.find(
-						(c) => c.id === chatId
-					);
-					if (chat) {
-						set({
-							messages: chat.messages || [],
-						});
+					// Load messages for the active chat from backend
+					if (chatId) {
+						get().loadMessagesForChat(chatId);
 					} else {
 						set({ messages: [] });
 					}
@@ -279,10 +275,77 @@ export const useChatStore = create<ChatState>()(
 						isSearching: false,
 					}),
 
-				createNewChat: (
+				createNewChat: async (
 					initialMessage?: string
 				) => {
 					const state = get();
+
+					// Try to create chat in backend first
+					try {
+						const user = authService.getUser();
+						if (user) {
+							const { conversationService } =
+								await import(
+									'../services/conversationService'
+								);
+							const response =
+								await conversationService.createConversation(
+									`Chat ${
+										state.chats.length +
+										1
+									}`
+								);
+
+							if (
+								response.success &&
+								response.data?.conversation
+							) {
+								const backendChat =
+									response.data
+										.conversation;
+								const newChat: Chat = {
+									id: backendChat.id,
+									displayId:
+										backendChat.title,
+									messages: [],
+									createdAt:
+										backendChat.createdAt,
+									lastActivity:
+										backendChat.updatedAt,
+									totalMessages: 0,
+									isPinned:
+										backendChat.isPinned,
+								};
+
+								const updatedChats = [
+									newChat,
+									...state.chats,
+								];
+								set({
+									chats: updatedChats,
+									activeChat: newChat.id,
+									messages: [],
+								});
+
+								// Send initial message if provided
+								if (initialMessage) {
+									setTimeout(() => {
+										get().sendMessage(
+											initialMessage
+										);
+									}, 100);
+								}
+								return;
+							}
+						}
+					} catch (error) {
+						console.error(
+							'Failed to create chat in backend:',
+							error
+						);
+					}
+
+					// Fallback to local-only chat creation
 					const newChatId = `chat-${Date.now()}`;
 					const newChat: Chat = {
 						id: newChatId,
@@ -486,6 +549,39 @@ export const useChatStore = create<ChatState>()(
 							totalMessages:
 								finalMessages.length,
 						});
+
+						// Try to save both user and AI messages to backend
+						try {
+							const user =
+								authService.getUser();
+							if (user && state.activeChat) {
+								const {
+									conversationService,
+								} = await import(
+									'../services/conversationService'
+								);
+
+								// Save user message
+								await conversationService.addMessage(
+									state.activeChat,
+									'user',
+									text
+								);
+
+								// Save AI response
+								await conversationService.addMessage(
+									state.activeChat,
+									'assistant',
+									response
+								);
+							}
+						} catch (error) {
+							console.error(
+								'Failed to save messages to backend:',
+								error
+							);
+							// Messages are still saved locally, so we continue
+						}
 					} catch (error) {
 						// Handle error
 						const errorMessage: Message = {
@@ -656,10 +752,10 @@ export const useChatStore = create<ChatState>()(
 						messages: [],
 						chats: [],
 						activeChat: null,
+						isTyping: false,
 						searchResults: [],
 						isSearching: false,
 						activePersona: null,
-						modelConfig: DEFAULT_CONFIG,
 					});
 				},
 
@@ -705,6 +801,138 @@ export const useChatStore = create<ChatState>()(
 
 						// Clean up guest data
 						clearGuestDataOnAuth();
+					}
+				},
+
+				loadChatsFromBackend: async () => {
+					const user = authService.getUser();
+					if (!user) {
+						get().clearAllData();
+						return;
+					}
+
+					try {
+						const { conversationService } =
+							await import(
+								'../services/conversationService'
+							);
+						const response =
+							await conversationService.getConversations();
+
+						if (
+							response.success &&
+							response.data?.conversations
+						) {
+							const backendChats =
+								response.data.conversations.map(
+									(conv) => ({
+										id: conv.id,
+										displayId:
+											conv.title,
+										messages: [], // Will be loaded when chat is selected
+										createdAt:
+											conv.createdAt,
+										lastActivity:
+											conv.lastMessageAt ||
+											conv.updatedAt,
+										totalMessages:
+											conv.totalMessages,
+										isPinned:
+											conv.isPinned,
+									})
+								);
+
+							set({ chats: backendChats });
+
+							// Set active chat to the most recent one
+							if (backendChats.length > 0) {
+								const mostRecent =
+									backendChats.sort(
+										(a, b) =>
+											new Date(
+												b.lastActivity ||
+													b.createdAt
+											).getTime() -
+											new Date(
+												a.lastActivity ||
+													a.createdAt
+											).getTime()
+									)[0];
+								set({
+									activeChat:
+										mostRecent.id,
+								});
+
+								// Load messages for the active chat
+								await get().loadMessagesForChat(
+									mostRecent.id
+								);
+							}
+						}
+					} catch (error) {
+						console.error(
+							'Failed to load chats from backend:',
+							error
+						);
+					}
+				},
+
+				loadMessagesForChat: async (
+					chatId: string
+				) => {
+					const user = authService.getUser();
+					if (!user || !chatId) {
+						set({ messages: [] });
+						return;
+					}
+
+					try {
+						const { conversationService } =
+							await import(
+								'../services/conversationService'
+							);
+						const response =
+							await conversationService.getMessages(
+								chatId
+							);
+
+						if (
+							response.success &&
+							response.data?.messages
+						) {
+							const backendMessages =
+								response.data.messages.map(
+									(msg) => ({
+										id: msg.id,
+										type:
+											msg.role ===
+											'user'
+												? ('prompt' as const)
+												: ('response' as const),
+										text: msg.content,
+										timestamp: new Date(
+											msg.createdAt
+										).toLocaleTimeString(
+											[],
+											{
+												hour: '2-digit',
+												minute: '2-digit',
+											}
+										),
+										status: 'delivered' as const,
+									})
+								);
+
+							set({
+								messages: backendMessages,
+							});
+						}
+					} catch (error) {
+						console.error(
+							'Failed to load messages from backend:',
+							error
+						);
+						set({ messages: [] });
 					}
 				},
 			}),

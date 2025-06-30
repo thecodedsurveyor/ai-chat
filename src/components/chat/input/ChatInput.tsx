@@ -130,25 +130,10 @@ const ChatInput: React.FC<ChatInputProps> = (props) => {
 			updateInputValue({
 				target: { value: text },
 			} as React.ChangeEvent<HTMLInputElement>);
-			// Auto-send the message after voice input
-			setTimeout(() => {
-				if (text.trim()) {
-					if (chats.length === 0) {
-						createNewChat(text);
-					} else {
-						sendMessage(text);
-					}
-					clearInput();
-				}
-			}, 100);
+			// Don't auto-send - let user review and send manually
+			// This prevents voice recognition from auto-starting after sending
 		},
-		[
-			chats.length,
-			createNewChat,
-			sendMessage,
-			updateInputValue,
-			clearInput,
-		]
+		[updateInputValue]
 	);
 
 	const handleVoiceCommand = useCallback(() => {

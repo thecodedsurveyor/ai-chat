@@ -120,6 +120,9 @@ class AuthService {
 
 				// Migrate guest data to authenticated user
 				this.migrateGuestDataToUser();
+
+				// Load user's chats from backend
+				await this.loadUserChats();
 			}
 
 			return result;
@@ -171,6 +174,9 @@ class AuthService {
 
 				// Migrate guest data to authenticated user
 				this.migrateGuestDataToUser();
+
+				// Load user's chats from backend
+				await this.loadUserChats();
 			}
 
 			return result;
@@ -261,12 +267,12 @@ class AuthService {
 			console.error('Logout API call failed:', error);
 			// Continue with local cleanup even if API call fails
 		} finally {
+			// Get current user before clearing to clean up their data
+			const currentUser = this.getUser();
+
 			// Clear all authentication data
 			this.token = null;
 			this.refreshToken = null;
-
-			// Get current user before clearing to clean up their data
-			const currentUser = this.getUser();
 
 			// Clear authentication tokens and user data
 			localStorage.removeItem('authToken');
@@ -292,8 +298,16 @@ class AuthService {
 				globalWindow.clearChatData();
 			}
 
+			// Force clear chat state immediately
+			this.forceClearChatState();
+
 			// Trigger storage event to notify other components
 			window.dispatchEvent(new Event('storage'));
+
+			// Trigger a custom event for immediate chat clearing
+			window.dispatchEvent(
+				new CustomEvent('userLogout')
+			);
 		}
 	}
 
@@ -841,6 +855,9 @@ class AuthService {
 
 				// Migrate guest data to authenticated user
 				this.migrateGuestDataToUser();
+
+				// Load user's chats from backend
+				await this.loadUserChats();
 			}
 
 			return result;
@@ -942,6 +959,56 @@ class AuthService {
 		}
 
 		return response;
+	}
+
+	/**
+	 * Load user's chats from backend after successful authentication
+	 */
+	private async loadUserChats(): Promise<void> {
+		try {
+			// Import chat store dynamically to load user's chats
+			const { useChatStore } = await import(
+				'../stores/chatStore'
+			);
+			const chatStore = useChatStore.getState();
+			if (chatStore.loadChatsFromBackend) {
+				await chatStore.loadChatsFromBackend();
+			}
+		} catch (error) {
+			console.error(
+				'Failed to load user chats:',
+				error
+			);
+		}
+	}
+
+	/**
+	 * Force clear chat state immediately
+	 */
+	private forceClearChatState(): void {
+		// Clear any chat-related state from Zustand stores
+		try {
+			// Import chat store dynamically to force clear state
+			import('../stores/chatStore')
+				.then(({ useChatStore }) => {
+					const chatStore =
+						useChatStore.getState();
+					if (chatStore.clearAllData) {
+						chatStore.clearAllData();
+					}
+				})
+				.catch((error) => {
+					console.error(
+						'Failed to clear chat store:',
+						error
+					);
+				});
+		} catch (error) {
+			console.error(
+				'Error clearing chat state:',
+				error
+			);
+		}
 	}
 }
 

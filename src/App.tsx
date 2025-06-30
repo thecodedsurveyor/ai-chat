@@ -1,7 +1,9 @@
+import React, { useEffect } from 'react';
 import {
 	BrowserRouter as Router,
 	Routes,
 	Route,
+	Navigate,
 } from 'react-router-dom';
 import {
 	QueryClient,
@@ -40,9 +42,10 @@ import ToastContainer from './components/ui/ToastContainer';
 import ScrollToTop from './components/ui/ScrollToTop';
 import BackToTop from './components/ui/BackToTop';
 import { useChats } from './stores/chatStore';
-import AdminDashboard from './components/admin/AdminDashboard';
-import { useEffect } from 'react';
-import SessionManager from './utils/sessionManager';
+import AdminAuth from './components/admin/AdminAuth';
+import { authService } from './services/authService';
+import { useChatStore } from './stores/chatStore';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 const queryClient = new QueryClient();
 
@@ -58,9 +61,26 @@ const AnalyticsPageWrapper = () => {
 };
 
 const App = () => {
-	// Initialize session monitoring when app starts
+	// Load user chats on app start if user is already authenticated
 	useEffect(() => {
-		SessionManager.initSessionMonitoring();
+		const loadUserChatsOnStart = async () => {
+			if (authService.isAuthenticated()) {
+				try {
+					const chatStore =
+						useChatStore.getState();
+					if (chatStore.loadChatsFromBackend) {
+						await chatStore.loadChatsFromBackend();
+					}
+				} catch (error) {
+					console.error(
+						'Failed to load user chats on app start:',
+						error
+					);
+				}
+			}
+		};
+
+		loadUserChatsOnStart();
 	}, []);
 
 	return (
@@ -81,7 +101,11 @@ const App = () => {
 								<Route
 									path='/profile'
 									element={
-										<ProfilePage />
+										<ProtectedRoute>
+											<PageWrapper>
+												<ProfilePage />
+											</PageWrapper>
+										</ProtectedRoute>
 									}
 								/>
 
@@ -89,7 +113,11 @@ const App = () => {
 								<Route
 									path='/settings'
 									element={
-										<SettingsPage />
+										<ProtectedRoute>
+											<PageWrapper>
+												<SettingsPage />
+											</PageWrapper>
+										</ProtectedRoute>
 									}
 								/>
 
@@ -97,7 +125,9 @@ const App = () => {
 								<Route
 									path='/reset-password'
 									element={
-										<ResetPasswordPage />
+										<PageWrapper>
+											<ResetPasswordPage />
+										</PageWrapper>
 									}
 								/>
 
@@ -105,7 +135,9 @@ const App = () => {
 								<Route
 									path='/verify-email'
 									element={
-										<EmailVerificationPage />
+										<PageWrapper>
+											<EmailVerificationPage />
+										</PageWrapper>
 									}
 								/>
 
@@ -178,19 +210,30 @@ const App = () => {
 								<Route
 									path='/analytics'
 									element={
-										<AnalyticsPageWrapper />
+										<ProtectedRoute>
+											<PageWrapper>
+												<AnalyticsPageWrapper />
+											</PageWrapper>
+										</ProtectedRoute>
 									}
 								/>
 								{/* Admin Dashboard route */}
 								<Route
 									path='/admin'
 									element={
-										<AdminDashboard
-											isVisible={true}
-											onClose={() =>
-												window.history.back()
-											}
-										/>
+										<PageWrapper>
+											<AdminAuth
+												onLoginSuccess={(
+													admin
+												) => {
+													console.log(
+														'Admin logged in:',
+														admin
+													);
+													// Handle admin login success
+												}}
+											/>
+										</PageWrapper>
 									}
 								/>
 								{/* New footer pages */}
@@ -281,6 +324,16 @@ const App = () => {
 											<Footer />
 											<BackToTop />
 										</PageWrapper>
+									}
+								/>
+								{/* Fallback route */}
+								<Route
+									path='*'
+									element={
+										<Navigate
+											to='/'
+											replace
+										/>
 									}
 								/>
 							</Routes>

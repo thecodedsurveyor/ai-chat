@@ -97,7 +97,7 @@ export const ChatProvider = ({
 		const handleStorageChange = () => {
 			const currentUser = authService.getUser();
 			if (!currentUser) {
-				// User logged out - clear all state
+				// User logged out - clear all state immediately
 				setChats([]);
 				setActiveChat('');
 				setMessages([]);
@@ -106,10 +106,23 @@ export const ChatProvider = ({
 			}
 		};
 
+		const handleUserLogout = () => {
+			// Force clear all state immediately when user logs out
+			setChats([]);
+			setActiveChat('');
+			setMessages([]);
+			setSearchResults([]);
+			setIsSearching(false);
+		};
+
 		// Listen for auth changes
 		window.addEventListener(
 			'storage',
 			handleStorageChange
+		);
+		window.addEventListener(
+			'userLogout',
+			handleUserLogout
 		);
 
 		return () => {
@@ -117,68 +130,182 @@ export const ChatProvider = ({
 				'storage',
 				handleStorageChange
 			);
+			window.removeEventListener(
+				'userLogout',
+				handleUserLogout
+			);
 		};
 	}, []);
 
-	// Load chats from user-specific localStorage on mount
+	// Load chats from backend when user changes or on mount
 	useEffect(() => {
-		const user = authService.getUser();
-		if (!user) {
-			// No user logged in - clear everything
-			setChats([]);
-			setActiveChat('');
-			setMessages([]);
-			return;
-		}
+		const loadUserChats = async () => {
+			const user = authService.getUser();
+			if (!user) {
+				// No user logged in - clear everything
+				setChats([]);
+				setActiveChat('');
+				setMessages([]);
+				return;
+			}
 
-		const userChatsKey = getUserStorageKey('chats');
-		const savedChats =
-			localStorage.getItem(userChatsKey);
-		if (savedChats) {
+			// Try to load chats from backend first
 			try {
-				const parsedChats = JSON.parse(savedChats);
-				setChats(parsedChats);
-				if (parsedChats.length > 0) {
-					setActiveChat(parsedChats[0].id);
+				const { conversationService } =
+					await import(
+						'../services/conversationService'
+					);
+				const response =
+					await conversationService.getConversations();
+
+				if (
+					response.success &&
+					response.data?.conversations
+				) {
+					const backendChats =
+						response.data.conversations.map(
+							(conv) => ({
+								id: conv.id,
+								displayId: conv.title,
+								messages: [], // Will be loaded when chat is selected
+								createdAt: conv.createdAt,
+								lastActivity:
+									conv.lastMessageAt ||
+									conv.updatedAt,
+								totalMessages:
+									conv.totalMessages,
+								isPinned: conv.isPinned,
+							})
+						);
+
+					setChats(backendChats);
+
+					// Set active chat to the most recent one
+					if (backendChats.length > 0) {
+						const mostRecent =
+							backendChats.sort(
+								(a, b) =>
+									new Date(
+										b.lastActivity ||
+											b.createdAt
+									).getTime() -
+									new Date(
+										a.lastActivity ||
+											a.createdAt
+									).getTime()
+							)[0];
+						setActiveChat(mostRecent.id);
+					}
+					return;
 				}
 			} catch (error) {
 				console.error(
-					'Error parsing saved chats:',
+					'Failed to load chats from backend:',
 					error
 				);
-				// Clear corrupted data
-				localStorage.removeItem(userChatsKey);
-				setChats([]);
 			}
-		}
+
+			// Fallback to localStorage if backend fails
+			const userChatsKey = getUserStorageKey('chats');
+			const savedChats =
+				localStorage.getItem(userChatsKey);
+			if (savedChats) {
+				try {
+					const parsedChats =
+						JSON.parse(savedChats);
+					setChats(parsedChats);
+					if (parsedChats.length > 0) {
+						setActiveChat(parsedChats[0].id);
+					}
+				} catch (error) {
+					console.error(
+						'Error parsing saved chats:',
+						error
+					);
+					localStorage.removeItem(userChatsKey);
+					setChats([]);
+				}
+			}
+		};
+
+		loadUserChats();
 	}, []);
 
 	// Load messages when active chat changes
 	useEffect(() => {
-		const user = authService.getUser();
-		if (!user || !activeChat) {
-			setMessages([]);
-			return;
-		}
+		const loadChatMessages = async () => {
+			const user = authService.getUser();
+			if (!user || !activeChat) {
+				setMessages([]);
+				return;
+			}
 
-		const userChatKey = getUserStorageKey(activeChat);
-		const savedMessages =
-			localStorage.getItem(userChatKey);
-		if (savedMessages) {
+			// Try to load messages from backend first
 			try {
-				setMessages(JSON.parse(savedMessages));
+				const { conversationService } =
+					await import(
+						'../services/conversationService'
+					);
+				const response =
+					await conversationService.getMessages(
+						activeChat
+					);
+
+				if (
+					response.success &&
+					response.data?.messages
+				) {
+					const backendMessages =
+						response.data.messages.map(
+							(msg) => ({
+								id: msg.id,
+								type:
+									msg.role === 'user'
+										? ('prompt' as const)
+										: ('response' as const),
+								text: msg.content,
+								timestamp: new Date(
+									msg.createdAt
+								).toLocaleTimeString([], {
+									hour: '2-digit',
+									minute: '2-digit',
+								}),
+								status: 'delivered' as const,
+							})
+						);
+
+					setMessages(backendMessages);
+					return;
+				}
 			} catch (error) {
 				console.error(
-					'Error parsing saved messages:',
+					'Failed to load messages from backend:',
 					error
 				);
-				// Clear corrupted data
-				localStorage.removeItem(userChatKey);
+			}
+
+			// Fallback to localStorage if backend fails
+			const userChatKey =
+				getUserStorageKey(activeChat);
+			const savedMessages =
+				localStorage.getItem(userChatKey);
+			if (savedMessages) {
+				try {
+					setMessages(JSON.parse(savedMessages));
+				} catch (error) {
+					console.error(
+						'Error parsing saved messages:',
+						error
+					);
+					localStorage.removeItem(userChatKey);
+					setMessages([]);
+				}
+			} else {
 				setMessages([]);
 			}
-		} else {
-			setMessages([]);
-		}
+		};
+
+		loadChatMessages();
 	}, [activeChat]);
 
 	// Save chats to user-specific localStorage whenever they change
@@ -213,14 +340,88 @@ export const ChatProvider = ({
 		});
 	}, [chats]);
 
-	const addMessage = (message: Message) => {
+	const createNewChat = async () => {
+		const user = authService.getUser();
+		if (!user) return;
+
+		try {
+			// Try to create chat in backend first
+			const { conversationService } = await import(
+				'../services/conversationService'
+			);
+			const response =
+				await conversationService.createConversation(
+					`Chat ${chats.length + 1}`
+				);
+
+			if (
+				response.success &&
+				response.data?.conversation
+			) {
+				const backendChat =
+					response.data.conversation;
+				const newChat: Chat = {
+					id: backendChat.id,
+					displayId: backendChat.title,
+					messages: [],
+					createdAt: backendChat.createdAt,
+					lastActivity: backendChat.updatedAt,
+					totalMessages: 0,
+					isPinned: backendChat.isPinned,
+				};
+
+				const updatedChats = [newChat, ...chats];
+				setChats(updatedChats);
+				setActiveChat(newChat.id);
+				setMessages([]);
+
+				// Also save to localStorage as backup
+				const userChatsKey =
+					getUserStorageKey('chats');
+				localStorage.setItem(
+					userChatsKey,
+					JSON.stringify(updatedChats)
+				);
+				return;
+			}
+		} catch (error) {
+			console.error(
+				'Failed to create chat in backend:',
+				error
+			);
+		}
+
+		// Fallback to local-only chat creation
+		const newChat: Chat = {
+			id: `chat-${Date.now()}`,
+			displayId: `Chat ${chats.length + 1}`,
+			messages: [],
+			createdAt: new Date().toISOString(),
+			lastActivity: new Date().toISOString(),
+			totalMessages: 0,
+		};
+
+		const updatedChats = [newChat, ...chats];
+		setChats(updatedChats);
+		setActiveChat(newChat.id);
+		setMessages([]);
+
+		// Save to user-specific localStorage
+		const userChatsKey = getUserStorageKey('chats');
+		localStorage.setItem(
+			userChatsKey,
+			JSON.stringify(updatedChats)
+		);
+	};
+
+	const addMessage = async (message: Message) => {
 		const user = authService.getUser();
 		if (!user) return;
 
 		const newMessages = [...messages, message];
 		setMessages(newMessages);
 
-		// Save to user-specific localStorage
+		// Save to user-specific localStorage immediately
 		if (activeChat) {
 			const userChatKey =
 				getUserStorageKey(activeChat);
@@ -242,33 +443,28 @@ export const ChatProvider = ({
 					: chat
 			);
 			setChats(updatedChats);
+
+			// Try to save message to backend
+			try {
+				const { conversationService } =
+					await import(
+						'../services/conversationService'
+					);
+				await conversationService.addMessage(
+					activeChat,
+					message.type === 'prompt'
+						? 'user'
+						: 'assistant',
+					message.text
+				);
+			} catch (error) {
+				console.error(
+					'Failed to save message to backend:',
+					error
+				);
+				// Message is still saved locally, so we continue
+			}
 		}
-	};
-
-	const createNewChat = () => {
-		const user = authService.getUser();
-		if (!user) return;
-
-		const newChat: Chat = {
-			id: `chat-${Date.now()}`,
-			displayId: `Chat ${chats.length + 1}`,
-			messages: [],
-			createdAt: new Date().toISOString(),
-			lastActivity: new Date().toISOString(),
-			totalMessages: 0,
-		};
-
-		const updatedChats = [newChat, ...chats];
-		setChats(updatedChats);
-		setActiveChat(newChat.id);
-		setMessages([]);
-
-		// Save to user-specific localStorage
-		const userChatsKey = getUserStorageKey('chats');
-		localStorage.setItem(
-			userChatsKey,
-			JSON.stringify(updatedChats)
-		);
 	};
 
 	const deleteChat = (chatId: string) => {
@@ -317,31 +513,25 @@ export const ChatProvider = ({
 				try {
 					const chatMessages: Message[] =
 						JSON.parse(savedMessages);
-					chatMessages.forEach(
-						(message, index) => {
-							if (
-								message.text
-									.toLowerCase()
-									.includes(
-										query.toLowerCase()
-									)
-							) {
-								results.push({
-									type: 'message',
-									chat: chat,
-									message,
-									matchedText:
-										message.text
-											.substring(
-												0,
-												100
-											)
-											.trim(),
-									relevanceScore: 1,
-								});
-							}
+					chatMessages.forEach((message) => {
+						if (
+							message.text
+								.toLowerCase()
+								.includes(
+									query.toLowerCase()
+								)
+						) {
+							results.push({
+								type: 'message',
+								chat: chat,
+								message,
+								matchedText: message.text
+									.substring(0, 100)
+									.trim(),
+								relevanceScore: 1,
+							});
 						}
-					);
+					});
 				} catch (error) {
 					console.error(
 						'Error parsing messages for search:',
@@ -363,10 +553,18 @@ export const ChatProvider = ({
 	// Expose function to clear user data when logging out
 	React.useEffect(() => {
 		// Add a global function to clear user data on logout
-		(window as any).clearChatData = clearUserData;
+		(
+			window as unknown as {
+				clearChatData?: () => void;
+			}
+		).clearChatData = clearUserData;
 
 		return () => {
-			delete (window as any).clearChatData;
+			delete (
+				window as unknown as {
+					clearChatData?: () => void;
+				}
+			).clearChatData;
 		};
 	}, []);
 
