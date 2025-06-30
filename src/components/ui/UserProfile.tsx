@@ -224,7 +224,7 @@ const UserProfile: React.FC = () => {
 					<>
 						{/* Backdrop for mobile - prevents interaction with elements behind */}
 						<div
-							className='fixed inset-0 z-[10001] md:hidden'
+							className='fixed inset-0 z-40 md:hidden'
 							onClick={() => setIsOpen(false)}
 						/>
 						<motion.div
@@ -244,7 +244,7 @@ const UserProfile: React.FC = () => {
 								scale: 0.95,
 							}}
 							transition={{ duration: 0.2 }}
-							className={`absolute right-0 mt-3 w-72 rounded-xl border z-[10002] ${
+							className={`absolute right-0 mt-3 w-72 rounded-xl border z-50 ${
 								isDark
 									? 'bg-chat-secondary border-white/10 shadow-2xl'
 									: 'bg-white/98 backdrop-blur-md border-gray-300 shadow-2xl ring-1 ring-black/10'

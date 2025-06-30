@@ -162,7 +162,7 @@ const MessageActions = ({
 	// Delete confirmation overlay
 	if (showDeleteConfirm) {
 		return (
-			<div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4'>
+			<div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40 p-4'>
 				<div
 					className={`w-full max-w-md p-6 rounded-2xl shadow-2xl ${
 						isDark

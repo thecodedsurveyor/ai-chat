@@ -86,7 +86,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
 							<div
 								key={message.id || index}
 								className={cn(
-									'flex w-full relative group',
+									'flex w-full relative group z-0',
 									isUser
 										? 'justify-end'
 										: 'justify-start'
@@ -96,7 +96,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
 									{/* Message Bubble */}
 									<div
 										className={cn(
-											'rounded-3xl bg-gradient-to-r from-chat-orange to-chat-pink text-white px-3 py-2 md:px-4 md:py-3 shadow-lg border-2 border-white/20 relative',
+											'rounded-3xl bg-gradient-to-r from-chat-orange to-chat-pink text-white px-3 py-2 md:px-4 md:py-3 shadow-lg border-2 border-white/20 relative z-0',
 											isUser
 												? 'rounded-tr-none ml-auto'
 												: 'rounded-tl-none max-w-[85%] md:max-w-[80%]'
