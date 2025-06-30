@@ -244,10 +244,10 @@ const UserProfile: React.FC = () => {
 								scale: 0.95,
 							}}
 							transition={{ duration: 0.2 }}
-							className={`absolute right-0 mt-3 w-72 rounded-xl shadow-2xl border z-[10002] ${
+							className={`absolute right-0 mt-3 w-72 rounded-xl border z-[10002] ${
 								isDark
-									? 'bg-chat-secondary border-white/10'
-									: 'bg-white border-gray-200'
+									? 'bg-chat-secondary border-white/10 shadow-2xl'
+									: 'bg-white/98 backdrop-blur-md border-gray-300 shadow-2xl ring-1 ring-black/10'
 							}`}
 						>
 							{/* Enhanced User Info Header */}
