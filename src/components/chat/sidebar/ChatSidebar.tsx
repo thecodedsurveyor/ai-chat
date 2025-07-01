@@ -61,8 +61,10 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
 
 	// Event handlers
 	const handleCreateNewChat = () => createNewChat();
-	const handleChatSelect = (chatId: string) =>
+	const handleChatSelect = (chatId: string) => {
 		setActiveChat(chatId);
+		if (isMobile) closeChatList();
+	};
 	const handleChatDelete = (
 		e: React.MouseEvent,
 		chatId: string

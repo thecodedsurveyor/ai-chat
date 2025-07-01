@@ -19,6 +19,8 @@ const UserProfile: React.FC = () => {
 	const navigate = useNavigate();
 	const [isOpen, setIsOpen] = useState(false);
 	const [isHovered, setIsHovered] = useState(false);
+	const [avatarLoaded, setAvatarLoaded] = useState(false);
+	const [avatarError, setAvatarError] = useState(false);
 	const dropdownRef = useRef<HTMLDivElement>(null);
 
 	const user = authService.getUser();
@@ -47,6 +49,12 @@ const UserProfile: React.FC = () => {
 			);
 		};
 	}, []);
+
+	// Reset avatar loading state when user changes
+	useEffect(() => {
+		setAvatarLoaded(false);
+		setAvatarError(false);
+	}, [user?.avatar]);
 
 	const handleLogout = async () => {
 		try {
@@ -100,22 +108,8 @@ const UserProfile: React.FC = () => {
 				? 'w-12 h-12 text-base'
 				: 'w-14 h-14 text-lg';
 
-		if (user.avatar) {
-			return (
-				<img
-					src={user.avatar}
-					alt={`${user.firstName} ${user.lastName}`}
-					className={`${sizeClasses} rounded-full object-cover border-2 border-white/20 shadow-lg`}
-					onError={(e) => {
-						// Hide the image and let the fallback div show
-						e.currentTarget.style.display =
-							'none';
-					}}
-				/>
-			);
-		}
-
-		return (
+		// Always show initials first as fallback
+		const InitialsAvatar = (
 			<div
 				className={`${sizeClasses} rounded-full flex items-center justify-center font-semibold shadow-lg ${
 					isDark
@@ -124,6 +118,35 @@ const UserProfile: React.FC = () => {
 				}`}
 			>
 				{getInitials(user.firstName, user.lastName)}
+			</div>
+		);
+
+		// If no avatar URL or there was an error, show initials
+		if (!user.avatar || avatarError) {
+			return InitialsAvatar;
+		}
+
+		return (
+			<div className='relative'>
+				{/* Show initials immediately while image loads */}
+				{!avatarLoaded && InitialsAvatar}
+
+				{/* Load avatar image with better error handling */}
+				<img
+					src={user.avatar}
+					alt={`${user.firstName} ${user.lastName}`}
+					className={`${sizeClasses} rounded-full object-cover border-2 border-white/20 shadow-lg transition-opacity duration-200 ${
+						avatarLoaded
+							? 'opacity-100'
+							: 'opacity-0 absolute inset-0'
+					}`}
+					onLoad={() => setAvatarLoaded(true)}
+					onError={() => {
+						setAvatarError(true);
+						setAvatarLoaded(false);
+					}}
+					loading='eager'
+				/>
 			</div>
 		);
 	};

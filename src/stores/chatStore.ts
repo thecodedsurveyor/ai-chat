@@ -812,6 +812,9 @@ export const useChatStore = create<ChatState>()(
 					}
 
 					try {
+						// Don't clear existing chats - show them immediately while loading
+						const currentState = get();
+
 						const { conversationService } =
 							await import(
 								'../services/conversationService'
@@ -844,8 +847,11 @@ export const useChatStore = create<ChatState>()(
 
 							set({ chats: backendChats });
 
-							// Set active chat to the most recent one
-							if (backendChats.length > 0) {
+							// Only auto-select if no chat is currently active
+							if (
+								backendChats.length > 0 &&
+								!currentState.activeChat
+							) {
 								const mostRecent =
 									backendChats.sort(
 										(a, b) =>
@@ -874,6 +880,7 @@ export const useChatStore = create<ChatState>()(
 							'Failed to load chats from backend:',
 							error
 						);
+						// Don't clear existing chats on error - keep what user has
 					}
 				},
 

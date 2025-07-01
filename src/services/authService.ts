@@ -121,8 +121,8 @@ class AuthService {
 				// Migrate guest data to authenticated user
 				this.migrateGuestDataToUser();
 
-				// Load user's chats from backend
-				await this.loadUserChats();
+				// Load user's chats from backend (non-blocking)
+				this.loadUserChats();
 			}
 
 			return result;
@@ -175,8 +175,8 @@ class AuthService {
 				// Migrate guest data to authenticated user
 				this.migrateGuestDataToUser();
 
-				// Load user's chats from backend
-				await this.loadUserChats();
+				// Load user's chats from backend (non-blocking)
+				this.loadUserChats();
 			}
 
 			return result;
@@ -856,8 +856,8 @@ class AuthService {
 				// Migrate guest data to authenticated user
 				this.migrateGuestDataToUser();
 
-				// Load user's chats from backend
-				await this.loadUserChats();
+				// Load user's chats from backend (non-blocking)
+				this.loadUserChats();
 			}
 
 			return result;
