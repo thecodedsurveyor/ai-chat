@@ -22,6 +22,9 @@ export default defineConfig({
 				'favicon.ico',
 				'robots.txt',
 				'apple-touch-icon.png',
+				'icon-192x192.png',
+				'icon-512x512.png',
+				'icon-512x512-mask.png',
 			],
 			manifest: {
 				name: 'NeuronFlow',
@@ -29,6 +32,11 @@ export default defineConfig({
 				description:
 					'AI-powered conversational platform with voice, offline mode, and more',
 				theme_color: '#5E35B1',
+				background_color: '#1a1a1a',
+				display: 'standalone',
+				start_url: '/',
+				scope: '/',
+				orientation: 'portrait-primary',
 				icons: [
 					{
 						src: 'icon-192x192.png',
@@ -53,11 +61,45 @@ export default defineConfig({
 				cleanupOutdatedCaches: true,
 				maximumFileSizeToCacheInBytes:
 					5 * 1024 * 1024, // 5MB
-				// Skip chrome-extension URLs
+				navigateFallback: '/',
 				navigateFallbackDenylist: [
 					/^chrome-extension:\/\//,
+					/api\//,
 				],
+				// Precache critical app shell and landing page
+				globPatterns: [
+					'**/*.{js,css,html,ico,png,svg,woff2}',
+				],
+				// Cache strategy for different resource types
 				runtimeCaching: [
+					// Landing page and app shell - Cache First
+					{
+						urlPattern: /^https?:\/\/[^/]+\/?$/,
+						handler: 'CacheFirst',
+						options: {
+							cacheName: 'app-shell',
+							expiration: {
+								maxEntries: 5,
+								maxAgeSeconds:
+									60 * 60 * 24 * 7, // 1 week
+							},
+						},
+					},
+					// Static assets - Cache First with long expiration
+					{
+						urlPattern:
+							/\.(?:js|css|woff2?|png|jpg|jpeg|svg|ico)$/,
+						handler: 'CacheFirst',
+						options: {
+							cacheName: 'static-assets',
+							expiration: {
+								maxEntries: 100,
+								maxAgeSeconds:
+									60 * 60 * 24 * 30, // 30 days
+							},
+						},
+					},
+					// Google Fonts
 					{
 						urlPattern:
 							/^https:\/\/fonts\.googleapis\.com/,
@@ -86,9 +128,29 @@ export default defineConfig({
 							},
 						},
 					},
+					// User data APIs - Network First with cache fallback
 					{
 						urlPattern:
-							/^https:\/\/api\.(openai|anthropic)\.com/,
+							/\/api\/(auth\/profile|conversations|messages)/,
+						handler: 'NetworkFirst',
+						options: {
+							cacheName: 'user-data',
+							expiration: {
+								maxEntries: 50,
+								maxAgeSeconds: 60 * 60 * 24, // 1 day
+							},
+							networkTimeoutSeconds: 3,
+						},
+					},
+					// AI APIs - Network Only (require internet)
+					{
+						urlPattern:
+							/\/api\/(ai|chat|openrouter)/,
+						handler: 'NetworkOnly',
+					},
+					{
+						urlPattern:
+							/^https:\/\/openrouter\.ai/,
 						handler: 'NetworkOnly',
 					},
 				],

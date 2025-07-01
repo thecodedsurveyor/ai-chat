@@ -41,6 +41,8 @@ import { ToastProvider } from './contexts/ToastContext';
 import ToastContainer from './components/ui/ToastContainer';
 import ScrollToTop from './components/ui/ScrollToTop';
 import BackToTop from './components/ui/BackToTop';
+import OfflineIndicator from './components/ui/OfflineIndicator';
+import PWAInstallPrompt from './components/ui/PWAInstallPrompt';
 import { useChats } from './stores/chatStore';
 import AdminAuth from './components/admin/AdminAuth';
 import { authService } from './services/authService';
@@ -88,6 +90,8 @@ const App = () => {
 			<ThemeProvider>
 				<ToastProvider>
 					<ToastContainer>
+						<OfflineIndicator />
+						<PWAInstallPrompt />
 						<Router>
 							<ScrollToTop />
 							<Routes>
