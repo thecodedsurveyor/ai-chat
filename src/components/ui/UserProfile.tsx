@@ -11,6 +11,7 @@ import {
 import { useTheme } from '../../contexts/ThemeContext';
 import { useToast } from '../../contexts/ToastContext';
 import { authService } from '../../services/authService';
+import { createPortal } from 'react-dom';
 
 const UserProfile: React.FC = () => {
 	const { isDark } = useTheme();
@@ -222,214 +223,247 @@ const UserProfile: React.FC = () => {
 			<AnimatePresence>
 				{isOpen && (
 					<>
-						{/* Backdrop for mobile - prevents interaction with elements behind */}
-						<div
-							className='fixed inset-0 z-40 md:hidden'
-							onClick={() => setIsOpen(false)}
-						/>
-						<motion.div
-							initial={{
-								opacity: 0,
-								y: -10,
-								scale: 0.95,
-							}}
-							animate={{
-								opacity: 1,
-								y: 0,
-								scale: 1,
-							}}
-							exit={{
-								opacity: 0,
-								y: -10,
-								scale: 0.95,
-							}}
-							transition={{ duration: 0.2 }}
-							className={`absolute right-0 mt-3 w-72 rounded-xl border z-50 ${
-								isDark
-									? 'bg-chat-secondary border-white/10 shadow-2xl'
-									: 'bg-white/98 backdrop-blur-md border-gray-300 shadow-2xl ring-1 ring-black/10'
-							}`}
-						>
-							{/* Enhanced User Info Header */}
-							<div
-								className={`px-4 py-4 border-b ${
-									isDark
-										? 'border-white/10'
-										: 'border-gray-100'
-								}`}
-							>
-								<div className='flex items-center gap-3'>
-									{renderAvatar('large')}
-									<div className='flex-1'>
-										<div
-											className={`font-semibold text-base ${
-												isDark
-													? 'text-white'
-													: 'text-gray-800'
-											}`}
-										>
-											{user.firstName}{' '}
-											{user.lastName}
-										</div>
-										<div
-											className={`text-sm opacity-75 ${
-												isDark
-													? 'text-chat-accent'
-													: 'text-gray-600'
-											}`}
-										>
-											{user.email}
-										</div>
-									</div>
-								</div>
-							</div>
-
-							{/* Enhanced Menu Items */}
-							<div className='py-2'>
-								<button
-									onClick={handleProfile}
-									className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all duration-200 hover:scale-[1.02] ${
-										isDark
-											? 'hover:bg-white/5 text-gray-300 hover:text-white'
-											: 'hover:bg-gray-50 text-gray-700 hover:text-gray-900'
-									}`}
-								>
-									<div
-										className={`p-2 rounded-lg ${
-											isDark
-												? 'bg-blue-500/20 text-blue-400'
-												: 'bg-blue-50 text-blue-600'
-										}`}
-									>
-										<User className='w-5 h-5' />
-									</div>
-									<div>
-										<div className='font-medium'>
-											My Profile
-										</div>
-										<div
-											className={`text-xs opacity-75 ${
-												isDark
-													? 'text-gray-400'
-													: 'text-gray-500'
-											}`}
-										>
-											Manage your
-											account
-										</div>
-									</div>
-								</button>
-
-								<button
-									onClick={handleSettings}
-									className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all duration-200 hover:scale-[1.02] ${
-										isDark
-											? 'hover:bg-white/5 text-gray-300 hover:text-white'
-											: 'hover:bg-gray-50 text-gray-700 hover:text-gray-900'
-									}`}
-								>
-									<div
-										className={`p-2 rounded-lg ${
-											isDark
-												? 'bg-purple-500/20 text-purple-400'
-												: 'bg-purple-50 text-purple-600'
-										}`}
-									>
-										<Settings className='w-5 h-5' />
-									</div>
-									<div>
-										<div className='font-medium'>
-											Settings
-										</div>
-										<div
-											className={`text-xs opacity-75 ${
-												isDark
-													? 'text-gray-400'
-													: 'text-gray-500'
-											}`}
-										>
-											App preferences
-										</div>
-									</div>
-								</button>
-
-								<button
-									onClick={
-										handleAnalytics
-									}
-									className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all duration-200 hover:scale-[1.02] ${
-										isDark
-											? 'hover:bg-white/5 text-gray-300 hover:text-white'
-											: 'hover:bg-gray-50 text-gray-700 hover:text-gray-900'
-									}`}
-								>
-									<div
-										className={`p-2 rounded-lg ${
-											isDark
-												? 'bg-green-500/20 text-green-400'
-												: 'bg-green-50 text-green-600'
-										}`}
-									>
-										<BarChart3 className='w-5 h-5' />
-									</div>
-									<div>
-										<div className='font-medium'>
-											Analytics
-										</div>
-										<div
-											className={`text-xs opacity-75 ${
-												isDark
-													? 'text-gray-400'
-													: 'text-gray-500'
-											}`}
-										>
-											Usage insights
-										</div>
-									</div>
-								</button>
-
+						{/* Backdrop for mobile - prevents interaction with elements behind (via portal) */}
+						{typeof window !== 'undefined' &&
+							createPortal(
 								<div
-									className={`my-2 border-t ${
+									className='fixed inset-0 z-40 md:hidden'
+									onClick={() =>
+										setIsOpen(false)
+									}
+								/>,
+								document.body
+							)}
+						{/* Dropdown Menu via Portal */}
+						{typeof window !== 'undefined' &&
+							createPortal(
+								<motion.div
+									initial={{
+										opacity: 0,
+										y: -10,
+										scale: 0.95,
+									}}
+									animate={{
+										opacity: 1,
+										y: 0,
+										scale: 1,
+									}}
+									exit={{
+										opacity: 0,
+										y: -10,
+										scale: 0.95,
+									}}
+									transition={{
+										duration: 0.2,
+									}}
+									className={`fixed right-4 top-20 w-72 rounded-xl border z-50 ${
 										isDark
-											? 'border-white/10'
-											: 'border-gray-100'
+											? 'bg-chat-secondary border-white/10 shadow-2xl'
+											: 'bg-white border-gray-300 shadow-2xl ring-1 ring-black/10'
 									}`}
-								/>
-
-								<button
-									onClick={handleLogout}
-									className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all duration-200 hover:scale-[1.02] ${
-										isDark
-											? 'hover:bg-red-500/10 text-red-400 hover:text-red-300'
-											: 'hover:bg-red-50 text-red-600 hover:text-red-700'
-									}`}
+									style={{}}
 								>
+									{/* Enhanced User Info Header */}
 									<div
-										className={`p-2 rounded-lg ${
+										className={`px-4 py-4 border-b ${
 											isDark
-												? 'bg-red-500/20 text-red-400'
-												: 'bg-red-50 text-red-600'
+												? 'border-white/10'
+												: 'border-gray-100'
 										}`}
 									>
-										<LogOut className='w-5 h-5' />
-									</div>
-									<div>
-										<div className='font-medium'>
-											Sign Out
+										<div className='flex items-center gap-3'>
+											{renderAvatar(
+												'large'
+											)}
+											<div className='flex-1'>
+												<div
+													className={`font-semibold text-base ${
+														isDark
+															? 'text-white'
+															: 'text-gray-800'
+													}`}
+												>
+													{
+														user.firstName
+													}{' '}
+													{
+														user.lastName
+													}
+												</div>
+												<div
+													className={`text-sm opacity-75 ${
+														isDark
+															? 'text-chat-accent'
+															: 'text-gray-600'
+													}`}
+												>
+													{
+														user.email
+													}
+												</div>
+											</div>
 										</div>
-										<div
-											className={`text-xs opacity-75 ${
+									</div>
+
+									{/* Enhanced Menu Items */}
+									<div className='py-2'>
+										<button
+											onClick={
+												handleProfile
+											}
+											className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all duration-200 hover:scale-[1.02] ${
 												isDark
-													? 'text-gray-400'
-													: 'text-gray-500'
+													? 'hover:bg-white/5 text-gray-300 hover:text-white'
+													: 'hover:bg-gray-50 text-gray-700 hover:text-gray-900'
 											}`}
 										>
-											End your session
-										</div>
+											<div
+												className={`p-2 rounded-lg ${
+													isDark
+														? 'bg-blue-500/20 text-blue-400'
+														: 'bg-blue-50 text-blue-600'
+												}`}
+											>
+												<User className='w-5 h-5' />
+											</div>
+											<div>
+												<div className='font-medium'>
+													My
+													Profile
+												</div>
+												<div
+													className={`text-xs opacity-75 ${
+														isDark
+															? 'text-gray-400'
+															: 'text-gray-500'
+													}`}
+												>
+													Manage
+													your
+													account
+												</div>
+											</div>
+										</button>
+
+										<button
+											onClick={
+												handleSettings
+											}
+											className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all duration-200 hover:scale-[1.02] ${
+												isDark
+													? 'hover:bg-white/5 text-gray-300 hover:text-white'
+													: 'hover:bg-gray-50 text-gray-700 hover:text-gray-900'
+											}`}
+										>
+											<div
+												className={`p-2 rounded-lg ${
+													isDark
+														? 'bg-purple-500/20 text-purple-400'
+														: 'bg-purple-50 text-purple-600'
+												}`}
+											>
+												<Settings className='w-5 h-5' />
+											</div>
+											<div>
+												<div className='font-medium'>
+													Settings
+												</div>
+												<div
+													className={`text-xs opacity-75 ${
+														isDark
+															? 'text-gray-400'
+															: 'text-gray-500'
+													}`}
+												>
+													App
+													preferences
+												</div>
+											</div>
+										</button>
+
+										<button
+											onClick={
+												handleAnalytics
+											}
+											className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all duration-200 hover:scale-[1.02] ${
+												isDark
+													? 'hover:bg-white/5 text-gray-300 hover:text-white'
+													: 'hover:bg-gray-50 text-gray-700 hover:text-gray-900'
+											}`}
+										>
+											<div
+												className={`p-2 rounded-lg ${
+													isDark
+														? 'bg-green-500/20 text-green-400'
+														: 'bg-green-50 text-green-600'
+												}`}
+											>
+												<BarChart3 className='w-5 h-5' />
+											</div>
+											<div>
+												<div className='font-medium'>
+													Analytics
+												</div>
+												<div
+													className={`text-xs opacity-75 ${
+														isDark
+															? 'text-gray-400'
+															: 'text-gray-500'
+													}`}
+												>
+													Usage
+													insights
+												</div>
+											</div>
+										</button>
+
+										<div
+											className={`my-2 border-t ${
+												isDark
+													? 'border-white/10'
+													: 'border-gray-100'
+											}`}
+										/>
+
+										<button
+											onClick={
+												handleLogout
+											}
+											className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all duration-200 hover:scale-[1.02] ${
+												isDark
+													? 'hover:bg-red-500/10 text-red-400 hover:text-red-300'
+													: 'hover:bg-red-50 text-red-600 hover:text-red-700'
+											}`}
+										>
+											<div
+												className={`p-2 rounded-lg ${
+													isDark
+														? 'bg-red-500/20 text-red-400'
+														: 'bg-red-50 text-red-600'
+												}`}
+											>
+												<LogOut className='w-5 h-5' />
+											</div>
+											<div>
+												<div className='font-medium'>
+													Sign Out
+												</div>
+												<div
+													className={`text-xs opacity-75 ${
+														isDark
+															? 'text-gray-400'
+															: 'text-gray-500'
+													}`}
+												>
+													End your
+													session
+												</div>
+											</div>
+										</button>
 									</div>
-								</button>
-							</div>
-						</motion.div>
+								</motion.div>,
+								document.body
+							)}
 					</>
 				)}
 			</AnimatePresence>
