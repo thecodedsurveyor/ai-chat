@@ -6,7 +6,7 @@ import {
 	ArrowRight,
 	Search,
 	Users,
-	MessageCircle,
+	MessagesSquare,
 	Shield,
 	Globe,
 	ChevronDown,
@@ -17,10 +17,6 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
-import { lazy, Suspense } from 'react';
-
-// Lazy load heavy components
-const WaterEffect = lazy(() => import('../ui/WaterEffect'));
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -34,7 +30,12 @@ const LandingPage = () => {
 		number | null
 	>(null);
 	const [faqSearch, setFaqSearch] = useState('');
-	const [heroLoaded, setHeroLoaded] = useState(false);
+	const [mousePosition, setMousePosition] = useState({
+		x: 0,
+		y: 0,
+	});
+	const [mouseVelocity, setMouseVelocity] = useState(0);
+	const lastMousePos = useRef({ x: 0, y: 0 });
 
 	const handleTryAI = () => {
 		navigate('/chat');
@@ -115,43 +116,43 @@ const LandingPage = () => {
 		};
 	}, []);
 
-	// Optimized mouse tracking with throttling for better performance
+	// Removed expensive mouse tracking for performance optimization
+
+	// Optimized mouse tracking for gradient light effect
 	useEffect(() => {
 		let rafId: number;
 		let lastTime = 0;
 
 		const handleMouseMove = (e: MouseEvent) => {
 			const now = performance.now();
-			// Throttle to 60fps maximum
-			if (now - lastTime < 16) return;
+			// Throttle to 30fps for smooth but efficient performance
+			if (now - lastTime < 33) return;
 			lastTime = now;
 
 			if (rafId) cancelAnimationFrame(rafId);
 
 			rafId = requestAnimationFrame(() => {
-				const particles = document.querySelectorAll(
-					'.interactive-particle'
+				// Calculate mouse velocity for dynamic effect intensity
+				const deltaX =
+					e.clientX - lastMousePos.current.x;
+				const deltaY =
+					e.clientY - lastMousePos.current.y;
+				const velocity = Math.sqrt(
+					deltaX * deltaX + deltaY * deltaY
 				);
-				// Limit to first 8 particles for performance
-				Array.from(particles)
-					.slice(0, 8)
-					.forEach((particle) => {
-						const rect =
-							particle.getBoundingClientRect();
-						const centerX =
-							rect.left + rect.width / 2;
-						const centerY =
-							rect.top + rect.height / 2;
 
-						const deltaX =
-							(e.clientX - centerX) / 80; // Reduced sensitivity
-						const deltaY =
-							(e.clientY - centerY) / 80;
+				setMousePosition({
+					x: e.clientX,
+					y: e.clientY,
+				});
+				setMouseVelocity(
+					Math.min(velocity / 10, 1)
+				); // Normalize velocity
 
-						(
-							particle as HTMLElement
-						).style.transform = `translate(${deltaX}px, ${deltaY}px)`;
-					});
+				lastMousePos.current = {
+					x: e.clientX,
+					y: e.clientY,
+				};
 			});
 		};
 
@@ -170,37 +171,35 @@ const LandingPage = () => {
 	}, []);
 
 	useEffect(() => {
-		// Optimized hero animations - simplified and faster
+		// Simplified hero animations - faster and lighter
 		const timeoutId = setTimeout(() => {
-			setHeroLoaded(true);
 			if (heroRef.current) {
 				gsap.fromTo(
 					heroRef.current.children,
-					{ y: 60, opacity: 0 },
+					{ y: 30, opacity: 0 },
 					{
 						y: 0,
 						opacity: 1,
-						duration: 0.8,
-						stagger: 0.1,
+						duration: 0.6,
+						stagger: 0.08,
 						ease: 'power2.out',
 					}
 				);
 			}
-		}, 200); // Small delay to ensure DOM is ready
+		}, 100); // Faster initial load
 
-		// Features scroll animation with smoother entrance
+		// Features scroll animation - simplified
 		if (featuresRef.current) {
 			gsap.fromTo(
 				featuresRef.current.querySelectorAll(
 					'.feature-card'
 				),
-				{ y: 60, opacity: 0, scale: 0.98 },
+				{ y: 40, opacity: 0 },
 				{
 					y: 0,
 					opacity: 1,
-					scale: 1,
-					duration: 0.7,
-					stagger: 0.1,
+					duration: 0.5,
+					stagger: 0.08,
 					ease: 'power2.out',
 					scrollTrigger: {
 						trigger: featuresRef.current,
@@ -287,43 +286,71 @@ const LandingPage = () => {
 		>
 			{/* Hero Section */}
 			<section className='relative min-h-screen flex items-center justify-center px-6 overflow-hidden'>
-				{/* Background Water Effect - Lazy loaded for performance */}
-				<div className='absolute inset-0 z-0'>
-					<Suspense
-						fallback={
-							<div className='absolute inset-0 bg-gradient-to-br from-blue-50/20 to-purple-50/20' />
-						}
-					>
-						<WaterEffect />
-					</Suspense>
-				</div>
+				{/* Simplified Background - Removed heavy WaterEffect for performance */}
+				<div
+					className={`absolute inset-0 z-0 ${
+						isDark
+							? 'bg-gradient-to-br from-chat-primary/50 via-chat-secondary/30 to-chat-primary/50'
+							: 'bg-gradient-to-br from-blue-50/40 to-purple-50/30'
+					}`}
+				/>
 
-				{/* Optimized Interactive Particles - Reduced count for performance */}
+				{/* Mouse Follow Gradient Light Effect */}
+				<div
+					className='absolute inset-0 z-0 pointer-events-none transition-opacity duration-300'
+					style={{
+						opacity: 0.4 + mouseVelocity * 0.3, // Dynamic opacity based on mouse speed
+						background: `radial-gradient(${
+							600 + mouseVelocity * 200
+						}px circle at ${
+							mousePosition.x
+						}px ${mousePosition.y}px, 
+							${
+								isDark
+									? `rgba(236, 72, 153, ${
+											0.12 +
+											mouseVelocity *
+												0.08
+									  }), rgba(139, 92, 246, ${
+											0.08 +
+											mouseVelocity *
+												0.05
+									  }), transparent 50%`
+									: `rgba(59, 130, 246, ${
+											0.1 +
+											mouseVelocity *
+												0.06
+									  }), rgba(147, 51, 234, ${
+											0.06 +
+											mouseVelocity *
+												0.04
+									  }), transparent 50%`
+							})`,
+					}}
+				/>
+
+				{/* Minimal decorative particles - Only 3 for performance */}
 				<div className='absolute inset-0 pointer-events-none'>
-					{Array.from({ length: 8 }, (_, i) => (
+					{Array.from({ length: 3 }, (_, i) => (
 						<motion.div
 							key={i}
-							className={`absolute w-2 h-2 rounded-full interactive-particle ${
+							className={`absolute w-2 h-2 rounded-full ${
 								isDark
-									? 'bg-white/15'
-									: 'bg-purple-400/25'
+									? 'bg-white/10'
+									: 'bg-purple-400/20'
 							}`}
 							style={{
-								left: `${15 + i * 12}%`,
-								top: `${
-									20 + Math.random() * 60
-								}%`,
+								left: `${25 + i * 25}%`,
+								top: `${30 + i * 20}%`,
 							}}
 							animate={{
-								y: [0, -20, 0],
-								opacity: [0.3, 0.7, 0.3],
-								scale: [1, 1.1, 1],
+								opacity: [0.2, 0.4, 0.2],
 							}}
 							transition={{
-								duration: 3 + i * 0.3,
+								duration: 4 + i,
 								repeat: Infinity,
 								ease: 'easeInOut',
-								delay: i * 0.15,
+								delay: i * 0.8,
 							}}
 						/>
 					))}
@@ -348,7 +375,7 @@ const LandingPage = () => {
 						</div>
 					</motion.div>
 
-					{/* Optimized Gradient Text - Reduced animation complexity */}
+					{/* Simplified Static Gradient Text - No animation for performance */}
 					<motion.h2
 						className={`text-3xl md:text-5xl font-exo font-bold mb-6`}
 						style={{
@@ -357,22 +384,11 @@ const LandingPage = () => {
 							backgroundClip: 'text',
 							color: 'transparent',
 						}}
-						animate={
-							heroLoaded
-								? {
-										backgroundPosition:
-											[
-												'0% 0%',
-												'100% 100%',
-												'0% 0%',
-											],
-								  }
-								: {}
-						}
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
 						transition={{
-							duration: 6,
-							repeat: Infinity,
-							ease: 'linear',
+							duration: 0.6,
+							delay: 0.3,
 						}}
 					>
 						<span className='block'>
@@ -406,32 +422,23 @@ const LandingPage = () => {
 					<div className='flex flex-col sm:flex-row gap-6 justify-center items-center'>
 						<motion.button
 							onClick={handleTryAI}
-							className='group bg-gradient-to-r from-chat-pink to-chat-purple px-8 py-4 rounded-2xl font-exo font-semibold text-lg text-white shadow-2xl hover:shadow-chat-pink/30 transition-all duration-300 flex items-center gap-3 relative overflow-hidden'
-							whileHover={{
-								scale: 1.05,
-								y: -2,
-							}}
-							whileTap={{ scale: 0.95 }}
+							className='group bg-gradient-to-r from-chat-pink to-chat-purple px-8 py-4 rounded-2xl font-exo font-semibold text-lg text-white shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-3'
+							whileHover={{ scale: 1.02 }}
+							whileTap={{ scale: 0.98 }}
 						>
-							<div className='absolute inset-0 bg-gradient-to-r from-chat-purple to-chat-pink opacity-0 group-hover:opacity-100 transition-opacity duration-300' />
-							<span className='relative'>
-								Try NeuronFlow Now
-							</span>
-							<ArrowRight className='w-5 h-5 group-hover:translate-x-1 transition-transform relative' />
+							<span>Try NeuronFlow Now</span>
+							<ArrowRight className='w-5 h-5 group-hover:translate-x-1 transition-transform' />
 						</motion.button>
 
 						<motion.button
 							onClick={handleLearnMore}
-							className={`px-8 py-4 rounded-2xl font-exo font-semibold text-lg border-2 transition-all duration-300 flex items-center gap-3 backdrop-blur-sm ${
+							className={`px-8 py-4 rounded-2xl font-exo font-semibold text-lg border-2 transition-all duration-200 flex items-center gap-3 ${
 								isDark
-									? 'border-chat-accent text-white hover:bg-chat-accent/20 hover:border-chat-pink'
-									: 'border-gray-300 text-gray-700 hover:bg-white hover:border-chat-purple hover:text-chat-purple'
+									? 'border-chat-accent text-white hover:bg-chat-accent/10'
+									: 'border-gray-300 text-gray-700 hover:bg-gray-50'
 							}`}
-							whileHover={{
-								scale: 1.05,
-								y: -2,
-							}}
-							whileTap={{ scale: 0.95 }}
+							whileHover={{ scale: 1.02 }}
+							whileTap={{ scale: 0.98 }}
 						>
 							<Search className='w-5 h-5' />
 							Explore Features
@@ -439,47 +446,7 @@ const LandingPage = () => {
 					</div>
 				</div>
 
-				{/* Simplified Floating elements - Reduced complexity for performance */}
-				<div className='absolute inset-0 pointer-events-none'>
-					<motion.div
-						className='absolute top-20 left-10 w-3 h-3 bg-chat-pink/30 rounded-full'
-						animate={{
-							y: [0, -20, 0],
-							opacity: [0.3, 0.6, 0.3],
-						}}
-						transition={{
-							duration: 4,
-							repeat: Infinity,
-							ease: 'easeInOut',
-						}}
-					/>
-					<motion.div
-						className='absolute top-40 right-20 w-4 h-4 bg-chat-purple/30 rounded-full'
-						animate={{
-							y: [0, 25, 0],
-							opacity: [0.4, 0.7, 0.4],
-						}}
-						transition={{
-							duration: 5,
-							repeat: Infinity,
-							ease: 'easeInOut',
-							delay: 1,
-						}}
-					/>
-					<motion.div
-						className='absolute bottom-40 left-20 w-2 h-2 bg-chat-orange/40 rounded-full'
-						animate={{
-							y: [0, -15, 0],
-							opacity: [0.2, 0.5, 0.2],
-						}}
-						transition={{
-							duration: 3,
-							repeat: Infinity,
-							ease: 'easeInOut',
-							delay: 2,
-						}}
-					/>
-				</div>
+				{/* Removed floating elements for better performance */}
 			</section>
 
 			{/* Social Proof & Statistics Section */}
@@ -558,34 +525,38 @@ const LandingPage = () => {
 								delay: 0.1,
 							}}
 							viewport={{ once: true }}
-							className={`p-6 rounded-2xl backdrop-blur-sm ${
+							whileHover={{
+								scale: 1.05,
+								y: -8,
+							}}
+							className={`p-6 rounded-2xl backdrop-blur-sm transition-all duration-300 cursor-pointer group ${
 								isDark
-									? 'bg-white/10'
-									: 'bg-white/80'
+									? 'bg-white/10 hover:bg-white/20 hover:shadow-2xl hover:shadow-chat-pink/20'
+									: 'bg-white/80 hover:bg-white hover:shadow-2xl hover:shadow-chat-purple/20'
 							}`}
 						>
 							<Users
-								className={`w-12 h-12 mx-auto mb-4 ${
+								className={`w-12 h-12 mx-auto mb-4 transition-all duration-300 group-hover:scale-110 ${
 									isDark
-										? 'text-chat-pink'
-										: 'text-chat-purple'
+										? 'text-chat-pink group-hover:text-chat-pink'
+										: 'text-chat-purple group-hover:text-chat-purple'
 								}`}
 							/>
 							<div
-								className={`text-4xl font-bold mb-2 ${
+								className={`text-4xl font-bold mb-2 transition-colors duration-300 ${
 									isDark
-										? 'text-white'
-										: 'text-gray-800'
+										? 'text-white group-hover:text-chat-pink'
+										: 'text-gray-800 group-hover:text-chat-purple'
 								}`}
 							>
 								{userCount.toLocaleString()}
 								+
 							</div>
 							<div
-								className={`${
+								className={`transition-colors duration-300 ${
 									isDark
-										? 'text-gray-300'
-										: 'text-gray-600'
+										? 'text-gray-300 group-hover:text-gray-200'
+										: 'text-gray-600 group-hover:text-gray-700'
 								}`}
 							>
 								Active Users
@@ -606,34 +577,38 @@ const LandingPage = () => {
 								delay: 0.2,
 							}}
 							viewport={{ once: true }}
-							className={`p-6 rounded-2xl backdrop-blur-sm ${
+							whileHover={{
+								scale: 1.05,
+								y: -8,
+							}}
+							className={`p-6 rounded-2xl backdrop-blur-sm transition-all duration-300 cursor-pointer group ${
 								isDark
-									? 'bg-white/10'
-									: 'bg-white/80'
+									? 'bg-white/10 hover:bg-white/20 hover:shadow-2xl hover:shadow-chat-orange/20'
+									: 'bg-white/80 hover:bg-white hover:shadow-2xl hover:shadow-chat-pink/20'
 							}`}
 						>
-							<MessageCircle
-								className={`w-12 h-12 mx-auto mb-4 ${
+							<MessagesSquare
+								className={`w-16 h-16 mx-auto mb-4 transition-all duration-300 group-hover:scale-110 ${
 									isDark
-										? 'text-chat-orange'
-										: 'text-chat-pink'
+										? 'text-chat-orange group-hover:text-chat-orange'
+										: 'text-chat-pink group-hover:text-chat-pink'
 								}`}
 							/>
 							<div
-								className={`text-4xl font-bold mb-2 ${
+								className={`text-4xl font-bold mb-2 transition-colors duration-300 ${
 									isDark
-										? 'text-white'
-										: 'text-gray-800'
+										? 'text-white group-hover:text-chat-orange'
+										: 'text-gray-800 group-hover:text-chat-pink'
 								}`}
 							>
 								{conversationCount.toLocaleString()}
 								+
 							</div>
 							<div
-								className={`${
+								className={`transition-colors duration-300 ${
 									isDark
-										? 'text-gray-300'
-										: 'text-gray-600'
+										? 'text-gray-300 group-hover:text-gray-200'
+										: 'text-gray-600 group-hover:text-gray-700'
 								}`}
 							>
 								Conversations
@@ -654,33 +629,37 @@ const LandingPage = () => {
 								delay: 0.3,
 							}}
 							viewport={{ once: true }}
-							className={`p-6 rounded-2xl backdrop-blur-sm ${
+							whileHover={{
+								scale: 1.05,
+								y: -8,
+							}}
+							className={`p-6 rounded-2xl backdrop-blur-sm transition-all duration-300 cursor-pointer group ${
 								isDark
-									? 'bg-white/10'
-									: 'bg-white/80'
+									? 'bg-white/10 hover:bg-white/20 hover:shadow-2xl hover:shadow-green-500/20'
+									: 'bg-white/80 hover:bg-white hover:shadow-2xl hover:shadow-chat-orange/20'
 							}`}
 						>
 							<Clock
-								className={`w-12 h-12 mx-auto mb-4 ${
+								className={`w-12 h-12 mx-auto mb-4 transition-all duration-300 group-hover:scale-110 ${
 									isDark
-										? 'text-chat-green'
-										: 'text-chat-orange'
+										? 'text-green-400 group-hover:text-green-400'
+										: 'text-chat-orange group-hover:text-chat-orange'
 								}`}
 							/>
 							<div
-								className={`text-4xl font-bold mb-2 ${
+								className={`text-4xl font-bold mb-2 transition-colors duration-300 ${
 									isDark
-										? 'text-white'
-										: 'text-gray-800'
+										? 'text-white group-hover:text-green-400'
+										: 'text-gray-800 group-hover:text-chat-orange'
 								}`}
 							>
 								99.9%
 							</div>
 							<div
-								className={`${
+								className={`transition-colors duration-300 ${
 									isDark
-										? 'text-gray-300'
-										: 'text-gray-600'
+										? 'text-gray-300 group-hover:text-gray-200'
+										: 'text-gray-600 group-hover:text-gray-700'
 								}`}
 							>
 								Uptime
