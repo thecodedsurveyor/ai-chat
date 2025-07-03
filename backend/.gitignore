@@ -1,1 +1,4 @@
 .vercel
+
+# Uploaded files (should use cloud storage like Cloudinary instead)
+uploads/
