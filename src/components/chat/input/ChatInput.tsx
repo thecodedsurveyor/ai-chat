@@ -370,7 +370,7 @@ const ChatInput: React.FC<ChatInputProps> = (props) => {
 				{/* Send Button */}
 				<button
 					type='submit'
-					className={`flex-shrink-0 p-3 rounded-full transition-all hover:scale-110 ${
+					className={`flex-shrink-0 p-3 rounded-full transition-all hover:scale-110 ml-2 ${
 						isDark
 							? 'bg-chat-pink text-white hover:bg-chat-orange'
 							: 'bg-chat-purple text-white hover:bg-chat-pink'
@@ -419,7 +419,7 @@ const ChatInput: React.FC<ChatInputProps> = (props) => {
 					{/* Send Button */}
 					<button
 						type='submit'
-						className={`flex-shrink-0 p-4 rounded-full transition-all hover:scale-105 shadow-md ${
+						className={`flex-shrink-0 p-4 rounded-full transition-all hover:scale-105 shadow-md ml-2 ${
 							isDark
 								? 'bg-chat-pink text-white hover:bg-chat-orange'
 								: 'bg-chat-purple text-white hover:bg-chat-pink'

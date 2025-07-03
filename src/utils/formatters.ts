@@ -9,7 +9,14 @@ export const getCurrentDate = () => {
 
 export const generateChatTitle = () => {
 	const now = new Date();
-	return `Chat ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+	return `Chat with AI – ${now.toLocaleDateString(
+		'en-US',
+		{ month: 'long', day: 'numeric', year: 'numeric' }
+	)} at ${now.toLocaleTimeString('en-US', {
+		hour: 'numeric',
+		minute: '2-digit',
+		hour12: true,
+	})}`;
 };
 
 export const generateId = () => {

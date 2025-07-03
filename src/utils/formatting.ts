@@ -16,7 +16,7 @@ export function formatDate(date: Date | string): string {
 	const d =
 		typeof date === 'string' ? new Date(date) : date;
 
-	// Format as "Jan 15, 2024 at 2:30 PM"
+	// Format as "Jan 15, 2024 at 2:30 PM" (no seconds)
 	return (
 		d.toLocaleDateString('en-US', {
 			year: 'numeric',
