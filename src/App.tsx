@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import {
 	BrowserRouter as Router,
 	Routes,
@@ -44,7 +44,7 @@ import BackToTop from './components/ui/BackToTop';
 import OfflineIndicator from './components/ui/OfflineIndicator';
 import PWAInstallPrompt from './components/ui/PWAInstallPrompt';
 import { useChats } from './stores/chatStore';
-import AdminAuth from './components/admin/AdminAuth';
+import AdminDashboard from './components/admin/AdminDashboard';
 import { authService } from './services/authService';
 import { useChatStore } from './stores/chatStore';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -226,15 +226,13 @@ const App = () => {
 									path='/admin'
 									element={
 										<PageWrapper>
-											<AdminAuth
-												onLoginSuccess={(
-													admin
-												) => {
-													console.log(
-														'Admin logged in:',
-														admin
-													);
-													// Handle admin login success
+											<AdminDashboard
+												isVisible={
+													true
+												}
+												onClose={() => {
+													window.location.href =
+														'/';
 												}}
 											/>
 										</PageWrapper>
